@@ -1,2 +1,2 @@
-server/.idea
-client/.idea
+server/target
+client/target
