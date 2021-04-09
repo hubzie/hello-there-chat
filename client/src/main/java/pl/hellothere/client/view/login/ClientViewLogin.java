@@ -1,3 +1,5 @@
+package pl.hellothere.client.view.login;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -14,7 +16,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
-public class Client extends Application {
+public class ClientViewLogin extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {

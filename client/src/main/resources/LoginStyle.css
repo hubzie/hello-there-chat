@@ -23,11 +23,11 @@
     -fx-border-radius: 20;
 }
 .text-field {
-        -fx-text-fill: Black;
-        -fx-background-color: White;
-        -fx-background-radius: 20;
-        -fx-border-width: 2px;
-        -fx-border-color: LightSkyBlue;
-        -fx-border-radius: 20;
-        -fx-highlight-fill: Grey;
+    -fx-text-fill: Black;
+    -fx-background-color: White;
+    -fx-background-radius: 20;
+    -fx-border-width: 2px;
+    -fx-border-color: LightSkyBlue;
+    -fx-border-radius: 20;
+    -fx-highlight-fill: Grey;
 }
