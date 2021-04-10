@@ -31,3 +31,6 @@
     -fx-border-radius: 20;
     -fx-highlight-fill: Grey;
 }
+.label {
+    -fx-font-family: "Lucida Console";
+}
