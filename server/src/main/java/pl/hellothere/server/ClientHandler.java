@@ -1,5 +1,6 @@
 package pl.hellothere.server;
 
+import pl.hellothere.message.*;
 import pl.hellothere.server.database.DatabaseClient;
 import pl.hellothere.server.database.DatabaseClient.*;
 
@@ -12,55 +13,52 @@ class ClientHandler extends Thread {
     private final ObjectInputStream c_in;
     private final ObjectOutputStream c_out;
 
-    private int user_id;
+    private int user_id = -1;
 
-    public ClientHandler(DatabaseClient db, Socket client) throws IOException, ClientAuthenticationException {
-        System.out.println("Initialize connection");
-
+    public ClientHandler(DatabaseClient db, Socket client) throws IOException {
         this.db = db;
         this.client = client;
 
         c_out = new ObjectOutputStream(client.getOutputStream());
         c_out.flush();
         c_in = new ObjectInputStream(client.getInputStream());
-
-        System.out.println("Try to log in");
-        authenticate();
     }
 
-    void authenticate() throws ClientAuthenticationException {
-        try {
-            System.out.println("Read login");
-            String login = (String) c_in.readObject();
-            System.out.println("Read password");
-            String password = (String) c_in.readObject();
+    void authenticate(AuthorizationRequest msg) {
+        AuthorizationResult.Code res;
 
-            user_id = db.authenticate(login, password);
-        } catch (IOException | ClassNotFoundException | ClassCastException e) {
-            sendMessage("Server unavailable");
-            throw new ClientAuthenticationException();
+        try {
+            user_id = db.authenticate(msg.getLogin(), msg.getPassword());
+            res = (user_id != -1 ? AuthorizationResult.Code.OK : AuthorizationResult.Code.ERROR);
         } catch (DatabaseException e) {
-            System.out.println(e);
-            sendMessage("Unknown user");
-            throw new ClientAuthenticationException();
+            res = AuthorizationResult.Code.SERVER_ERROR;
         }
-    }
 
-    void sendMessage(String text) {
         try {
-            c_out.writeObject(text);
+            c_out.writeObject(new AuthorizationResult(res, user_id));
             c_out.flush();
-        } catch (IOException e) {
-            System.out.println("Unable to send message to user");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     @Override
     public void run() {
-        System.out.println("New client connected: " + user_id);
-        sendMessage("Hello user!");
+        while (client.isConnected()) {
+            try {
+                Message msg = (Message) c_in.readObject();
+
+                if (msg instanceof AuthorizationRequest) authenticate((AuthorizationRequest) msg);
+                else throw new ClassNotFoundException();
+            }  catch (EOFException e) {
+                try {
+                    client.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            } catch (ClassNotFoundException | ClassCastException | IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
-
-class ClientHandlerException extends Exception {}
-class ClientAuthenticationException extends ClientHandlerException {}

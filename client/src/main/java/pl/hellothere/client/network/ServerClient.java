@@ -1,35 +1,50 @@
 package pl.hellothere.client.network;
 
+import pl.hellothere.message.AuthorizationRequest;
+import pl.hellothere.message.AuthorizationResult;
+
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.Scanner;
 
 public class ServerClient {
     private static final String address = "localhost";
     private static final int port = 8374;
+    final Socket connection;
+    final ObjectOutputStream c_out;
+    final ObjectInputStream c_in;
+    int user_id = -1;
 
-    public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
-
-        System.out.print("Login: ");
-        String login = in.nextLine();
-        System.out.print("Password: ");
-        String password = in.nextLine();
-
-        try (Socket c = new Socket(address, port)) {
-            ObjectOutputStream c_out = new ObjectOutputStream(c.getOutputStream());
+    public ServerClient() {
+        try {
+            connection = new Socket(address, port);
+            c_out = new ObjectOutputStream(connection.getOutputStream());
             c_out.flush();
-            ObjectInputStream c_in = new ObjectInputStream(c.getInputStream());
-
-            c_out.writeObject(login);
-            c_out.writeObject(password);
-            c_out.flush();
-
-            String res = (String) c_in.readObject();
-            System.out.println(res);
+            c_in = new ObjectInputStream(connection.getInputStream());
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
+    }
+
+    public boolean signIn(String login, String password) {
+        if (user_id != -1)
+            throw new RuntimeException();
+
+        try {
+            c_out.writeObject(new AuthorizationRequest(login, password));
+            c_out.flush();
+
+            AuthorizationResult response = (AuthorizationResult) c_in.readObject();
+            if (response.success())
+                user_id = response.getID();
+            return response.success();
+        } catch (IOException | ClassCastException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean isLoggedIn() {
+        return user_id != -1;
     }
 }
