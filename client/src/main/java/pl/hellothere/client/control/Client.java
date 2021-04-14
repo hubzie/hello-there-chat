@@ -1,18 +1,11 @@
 package pl.hellothere.client.control;
 
 import javafx.application.Application;
-import javafx.stage.Stage;
-import pl.hellothere.client.view.login.ClientViewLogin;
+import pl.hellothere.client.view.controller.ClientViewController;
 
-public class Client extends Application {
-    @Override
-    public void start(Stage primaryStage) {
-        ClientViewLogin cvl = new ClientViewLogin();
-        cvl.setCredentialsTest((a,b) -> (a.equals("General Kenobi")));
-        cvl.start(primaryStage);
-    }
-
+public class Client {
     public static void main(String[] args) {
-        launch(args);
+        ClientViewController.setCredentialsTest((a,b) -> (a.equals("General Kenobi")));
+        Application.launch(ClientViewController.class);
     }
 }
