@@ -1,8 +1,8 @@
 package pl.hellothere.client.control;
 
+import javafx.application.Application;
 import pl.hellothere.client.network.ServerClient;
-
-import java.util.Scanner;
+import pl.hellothere.client.view.controller.ClientViewController;
 
 public class Client {
     final ServerClient connection;
@@ -16,19 +16,8 @@ public class Client {
     }
 
     public void run() {
-        Scanner in = new Scanner(System.in);
-        while (!connection.isLoggedIn()) {
-            System.out.print("Login: ");
-            String login = in.nextLine();
-
-            System.out.print("Password: ");
-            String password = in.nextLine();
-
-            if(connection.signIn(login, password))
-                System.out.println("Welcome!");
-            else
-                System.out.println("Wrong login or password. Try again.");
-        }
+        ClientViewController.setCredentialsTest(connection::signIn);
+        Application.launch(ClientViewController.class);
     }
 
     public static void main(String[] args) {
