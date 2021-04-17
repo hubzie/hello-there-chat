@@ -7,3 +7,10 @@ cd server
 mvn compile
 mvn exec:java -Dexec.mainClass="pl.hellothere.server.Server"
 ```
+
+## Run client
+```
+cd client
+mvn compile
+mvn exec:java -Dexec.mainClass="pl.hellothere.client.control.Client"
+```
