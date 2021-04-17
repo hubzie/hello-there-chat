@@ -44,7 +44,7 @@ class ClientHandler extends Thread {
 
     @Override
     public void run() {
-        while (client.isConnected()) {
+        while (!client.isClosed()) {
             try {
                 Message msg = (Message) c_in.readObject();
 
