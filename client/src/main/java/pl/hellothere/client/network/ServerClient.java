@@ -1,7 +1,7 @@
 package pl.hellothere.client.network;
 
-import pl.hellothere.message.AuthorizationRequest;
-import pl.hellothere.message.AuthorizationResult;
+import pl.hellothere.containers.socket.AuthorizationRequest;
+import pl.hellothere.containers.socket.AuthorizationResult;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

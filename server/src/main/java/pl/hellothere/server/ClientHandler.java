@@ -1,6 +1,8 @@
 package pl.hellothere.server;
 
-import pl.hellothere.message.*;
+import pl.hellothere.containers.socket.AuthorizationRequest;
+import pl.hellothere.containers.socket.AuthorizationResult;
+import pl.hellothere.containers.socket.Package;
 import pl.hellothere.server.database.DatabaseClient;
 import pl.hellothere.server.database.DatabaseClient.*;
 
@@ -46,7 +48,7 @@ class ClientHandler extends Thread {
     public void run() {
         while (!client.isClosed()) {
             try {
-                Message msg = (Message) c_in.readObject();
+                Package msg = (Package) c_in.readObject();
 
                 if (msg instanceof AuthorizationRequest) authenticate((AuthorizationRequest) msg);
                 else throw new ClassNotFoundException();

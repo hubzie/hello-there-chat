@@ -1,6 +1,6 @@
-package pl.hellothere.message;
+package pl.hellothere.containers.socket;
 
-public class AuthorizationRequest implements Message {
+public class AuthorizationRequest implements Package {
     String login;
     String password;
 
