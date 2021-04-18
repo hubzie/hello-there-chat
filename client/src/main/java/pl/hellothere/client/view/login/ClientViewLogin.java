@@ -7,32 +7,17 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import pl.hellothere.client.view.controller.ClientViewController;
 
 import java.util.Objects;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 
 public class ClientViewLogin extends Application {
     private Stage primaryStage;
-    private BiFunction<String, String, Boolean> credentialsTest;
     private BiConsumer<String, String> signInAction;
     private ClientViewLoginController cvlc;
 
     public void setSignInAction(BiConsumer<String, String> signInAction) {
         this.signInAction = signInAction;
-    }
-
-    public BiConsumer<String, String> getSignInAction() {
-        return signInAction;
-    }
-
-    public void setCredentialsTest(BiFunction<String, String, Boolean> credentialsTest) {
-        this.credentialsTest = credentialsTest;
-    }
-
-    public BiFunction<String, String, Boolean> getCredentialsTest() {
-        return credentialsTest;
     }
 
     public void close() { primaryStage.close(); }
@@ -49,13 +34,17 @@ public class ClientViewLogin extends Application {
         });
     }
 
-    public void setCvlc(ClientViewLoginController cvlc) {
+    BiConsumer<String, String> getSignInAction() {
+        return signInAction;
+    }
+
+    void setCvlc(ClientViewLoginController cvlc) {
         this.cvlc = cvlc;
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        if(credentialsTest == null) throw new ClientViewController.NoCredentialsTestException();
+        if(signInAction == null) throw new NoSignInActionException();
         this.primaryStage = primaryStage;
         Parent root;
 
@@ -72,4 +61,5 @@ public class ClientViewLogin extends Application {
     }
 
     public static class NoFxmlLoadedException extends Exception {}
+    public static class NoSignInActionException extends Exception {}
 }

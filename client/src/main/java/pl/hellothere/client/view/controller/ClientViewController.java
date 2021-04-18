@@ -8,20 +8,17 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import pl.hellothere.client.view.login.ClientViewLogin;
 
-import java.util.function.BiFunction;
-
 public class ClientViewController extends Application {
-    static ClientViewLogin cvl0 = new ClientViewLogin();
-    static BiFunction<String, String, Boolean> credentialsTest;
+    private static final ClientViewLogin cvl0 = new ClientViewLogin();
 
     @Override
     public void start(Stage primaryStage) { }
 
-    static public ClientViewLogin getLoginView() { return cvl0; }
+    public static ClientViewLogin getLoginView() { return cvl0; }
 
-    static public void close() { Platform.exit(); }
+    public static void close() { Platform.exit(); }
 
-    static public void showErrorMessage(String errorMessage) {
+    public static void showErrorMessage(String errorMessage) {
         Stage errorStage = new Stage();
         StackPane root = new StackPane();
         root.setStyle("-fx-background-color: AliceBlue;");
@@ -35,6 +32,4 @@ public class ClientViewController extends Application {
 
         errorStage.show();
     }
-
-    public static class NoCredentialsTestException extends Exception {}
 }

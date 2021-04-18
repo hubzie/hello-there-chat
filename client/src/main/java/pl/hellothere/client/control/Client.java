@@ -16,8 +16,7 @@ public class Client extends Application {
             return;
         }
 
-        ClientViewController.getLoginView().setCredentialsTest(connection::signIn);
-        ClientViewController.getLoginView().setSignInAction((a, b) -> System.out.println("Login: "+a+" Password: "+b));
+        ClientViewController.getLoginView().setSignInAction((a, b) -> System.out.println("Submitted"));
         ClientViewController.getLoginView().run();
     }
 
