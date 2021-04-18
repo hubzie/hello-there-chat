@@ -1,3 +1,6 @@
+.root {
+    -fx-background-color: AliceBlue;
+}
 .button {
     -fx-background-color: White;
     -fx-background-radius: 20;
@@ -31,6 +34,15 @@
     -fx-border-radius: 20;
     -fx-highlight-fill: Grey;
 }
+.text-field:focused {
+    -fx-prompt-text-fill: derive(-fx-control-inner-background, -30%);
+}
 .label {
     -fx-font-family: "Lucida Console";
+}
+.grid-pane {
+    -fx-background-color: AliceBlue;
+}
+#title {
+    -fx-font-size: 30;
 }
