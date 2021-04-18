@@ -1,11 +1,13 @@
 package pl.hellothere.containers.messages;
 
-public class TextMessage implements Message {
-    int uid;
+import java.util.Date;
+
+public class TextMessage extends Message {
     String content;
 
-    public TextMessage(int uid, String content) {
+    public TextMessage(int uid, Date date, String content) {
         this.uid = uid;
+        this.date = date;
         this.content = content;
     }
 
@@ -15,7 +17,11 @@ public class TextMessage implements Message {
     }
 
     @Override
-    public <T> T getContent(T a) throws ClassCastException {
-        return (T) content;
+    public Date getDate() {
+        return date;
+    }
+
+    public String getContent() {
+        return content;
     }
 }

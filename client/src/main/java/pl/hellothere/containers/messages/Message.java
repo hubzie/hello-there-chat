@@ -1,6 +1,11 @@
 package pl.hellothere.containers.messages;
 
-public interface Message {
-    int getSenderID();
-    <T> T getContent(T a);
+import java.util.Date;
+
+public abstract class Message {
+    int uid;
+    Date date;
+
+    public abstract int getSenderID();
+    public abstract Date getDate();
 }
