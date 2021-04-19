@@ -1,6 +1,8 @@
-package pl.hellothere.containers.socket;
+package pl.hellothere.containers.socket.authorization;
 
-public class AuthorizationRequest implements Package {
+import pl.hellothere.containers.SocketPackage;
+
+public class AuthorizationRequest implements SocketPackage {
     String login;
     String password;
 

@@ -1,6 +1,8 @@
-package pl.hellothere.containers.socket;
+package pl.hellothere.containers.socket.authorization;
 
-public class AuthorizationResult implements Package {
+import pl.hellothere.containers.SocketPackage;
+
+public class AuthorizationResult implements SocketPackage {
     public enum Code {
         OK, ERROR, SERVER_ERROR
     }
@@ -9,7 +11,7 @@ public class AuthorizationResult implements Package {
     int user_id;
 
     AuthorizationResult() {}
-    
+
     public AuthorizationResult(Code result, int user_id) {
         this.result = result;
         this.user_id = user_id;

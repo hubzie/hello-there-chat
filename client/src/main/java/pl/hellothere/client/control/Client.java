@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import pl.hellothere.client.network.ServerClient;
 import pl.hellothere.client.view.controller.ClientViewController;
+import pl.hellothere.containers.messages.TextMessage;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -59,9 +60,18 @@ public class Client extends Application {
 
     void startMainApp() {
         ClientViewController.showErrorMessage("Welcome!");
+        try {
+            while(true){
+                TextMessage msg = (TextMessage) connection.nextMessage();
+                System.out.println(msg.getSenderID()+", "+msg.getDate()+" | "+msg.getContent());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void close() {
+        connection.close();
         ex.shutdown();
     }
 

@@ -1,9 +1,13 @@
 package pl.hellothere.server.database;
 
+import pl.hellothere.containers.messages.TextMessage;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.*;
+import java.util.LinkedList;
+import java.util.List;
 
 public class DatabaseClient implements AutoCloseable {
     private Connection db = null;
@@ -71,6 +75,22 @@ public class DatabaseClient implements AutoCloseable {
                 if (r.next())
                     return r.getInt(1);
                 throw new DatabaseAuthenticationException("Wrong password");
+            } catch (SQLException e) {
+                throw e;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DatabaseException("Cannot execute query");
+        }
+    }
+
+    public List<TextMessage> getMessages() throws DatabaseException {
+        try (PreparedStatement s = db.prepareStatement("select user_id, send_time, content from conversation natural join messages order by send_time")) {
+            try (ResultSet r = s.executeQuery()) {
+                List<TextMessage> res = new LinkedList<>();
+                while(r.next())
+                    res.add(new TextMessage(r.getInt(1), r.getDate(2), r.getString(3)));
+                return res;
             } catch (SQLException e) {
                 throw e;
             }
