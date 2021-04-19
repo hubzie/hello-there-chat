@@ -85,7 +85,7 @@ public class DatabaseClient implements AutoCloseable {
     }
 
     public List<TextMessage> getMessages() throws DatabaseException {
-        try (PreparedStatement s = db.prepareStatement("select user_id, send_time, content from conversation natural join messages order by send_time")) {
+        try (PreparedStatement s = db.prepareStatement("select user_id, send_time, content from conversation natural join messages order by send_time desc")) {
             try (ResultSet r = s.executeQuery()) {
                 List<TextMessage> res = new LinkedList<>();
                 while(r.next())
