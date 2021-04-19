@@ -23,6 +23,6 @@ create table membership (
 create table messages (
 	user_id serial not null,
 	conversation_id serial not null,
-	send_time date not null,
+	send_time timestamp not null,
 	content varchar(250)
 );
