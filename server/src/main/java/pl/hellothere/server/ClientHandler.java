@@ -2,6 +2,7 @@ package pl.hellothere.server;
 
 import pl.hellothere.containers.SocketPackage;
 import pl.hellothere.containers.data.Conversation;
+import pl.hellothere.containers.messages.Message;
 import pl.hellothere.containers.socket.Info;
 import pl.hellothere.containers.socket.authorization.AuthorizationRequest;
 import pl.hellothere.containers.socket.authorization.AuthorizationResult;
@@ -18,6 +19,7 @@ class ClientHandler extends Thread {
     private final ObjectInputStream c_in;
     private final ObjectOutputStream c_out;
 
+    private int conv_id = -1;
     private int user_id = -1;
 
     public ClientHandler(DatabaseClient db, Socket client) throws IOException {
@@ -77,8 +79,20 @@ class ClientHandler extends Thread {
     void chooseConversation(int conv_id) throws ConnectionLost {
         try {
             send(db.getConversationDetails(conv_id));
+            this.conv_id = conv_id;
         } catch (InvalidData e) {
             send(Info.ConversationNotFound);
+        } catch (DatabaseException e) {
+            throw new DatabaseError(e);
+        }
+    }
+
+    void getMessages() throws ConnectionLost {
+        try {
+            List<Message> list = db.getMessages(conv_id);
+            for(Message c : list)
+                send(c);
+            send(Info.NoMoreMessages);
         } catch (DatabaseException e) {
             throw new DatabaseError(e);
         }
@@ -88,6 +102,7 @@ class ClientHandler extends Thread {
         switch (msg.getStatus()) {
             case CONVERSATION_LIST -> sendConversationList();
             case CHOOSE_CONVERSATION -> chooseConversation(msg.getData());
+            case GET_MESSAGES -> getMessages();
             default -> throw new ConnectionError();
         }
     }
@@ -115,7 +130,6 @@ class ClientHandler extends Thread {
         } catch (ConnectionError e) {
             e.printStackTrace();
         } finally {
-            db.close();
             try {
                 client.close();
             } catch (Exception e) {

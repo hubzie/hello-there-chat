@@ -2,6 +2,7 @@ package pl.hellothere.client.network;
 
 import pl.hellothere.containers.SocketPackage;
 import pl.hellothere.containers.data.*;
+import pl.hellothere.containers.messages.Message;
 import pl.hellothere.containers.socket.Info;
 import pl.hellothere.containers.socket.authorization.*;
 
@@ -97,6 +98,24 @@ public class ServerClient {
         if(o instanceof ConversationDetails)
             return (ConversationDetails) o;
         throw new ConnectionError();
+    }
+
+    public List<Message> getMessages() throws ConnectionLost {
+        try {
+            send(Info.GetMessages);
+
+            List<Message> list = new ArrayList<>();
+            while (true) {
+                Object o = receive();
+                if(o instanceof Info)
+                    break;
+                list.add((Message) o);
+            }
+
+            return list;
+        } catch (ClassCastException e) {
+            throw new ConnectionError(e);
+        }
     }
 
     public static class ConnectionLost extends Exception {

@@ -7,6 +7,7 @@ import pl.hellothere.client.network.ServerClient;
 import pl.hellothere.client.view.controller.ClientViewController;
 import pl.hellothere.containers.data.Conversation;
 import pl.hellothere.containers.data.ConversationDetails;
+import pl.hellothere.containers.messages.Message;
 import pl.hellothere.containers.messages.TextMessage;
 
 import java.util.List;
@@ -74,7 +75,12 @@ public class Client extends Application {
             }
 
             System.out.println(conversationDetails);
+
+            if(conversationDetails != null)
+                for(Message m : connection.getMessages())
+                    System.out.println(m);
         } catch (ServerClient.ConnectionLost | ServerClient.ConnectionError e) {
+            e.printStackTrace();
             System.out.println("No connection");
         }
     }

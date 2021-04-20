@@ -2,6 +2,7 @@ package pl.hellothere.server.database;
 
 import pl.hellothere.containers.data.Conversation;
 import pl.hellothere.containers.data.ConversationDetails;
+import pl.hellothere.containers.messages.Message;
 import pl.hellothere.containers.messages.TextMessage;
 
 import java.nio.charset.StandardCharsets;
@@ -91,7 +92,7 @@ public class DatabaseClient implements AutoCloseable {
                 "natural join (select conversation_id from membership where user_id = ?) member " +
                 "natural join (select conversation_id, max(send_time) as last_update from messages group by conversation_id ) last " +
                 "order by last_update " +
-                "limit 10"
+                "limit 8"
         )) {
             s.setInt(1, user_id);
 
@@ -99,6 +100,28 @@ public class DatabaseClient implements AutoCloseable {
                 List<Conversation> list = new LinkedList<>();
                 while(r.next())
                     list.add(new Conversation(r.getInt(1), r.getString(2)));
+                return list;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DatabaseException(e);
+        }
+    }
+
+    public List<Message> getMessages(int conv_id) throws DatabaseException {
+        try (PreparedStatement s = db.prepareStatement(
+                "select *" +
+                        "from messages " +
+                        "where conversation_id = ? " +
+                        "order by send_time desc " +
+                        "limit 8"
+        )) {
+            s.setInt(1, conv_id);
+
+            try (ResultSet r = s.executeQuery()) {
+                List<Message> list = new LinkedList<>();
+                while(r.next())
+                    list.add(new TextMessage(r.getInt("user_id"), r.getTimestamp("send_time"), r.getString("content")));
                 return list;
             }
         } catch (SQLException e) {

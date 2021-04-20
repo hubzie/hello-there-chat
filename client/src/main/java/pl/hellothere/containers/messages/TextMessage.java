@@ -13,4 +13,9 @@ public class TextMessage extends Message {
     public String getContent() {
         return content;
     }
+
+    @Override
+    public String toString() {
+        return date+": ("+uid+") -> "+content;
+    }
 }

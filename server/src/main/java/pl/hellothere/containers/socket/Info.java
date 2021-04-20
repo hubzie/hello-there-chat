@@ -4,7 +4,7 @@ import pl.hellothere.containers.SocketPackage;
 
 public class Info implements SocketPackage {
     public enum Status {
-        NO_MORE_MESSAGES, NEXT_MESSAGE,
+        GET_MESSAGES, NEXT_MESSAGE, NO_MORE_MESSAGES,
         CONVERSATION_LIST, NO_MORE_CONVERSATION, CHOOSE_CONVERSATION, CONVERSATION_NOT_FOUND,
         SERVER_ERROR
     }
@@ -28,6 +28,7 @@ public class Info implements SocketPackage {
         return data;
     }
 
+    public static Info GetMessages= new Info(Status.GET_MESSAGES);
     public static Info NextMessage = new Info(Status.NEXT_MESSAGE);
     public static Info NoMoreMessages = new Info(Status.NO_MORE_MESSAGES);
 
