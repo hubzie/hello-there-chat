@@ -5,8 +5,11 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import pl.hellothere.client.network.ServerClient;
 import pl.hellothere.client.view.controller.ClientViewController;
+import pl.hellothere.containers.data.Conversation;
+import pl.hellothere.containers.data.ConversationDetails;
 import pl.hellothere.containers.messages.TextMessage;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -15,12 +18,11 @@ public class Client extends Application {
     static Client client;
 
     ServerClient connection;
-    ExecutorService ex = Executors.newCachedThreadPool();
 
     AtomicBoolean logging = new AtomicBoolean(false);
 
     void signIn(String login, String password) {
-        ex.submit(() -> {
+        new Thread(() -> {
             if(!logging.compareAndSet(false, true))
                 return;
 
@@ -33,6 +35,7 @@ public class Client extends Application {
                 else
                     Platform.runLater(ClientViewController.getLoginView()::loginFailMessage);
             } catch (Exception e) {
+                e.printStackTrace();
                 Platform.runLater(() -> {
                     ClientViewController.showErrorMessage("No connection");
                     ClientViewController.getLoginView().close();
@@ -40,7 +43,7 @@ public class Client extends Application {
             } finally {
                 logging.set(false);
             }
-        });
+        }).start();
     }
 
     @Override
@@ -49,7 +52,7 @@ public class Client extends Application {
 
         try {
             connection = new ServerClient();
-        } catch (Exception e) {
+        } catch (ServerClient.ConnectionError e) {
             ClientViewController.showErrorMessage("No connection");
             return;
         }
@@ -58,21 +61,27 @@ public class Client extends Application {
         ClientViewController.getLoginView().run();
     }
 
+    ConversationDetails conversationDetails = null;
+
     void startMainApp() {
-        ClientViewController.showErrorMessage("Welcome!");
         try {
-            while(true){
-                TextMessage msg = (TextMessage) connection.nextMessage();
-                System.out.println(msg.getSenderID()+", "+msg.getDate()+" | "+msg.getContent());
+            List<Conversation> list = connection.getConversationsList();
+            System.out.println(list);
+
+            if(!list.isEmpty()) {
+                int id = list.get(0).getID();
+                conversationDetails = connection.chooseConversation(id);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+
+            System.out.println(conversationDetails);
+        } catch (ServerClient.ConnectionLost | ServerClient.ConnectionError e) {
+            System.out.println("No connection");
         }
     }
 
     public void close() {
-        connection.close();
-        ex.shutdown();
+        if(connection != null)
+            connection.close();
     }
 
     public static void main(String[] args) {

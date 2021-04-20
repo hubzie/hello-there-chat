@@ -1,7 +1,7 @@
 package pl.hellothere.server;
 
 import pl.hellothere.containers.SocketPackage;
-import pl.hellothere.containers.messages.TextMessage;
+import pl.hellothere.containers.data.Conversation;
 import pl.hellothere.containers.socket.Info;
 import pl.hellothere.containers.socket.authorization.AuthorizationRequest;
 import pl.hellothere.containers.socket.authorization.AuthorizationResult;
@@ -10,7 +10,6 @@ import pl.hellothere.server.database.DatabaseClient.*;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Iterator;
 import java.util.List;
 
 class ClientHandler extends Thread {
@@ -30,7 +29,24 @@ class ClientHandler extends Thread {
         c_in = new ObjectInputStream(client.getInputStream());
     }
 
-    void authenticate(AuthorizationRequest msg) {
+    void send(SocketPackage pkg) throws ConnectionLost {
+        try {
+            c_out.writeObject(pkg);
+            c_out.flush();
+        } catch (IOException e) {
+            throw new ConnectionLost(e);
+        }
+    }
+
+    Object receive() throws ConnectionLost {
+        try {
+            return c_in.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            throw new ConnectionLost(e);
+        }
+    }
+
+    void authenticate(AuthorizationRequest msg) throws ConnectionLost {
         AuthorizationResult.Code res;
 
         try {
@@ -41,54 +57,119 @@ class ClientHandler extends Thread {
         }
 
         try {
-            c_out.writeObject(new AuthorizationResult(res, user_id));
-            c_out.flush();
+            send(new AuthorizationResult(res, user_id));
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new ConnectionLost(e);
         }
     }
 
-    List<TextMessage> messages = null;
-    Iterator<TextMessage> it;
-    void handleMessageInfo(Info msg) throws IOException {
-        if(messages == null) {
-            try {
-                messages = db.getMessages();
-            } catch (DatabaseException e) {
-                c_out.writeObject(Info.ServerError);
-                c_out.flush();
-                return;
-            }
-
-            it = messages.iterator();
+    void sendConversationList() throws ConnectionLost {
+        try {
+            List<Conversation> list = db.getConversationList(user_id);
+            for(Conversation c : list)
+                send(c);
+            send(Info.NoMoreConversation);
+        } catch (DatabaseException e) {
+            throw new DatabaseError(e);
         }
+    }
 
-        if(!it.hasNext())
-            c_out.writeObject(Info.NoMoreMessages);
-        else
-            c_out.writeObject(it.next());
+    void chooseConversation(int conv_id) throws ConnectionLost {
+        try {
+            send(db.getConversationDetails(conv_id));
+        } catch (InvalidData e) {
+            send(Info.ConversationNotFound);
+        } catch (DatabaseException e) {
+            throw new DatabaseError(e);
+        }
+    }
 
-        c_out.flush();
+    void handleInfo(Info msg) throws ConnectionLost {
+        switch (msg.getStatus()) {
+            case CONVERSATION_LIST -> sendConversationList();
+            case CHOOSE_CONVERSATION -> chooseConversation(msg.getData());
+            default -> throw new ConnectionError();
+        }
     }
 
     @Override
     public void run() {
-        while (!client.isClosed()) {
-            try {
-                SocketPackage msg = (SocketPackage) c_in.readObject();
-
-                if (msg instanceof AuthorizationRequest) authenticate((AuthorizationRequest) msg);
-                else if (msg instanceof Info) handleMessageInfo((Info) msg);
-                else throw new ClassNotFoundException();
-            } catch (EOFException e) {
+        try {
+            while (!client.isClosed()) {
                 try {
-                    client.close();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
+                    SocketPackage msg = (SocketPackage) receive();
+
+                    if (msg instanceof AuthorizationRequest) authenticate((AuthorizationRequest) msg);
+                    else if (msg instanceof Info) handleInfo((Info) msg);
+                    else throw new ConnectionError();
+                } catch (ConnectionLost e) {
+                    try {
+                        client.close();
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                } catch (ClassCastException e) {
+                    e.printStackTrace();
                 }
-            } catch (ClassNotFoundException | ClassCastException | IOException e) {
+            }
+        } catch (ConnectionError e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+            try {
+                client.close();
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
+
+    public static class ConnectionLost extends Exception {
+        public ConnectionLost() {
+            super();
+        }
+
+        public ConnectionLost(String message) {
+            super(message);
+        }
+
+        public ConnectionLost(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public ConnectionLost(Throwable cause) {
+            super(cause);
+        }}
+    public static class ConnectionError extends RuntimeException {
+        public ConnectionError() {
+            super();
+        }
+
+        public ConnectionError(String message) {
+            super(message);
+        }
+
+        public ConnectionError(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public ConnectionError(Throwable cause) {
+            super(cause);
+        }}
+    public static class DatabaseError extends RuntimeException {
+        public DatabaseError() {
+            super();
+        }
+
+        public DatabaseError(String message) {
+            super(message);
+        }
+
+        public DatabaseError(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public DatabaseError(Throwable cause) {
+            super(cause);
+        }}
 }

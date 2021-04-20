@@ -1,5 +1,7 @@
 package pl.hellothere.server.database;
 
+import pl.hellothere.containers.data.Conversation;
+import pl.hellothere.containers.data.ConversationDetails;
 import pl.hellothere.containers.messages.TextMessage;
 
 import java.nio.charset.StandardCharsets;
@@ -75,28 +77,48 @@ public class DatabaseClient implements AutoCloseable {
                 if (r.next())
                     return r.getInt(1);
                 throw new DatabaseAuthenticationException("Wrong password");
-            } catch (SQLException e) {
-                throw e;
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new DatabaseException("Cannot execute query");
+            throw new DatabaseException(e);
         }
     }
 
-    public List<TextMessage> getMessages() throws DatabaseException {
-        try (PreparedStatement s = db.prepareStatement("select user_id, send_time, content from conversation natural join messages order by send_time")) {
+    public List<Conversation> getConversationList(int user_id) throws DatabaseException {
+        try (PreparedStatement s = db.prepareStatement(
+                "select conversation_id, name " +
+                "from conversation " +
+                "natural join (select conversation_id from membership where user_id = ?) member " +
+                "natural join (select conversation_id, max(send_time) as last_update from messages group by conversation_id ) last " +
+                "order by last_update " +
+                "limit 10"
+        )) {
+            s.setInt(1, user_id);
+
             try (ResultSet r = s.executeQuery()) {
-                List<TextMessage> res = new LinkedList<>();
+                List<Conversation> list = new LinkedList<>();
                 while(r.next())
-                    res.add(new TextMessage(r.getInt(1), r.getDate(2), r.getString(3)));
-                return res;
-            } catch (SQLException e) {
-                throw e;
+                    list.add(new Conversation(r.getInt(1), r.getString(2)));
+                return list;
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new DatabaseException("Cannot execute query");
+            throw new DatabaseException(e);
+        }
+    }
+
+    public ConversationDetails getConversationDetails(int conv_id) throws DatabaseException {
+        try (PreparedStatement s = db.prepareStatement("select * from conversation where conversation_id = ?")) {
+            s.setInt(1, conv_id);
+
+            try (ResultSet r = s.executeQuery()) {
+                if(r.next())
+                    return new ConversationDetails(r.getInt("conversation_id"), r.getString("name"));
+                throw new InvalidData();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DatabaseException(e);
         }
     }
 
@@ -149,4 +171,20 @@ public class DatabaseClient implements AutoCloseable {
             super(cause);
         }
     }
+    static public class InvalidData extends DatabaseException {
+        public InvalidData() {
+            super();
+        }
+
+        public InvalidData(String message) {
+            super(message);
+        }
+
+        public InvalidData(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public InvalidData(Throwable cause) {
+            super(cause);
+        }}
 }

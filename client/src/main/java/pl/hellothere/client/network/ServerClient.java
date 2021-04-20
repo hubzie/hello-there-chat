@@ -1,16 +1,16 @@
 package pl.hellothere.client.network;
 
 import pl.hellothere.containers.SocketPackage;
-import pl.hellothere.containers.messages.Message;
-import pl.hellothere.containers.messages.TextMessage;
+import pl.hellothere.containers.data.*;
 import pl.hellothere.containers.socket.Info;
-import pl.hellothere.containers.socket.authorization.AuthorizationRequest;
-import pl.hellothere.containers.socket.authorization.AuthorizationResult;
+import pl.hellothere.containers.socket.authorization.*;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ServerClient {
     private static final String address = "localhost";
@@ -27,7 +27,7 @@ public class ServerClient {
             c_out.flush();
             c_in = new ObjectInputStream(connection.getInputStream());
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new ConnectionError(e);
         }
     }
 
@@ -39,39 +39,64 @@ public class ServerClient {
         }
     }
 
+    void send(SocketPackage pkg) throws ConnectionLost {
+        try {
+            c_out.writeObject(pkg);
+            c_out.flush();
+        } catch (IOException e) {
+            throw new ConnectionLost(e);
+        }
+    }
+
+    Object receive() throws ConnectionLost {
+        try {
+            return c_in.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            throw new ConnectionLost(e);
+        }
+    }
+
     public boolean signIn(String login, String password) throws ConnectionLost {
         if (user_id != -1)
             throw new RuntimeException();
 
         try {
-            c_out.writeObject(new AuthorizationRequest(login, password));
-            c_out.flush();
+            send(new AuthorizationRequest(login, password));
+            AuthorizationResult response = (AuthorizationResult) receive();
 
-            AuthorizationResult response = (AuthorizationResult) c_in.readObject();
             if (response.success())
                 user_id = response.getID();
             return response.success();
-        } catch (IOException | ClassCastException | ClassNotFoundException e) {
-            throw new ConnectionLost(e);
+        } catch (ClassCastException e) {
+            throw new ConnectionError(e);
         }
     }
 
-    public Message nextMessage() throws ConnectionLost, NoMoreMessages {
+    public List<Conversation> getConversationsList() throws ConnectionLost {
         try {
-            c_out.writeObject(Info.NextMessage);
-            c_out.flush();
+            send(Info.GetConversationList);
 
-            SocketPackage pkg = (SocketPackage) c_in.readObject();
+            List<Conversation> list = new ArrayList<>();
+            while (true) {
+                Object o = receive();
+                if(o instanceof Info)
+                    break;
+                list.add((Conversation) o);
+            }
 
-            if(pkg instanceof Info) throw new NoMoreMessages();
-
-            Message msg = (Message) pkg;
-
-            if(msg instanceof TextMessage) return (TextMessage) msg;
-            else throw new ClassNotFoundException();
-        } catch (IOException | ClassCastException | ClassNotFoundException e) {
-            throw new ConnectionLost(e);
+            return list;
+        } catch (ClassCastException e) {
+            throw new ConnectionError(e);
         }
+    }
+
+    public ConversationDetails chooseConversation(int id) throws ConnectionLost {
+        send(Info.chooseConversation(id));
+        Object o = receive();
+
+        if(o instanceof ConversationDetails)
+            return (ConversationDetails) o;
+        throw new ConnectionError();
     }
 
     public static class ConnectionLost extends Exception {
@@ -90,20 +115,20 @@ public class ServerClient {
         public ConnectionLost(Throwable cause) {
             super(cause);
         }}
-    public static class NoMoreMessages extends Exception {
-        public NoMoreMessages() {
+    public static class ConnectionError extends RuntimeException {
+        public ConnectionError() {
             super();
         }
 
-        public NoMoreMessages(String message) {
+        public ConnectionError(String message) {
             super(message);
         }
 
-        public NoMoreMessages(String message, Throwable cause) {
+        public ConnectionError(String message, Throwable cause) {
             super(message, cause);
         }
 
-        public NoMoreMessages(Throwable cause) {
+        public ConnectionError(Throwable cause) {
             super(cause);
         }}
 }
