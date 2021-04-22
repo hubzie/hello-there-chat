@@ -88,7 +88,7 @@ public class DatabaseClient implements AutoCloseable {
     public List<Conversation> getConversationList(int user_id) throws DatabaseException {
         try (PreparedStatement s = db.prepareStatement(
                 "select conversation_id, name " +
-                "from conversation " +
+                "from conversations " +
                 "natural join (select conversation_id from membership where user_id = ?) member " +
                 "natural join (select conversation_id, max(send_time) as last_update from messages group by conversation_id ) last " +
                 "order by last_update " +
@@ -131,7 +131,7 @@ public class DatabaseClient implements AutoCloseable {
     }
 
     public ConversationDetails getConversationDetails(int conv_id) throws DatabaseException {
-        try (PreparedStatement s = db.prepareStatement("select * from conversation where conversation_id = ?")) {
+        try (PreparedStatement s = db.prepareStatement("select * from conversations where conversation_id = ?")) {
             s.setInt(1, conv_id);
 
             try (ResultSet r = s.executeQuery()) {

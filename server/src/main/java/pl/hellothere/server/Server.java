@@ -6,7 +6,7 @@ import java.net.ServerSocket;
 
 public class Server {
     private static final String db_address = "jdbc:postgresql://localhost:5432/hellothere";
-    private static final String db_login = "hellothere_server";
+    private static final String db_login = "hellothere";
     private static final String db_password = "password";
     private static final int port = 8374;
 
