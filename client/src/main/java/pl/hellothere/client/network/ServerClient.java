@@ -118,6 +118,8 @@ public class ServerClient {
         }
     }
 
+    public int getUserID() { return user_id; }
+
     public static class ConnectionLost extends Exception {
         public ConnectionLost() {
             super();
@@ -133,7 +135,9 @@ public class ServerClient {
 
         public ConnectionLost(Throwable cause) {
             super(cause);
-        }}
+        }
+    }
+
     public static class ConnectionError extends RuntimeException {
         public ConnectionError() {
             super();
@@ -149,5 +153,6 @@ public class ServerClient {
 
         public ConnectionError(Throwable cause) {
             super(cause);
-        }}
+        }
+    }
 }
