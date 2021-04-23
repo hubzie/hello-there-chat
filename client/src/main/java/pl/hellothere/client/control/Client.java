@@ -8,11 +8,8 @@ import pl.hellothere.client.view.controller.ClientViewController;
 import pl.hellothere.containers.data.Conversation;
 import pl.hellothere.containers.data.ConversationDetails;
 import pl.hellothere.containers.messages.Message;
-import pl.hellothere.containers.messages.TextMessage;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Client extends Application {
@@ -28,11 +25,12 @@ public class Client extends Application {
                 return;
 
             try {
-                if(connection.signIn(login, password))
-                    Platform.runLater(() -> {
-                        ClientViewController.getLoginView().close();
-                        startMainApp();
-                    });
+                if(connection.signIn(login, password)) {
+                        Platform.runLater(() -> {
+                            ClientViewController.getLoginView().close();
+                            startMainApp();
+                        });
+                    }
                 else
                     Platform.runLater(ClientViewController.getLoginView()::loginFailMessage);
             } catch (Exception e) {
@@ -45,6 +43,28 @@ public class Client extends Application {
                 logging.set(false);
             }
         }).start();
+    }
+
+    void changeGroup(Integer groupId) {
+        try {
+            System.out.println(groupId);
+            List<Conversation> list = connection.getConversationsList();
+            for(Conversation c : list){
+                if(c.getID() == groupId) {
+                    ClientViewController.getAppView().changeGroup(c);
+                    conversationDetails = connection.chooseConversation(c.getID());
+                    for(Message m : connection.getMessages()) {
+                        System.out.println(m);
+                        ClientViewController.getAppView().addBottomMessage(m);
+                    }
+                    return;
+                }
+            }
+            System.out.println("No group");
+        } catch (ServerClient.ConnectionLost connectionLost) {
+            connectionLost.printStackTrace();
+            ClientViewController.showErrorMessage("No connection");
+        }
     }
 
     @Override
@@ -65,23 +85,29 @@ public class Client extends Application {
     ConversationDetails conversationDetails = null;
 
     void startMainApp() {
+        ClientViewController.getAppView().setUserID(connection.getUserID());
+        ClientViewController.getAppView().setGroupAction(this::changeGroup);
+        try {
+            ClientViewController.getAppView().run();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         try {
             List<Conversation> list = connection.getConversationsList();
             System.out.println(list);
 
+            for(Conversation c : list) ClientViewController.getAppView().addGroup(c);
+
             if(!list.isEmpty()) {
                 int id = list.get(0).getID();
-                conversationDetails = connection.chooseConversation(id);
+                changeGroup(id);
             }
 
             System.out.println(conversationDetails);
 
-            if(conversationDetails != null)
-                for(Message m : connection.getMessages())
-                    System.out.println(m);
         } catch (ServerClient.ConnectionLost | ServerClient.ConnectionError e) {
             e.printStackTrace();
-            System.out.println("No connection");
+            ClientViewController.showErrorMessage("No connection");
         }
     }
 

@@ -1,0 +1,6 @@
+* {
+   -fx-generic: LightSkyBlue;
+   -fx-secondary: Grey;
+   -fx-primary-text: derived(Grey, -20.0%);
+   -fx-primary-background: derive(LightSkyBlue, 90.0%);
+}
