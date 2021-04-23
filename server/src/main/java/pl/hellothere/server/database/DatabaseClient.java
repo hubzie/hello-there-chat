@@ -113,8 +113,8 @@ public class DatabaseClient implements AutoCloseable {
                 "select *" +
                         "from messages " +
                         "where conversation_id = ? " +
-                        "order by send_time desc " +
-                        "limit 8"
+                        "order by send_time " +
+                        "limit 16"
         )) {
             s.setInt(1, conv_id);
 
