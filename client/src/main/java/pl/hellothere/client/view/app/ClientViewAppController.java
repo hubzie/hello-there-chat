@@ -1,6 +1,7 @@
 package pl.hellothere.client.view.app;
 
 import javafx.application.Platform;
+import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -10,14 +11,14 @@ import javafx.scene.layout.VBox;
 import pl.hellothere.client.view.controller.ClientViewController;
 
 public class ClientViewAppController {
-    public VBox messagesBox;
-    public TextField newMessageField;
-    public HBox appTop;
-    public ScrollPane messagesPane;
+    @FXML VBox messagesBox;
+    @FXML TextField newMessageField;
+    @FXML HBox appTop;
+    @FXML ScrollPane messagesPane;
 
     public ClientViewAppController() { ClientViewController.getAppView().setCvlc(this); }
 
-    public void handleSendButtonAction() {
+    @FXML private void handleSendButtonAction() {
         messagesBox.getChildren().add(new HBox(){
             {
                 getChildren().add(new Label() {
