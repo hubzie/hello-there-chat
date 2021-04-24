@@ -19,7 +19,7 @@ public class ServerClient {
     final Socket connection;
     final ObjectOutputStream c_out;
     final ObjectInputStream c_in;
-    int user_id = -1;
+    UserData user = null;
 
     public ServerClient() {
         try {
@@ -58,7 +58,7 @@ public class ServerClient {
     }
 
     public boolean signIn(String login, String password) throws ConnectionLost {
-        if (user_id != -1)
+        if (user != null)
             throw new RuntimeException();
 
         try {
@@ -66,7 +66,7 @@ public class ServerClient {
             AuthorizationResult response = (AuthorizationResult) receive();
 
             if (response.success())
-                user_id = response.getID();
+                user = response.getUserData();
             return response.success();
         } catch (ClassCastException e) {
             throw new ConnectionError(e);
@@ -116,6 +116,10 @@ public class ServerClient {
         } catch (ClassCastException e) {
             throw new ConnectionError(e);
         }
+    }
+
+    public UserData getUser() {
+        return user;
     }
 
     public static class ConnectionLost extends Exception {
