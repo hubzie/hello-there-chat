@@ -1,0 +1,46 @@
+* {
+    -fx-primary: Grey;
+    -fx-primary-text: Black;
+    -fx-primary-background: WhiteSmoke;
+}
+.root {
+    -fx-background-color: -fx-primary-background;
+}
+.button {
+    -fx-background-color: derived(-fx-primary-background, 100%);
+    -fx-background-radius: 5;
+    -fx-text-fill: -fx-primary-text;
+    -fx-border-width: 2;
+    -fx-border-color: derived(-fx-primary, 40%);
+    -fx-border-radius: 5;
+    -fx-background-insets: 2 0 2 0;
+}
+.button:hover {
+    -fx-background-color: derived(-fx-primary, 20%);
+    -fx-text-fill: derived(-fx-primary-background, 100%);
+    -fx-border-color: derived(-fx-primary, 20%);
+    -fx-cursor: hand;
+}
+.button:pressed {
+    -fx-background-color: derived(-fx-primary, 0%);
+    -fx-border-color: derived(-fx-primary, 0%);
+}
+.text-field {
+    -fx-text-fill: -fx-primary-text;
+    -fx-background-color: derived(-fx-primary-background, 100%);
+    -fx-background-radius: 5;
+    -fx-border-width: 2;
+    -fx-border-color: derived(-fx-primary, 40%);
+    -fx-border-radius: 5;
+    -fx-highlight-fill: derived(-fx-primary, 20%);
+}
+.text-field:focused {
+    -fx-prompt-text-fill: derive(-fx-control-inner-background, -30%);
+}
+.label {
+    -fx-font-family: "Lucida Console";
+}
+
+#title {
+    -fx-font-size: 30;
+}
