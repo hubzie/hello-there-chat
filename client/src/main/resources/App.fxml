@@ -11,17 +11,17 @@
             xmlns:fx="http://javafx.com/fxml">
 
     <top>
-        <HBox fx:id="appTop" id="messages-box" spacing="10" alignment="BOTTOM_CENTER"/>
+        <HBox fx:id="appTop" id="top-box" spacing="10" alignment="BOTTOM_CENTER"/>
     </top>
 
     <center>
-        <ScrollPane fx:id="messagesPane" vbarPolicy="ALWAYS" hbarPolicy="NEVER" fitToWidth="true">
+        <ScrollPane fx:id="messagesPane" id="messages-pane" vbarPolicy="ALWAYS" hbarPolicy="NEVER" fitToWidth="true">
             <VBox fx:id="messagesBox" id="messages-box" spacing="10" alignment="BOTTOM_CENTER"/>
         </ScrollPane>
     </center>
 
     <bottom>
-        <HBox alignment="CENTER">
+        <HBox id="bottom-box" alignment="CENTER">
             <TextField fx:id="newMessageField" promptText="Write New Message" HBox.hgrow="ALWAYS">
                 <HBox.margin> <Insets> <top>5</top> <bottom>5</bottom> <left>5</left> </Insets> </HBox.margin>
             </TextField>
@@ -32,8 +32,7 @@
     </bottom>
 
     <stylesheets>
-        <URL value="@AppStyleGeneric.css" />
-        <URL value="@AppStyleGenericBlue.css" />
+        <URL value="@AppStyleGrey.css" />
     </stylesheets>
 
 </BorderPane>
