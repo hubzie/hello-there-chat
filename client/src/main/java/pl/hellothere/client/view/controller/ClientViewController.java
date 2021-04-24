@@ -25,7 +25,7 @@ public class ClientViewController extends Application {
     public static void showErrorMessage(String errorMessage) {
         Stage errorStage = new Stage();
         StackPane root = new StackPane();
-        root.setStyle("-fx-background-color: AliceBlue;");
+        root.setStyle("-fx-background-color: WhiteSmoke;");
         Label errorLabel = new Label(errorMessage);
         errorLabel.setStyle("-fx-font-family: Lucida Console; -fx-text-fill: Red; -fx-font-size: 20; -fx-wrap-text: true");
         root.getChildren().add(errorLabel);

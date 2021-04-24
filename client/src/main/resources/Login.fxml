@@ -37,7 +37,7 @@
     </HBox>
 
     <stylesheets>
-        <URL value="@Login.css" />
+        <URL value="@LoginGrey.css" />
     </stylesheets>
 
 </GridPane>

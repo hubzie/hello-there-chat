@@ -16,6 +16,7 @@
     -fx-border-width: 2px;
     -fx-border-color: DarkGrey;
     -fx-border-radius: 20;
+    -fx-cursor: hand;
 }
 .button:pressed {
     -fx-background-color: DarkGrey;
@@ -40,9 +41,10 @@
 .label {
     -fx-font-family: "Lucida Console";
 }
-.grid-pane {
+/*.grid-pane {
     -fx-background-color: AliceBlue;
-}
+}*/
+
 #title {
     -fx-font-size: 30;
 }
