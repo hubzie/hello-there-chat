@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import pl.hellothere.client.network.ServerClient;
+import pl.hellothere.client.view.app.ClientViewApp;
 import pl.hellothere.client.view.controller.ClientViewController;
 import pl.hellothere.containers.data.Conversation;
 import pl.hellothere.containers.data.ConversationDetails;
@@ -70,8 +71,14 @@ public class Client extends Application {
     void changeGroup(int groupId) {
         try {
             conversationDetails = connection.chooseConversation(groupId);
-            for(Message m : connection.getMessages())
-                ClientViewController.getAppView().addBottomMessage(m);
+            for(Message m : connection.getMessages()) {
+                try {
+                    ClientViewController.getAppView().addBottomMessage(m);
+                } catch (ClientViewApp.UnknownMessageTypeException e) {
+                    e.printStackTrace();
+                    ClientViewController.showErrorMessage("Unknown Message Type");
+                }
+            }
         } catch (ServerClient.ConnectionLost e) {
             e.printStackTrace();
             ClientViewController.getAppView().close();

@@ -34,21 +34,21 @@ public class ClientViewApp extends Application {
         this.curGroup = curGroup;
     }
 
-    public void addTopMessage(Message m) {
+    public void addTopMessage(Message m) throws UnknownMessageTypeException {
         if(m instanceof TextMessage) {
             cvac.messagesBox.getChildren().add( 0, new TextMessageBox(m) );
         }
         else {
-            System.out.println("UnknownMessageType");
+            throw new UnknownMessageTypeException();
         }
     }
 
-    public void addBottomMessage(Message m) {
+    public void addBottomMessage(Message m) throws UnknownMessageTypeException {
         if(m instanceof TextMessage) {
             cvac.messagesBox.getChildren().add( new TextMessageBox(m) );
         }
         else {
-            System.out.println("UnknownMessageType");
+            throw new UnknownMessageTypeException();
         }
     }
 
@@ -118,4 +118,5 @@ public class ClientViewApp extends Application {
     }
 
     public static class NoFxmlLoadedException extends Exception {}
+    public static class UnknownMessageTypeException extends Exception {}
 }
