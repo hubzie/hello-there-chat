@@ -2,6 +2,7 @@ package pl.hellothere.server;
 
 import pl.hellothere.containers.SocketPackage;
 import pl.hellothere.containers.data.Conversation;
+import pl.hellothere.containers.data.UserData;
 import pl.hellothere.containers.messages.Message;
 import pl.hellothere.containers.socket.Info;
 import pl.hellothere.containers.socket.authorization.AuthorizationRequest;
@@ -20,7 +21,7 @@ class ClientHandler extends Thread {
     private final ObjectOutputStream c_out;
 
     private int conv_id = -1;
-    private int user_id = -1;
+    private UserData user = null;
 
     public ClientHandler(DatabaseClient db, Socket client) throws IOException {
         this.db = db;
@@ -52,14 +53,14 @@ class ClientHandler extends Thread {
         AuthorizationResult.Code res;
 
         try {
-            user_id = db.authenticate(msg.getLogin(), msg.getPassword());
-            res = (user_id != -1 ? AuthorizationResult.Code.OK : AuthorizationResult.Code.ERROR);
+            user = db.authenticate(msg.getLogin(), msg.getPassword());
+            res = (user != null ? AuthorizationResult.Code.OK : AuthorizationResult.Code.ERROR);
         } catch (DatabaseException e) {
             res = AuthorizationResult.Code.SERVER_ERROR;
         }
 
         try {
-            send(new AuthorizationResult(res, user_id));
+            send(new AuthorizationResult(res, user));
         } catch (Exception e) {
             throw new ConnectionLost(e);
         }
@@ -67,7 +68,7 @@ class ClientHandler extends Thread {
 
     void sendConversationList() throws ConnectionLost {
         try {
-            List<Conversation> list = db.getConversationList(user_id);
+            List<Conversation> list = db.getConversationList(user.getID());
             for(Conversation c : list)
                 send(c);
             send(Info.NoMoreConversation);
@@ -100,10 +101,10 @@ class ClientHandler extends Thread {
 
     void handleInfo(Info msg) throws ConnectionLost {
         switch (msg.getStatus()) {
-            case CONVERSATION_LIST -> sendConversationList();
-            case CHOOSE_CONVERSATION -> chooseConversation(msg.getData());
-            case GET_MESSAGES -> getMessages();
-            default -> throw new ConnectionError();
+            case CONVERSATION_LIST: sendConversationList(); break;
+            case CHOOSE_CONVERSATION: chooseConversation(msg.getData()); break;
+            case GET_MESSAGES: getMessages(); break;
+            default: throw new ConnectionError();
         }
     }
 

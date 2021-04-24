@@ -1,6 +1,7 @@
 package pl.hellothere.containers.socket.authorization;
 
 import pl.hellothere.containers.SocketPackage;
+import pl.hellothere.containers.data.UserData;
 
 public class AuthorizationResult implements SocketPackage {
     public enum Code {
@@ -8,20 +9,20 @@ public class AuthorizationResult implements SocketPackage {
     }
 
     Code result;
-    int user_id;
+    UserData user;
 
     AuthorizationResult() {}
 
-    public AuthorizationResult(Code result, int user_id) {
+    public AuthorizationResult(Code result, UserData user) {
         this.result = result;
-        this.user_id = user_id;
+        this.user = user;
     }
 
     public boolean success() {
-        return (user_id != -1);
+        return (user != null);
     }
 
-    public int getID() {
-        return user_id;
+    public UserData getUserData() {
+        return user;
     }
 }

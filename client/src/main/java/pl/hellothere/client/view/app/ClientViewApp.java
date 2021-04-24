@@ -108,6 +108,7 @@ public class ClientViewApp extends Application {
             this.conv = conv;
             setText(conv.getName());
             setOnAction(e -> {
+                changeGroup(conv);
                 groupAction.accept(conv.getID());
                 Platform.runLater(() -> cvac.messagesPane.setVvalue(cvac.messagesPane.getVmax()));
             });

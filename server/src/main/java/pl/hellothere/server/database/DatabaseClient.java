@@ -2,6 +2,7 @@ package pl.hellothere.server.database;
 
 import pl.hellothere.containers.data.Conversation;
 import pl.hellothere.containers.data.ConversationDetails;
+import pl.hellothere.containers.data.UserData;
 import pl.hellothere.containers.messages.Message;
 import pl.hellothere.containers.messages.TextMessage;
 
@@ -69,14 +70,14 @@ public class DatabaseClient implements AutoCloseable {
         }
     }
 
-    public int authenticate(String login, String password) throws DatabaseException {
-        try (PreparedStatement s = db.prepareStatement("select user_id from users where login = ? and password = ?")) {
+    public UserData authenticate(String login, String password) throws DatabaseException {
+        try (PreparedStatement s = db.prepareStatement("select user_id, name from users where login = ? and password = ?")) {
             s.setString(1, login);
             s.setBytes(2, getEncodedPassword(login, password));
 
             try (ResultSet r = s.executeQuery()) {
                 if (r.next())
-                    return r.getInt(1);
+                    return new UserData(r.getInt(1), r.getString(2));
                 throw new DatabaseAuthenticationException("Wrong password");
             }
         } catch (SQLException e) {

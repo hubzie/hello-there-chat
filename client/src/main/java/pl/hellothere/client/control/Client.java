@@ -45,28 +45,6 @@ public class Client extends Application {
         }).start();
     }
 
-    void changeGroup(Integer groupId) {
-        try {
-            System.out.println(groupId);
-            List<Conversation> list = connection.getConversationsList();
-            for(Conversation c : list){
-                if(c.getID() == groupId) {
-                    ClientViewController.getAppView().changeGroup(c);
-                    conversationDetails = connection.chooseConversation(c.getID());
-                    for(Message m : connection.getMessages()) {
-                        System.out.println(m);
-                        ClientViewController.getAppView().addBottomMessage(m);
-                    }
-                    return;
-                }
-            }
-            System.out.println("No group");
-        } catch (ServerClient.ConnectionLost connectionLost) {
-            connectionLost.printStackTrace();
-            ClientViewController.showErrorMessage("No connection");
-        }
-    }
-
     @Override
     public void start(Stage stage) throws Exception {
         client = this;
@@ -84,30 +62,40 @@ public class Client extends Application {
 
     ConversationDetails conversationDetails = null;
 
+    void changeGroup(int groupId) {
+        try {
+            conversationDetails = connection.chooseConversation(groupId);
+            for(Message m : connection.getMessages())
+                ClientViewController.getAppView().addBottomMessage(m);
+        } catch (ServerClient.ConnectionLost e) {
+            e.printStackTrace();
+            // ClientViewController.getAppView().close();
+            ClientViewController.showErrorMessage("No connection");
+        }
+    }
+
     void startMainApp() {
-        ClientViewController.getAppView().setUserID(connection.getUserID());
+        ClientViewController.getAppView().setUserID(connection.getUser().getID());
         ClientViewController.getAppView().setGroupAction(this::changeGroup);
+
         try {
             ClientViewController.getAppView().run();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-            List<Conversation> list = connection.getConversationsList();
-            System.out.println(list);
 
-            for(Conversation c : list) ClientViewController.getAppView().addGroup(c);
+            List<Conversation> list = connection.getConversationsList();
+            for(Conversation c : list)
+                ClientViewController.getAppView().addGroup(c);
 
             if(!list.isEmpty()) {
                 int id = list.get(0).getID();
                 changeGroup(id);
             }
-
-            System.out.println(conversationDetails);
-
         } catch (ServerClient.ConnectionLost | ServerClient.ConnectionError e) {
             e.printStackTrace();
+            // ClientViewController.getAppView().close();
             ClientViewController.showErrorMessage("No connection");
+        } catch (Exception e) {
+            e.printStackTrace();
+            ClientViewController.showErrorMessage("View error");
         }
     }
 
