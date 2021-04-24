@@ -46,7 +46,7 @@ public class Client extends Application {
     }
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage) {
         client = this;
 
         try {
@@ -57,7 +57,12 @@ public class Client extends Application {
         }
 
         ClientViewController.getLoginView().setSignInAction(this::signIn);
-        ClientViewController.getLoginView().run();
+        try {
+            ClientViewController.getLoginView().run();
+        } catch (Exception e) {
+            e.printStackTrace();
+            ClientViewController.showErrorMessage("View error");
+        }
     }
 
     ConversationDetails conversationDetails = null;
@@ -69,7 +74,7 @@ public class Client extends Application {
                 ClientViewController.getAppView().addBottomMessage(m);
         } catch (ServerClient.ConnectionLost e) {
             e.printStackTrace();
-            // ClientViewController.getAppView().close();
+            ClientViewController.getAppView().close();
             ClientViewController.showErrorMessage("No connection");
         }
     }
@@ -91,7 +96,7 @@ public class Client extends Application {
             }
         } catch (ServerClient.ConnectionLost | ServerClient.ConnectionError e) {
             e.printStackTrace();
-            // ClientViewController.getAppView().close();
+            ClientViewController.getAppView().close();
             ClientViewController.showErrorMessage("No connection");
         } catch (Exception e) {
             e.printStackTrace();

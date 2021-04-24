@@ -1,7 +1,6 @@
 package pl.hellothere.client.view.app;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.*;
@@ -18,12 +17,15 @@ import java.util.function.Consumer;
 
 
 public class ClientViewApp extends Application {
+    private Stage primaryStage;
     private ClientViewAppController cvac;
     private int curUserID = -1;
     private Consumer<Integer> groupAction;
     private Conversation curGroup = null;
 
     public void run() throws Exception { start(new Stage()); }
+
+    public void close() { primaryStage.close(); }
 
     public void setGroupAction(Consumer<Integer> groupAction) { this.groupAction = groupAction; }
 
@@ -62,6 +64,7 @@ public class ClientViewApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        this.primaryStage = primaryStage;
         Parent root;
 
         try {
@@ -74,7 +77,7 @@ public class ClientViewApp extends Application {
         primaryStage.setScene(new Scene(root, 800, 600));
         primaryStage.setResizable(false);
 
-        cvac.messagesPane.setVvalue(cvac.messagesPane.getVmax());
+        cvac.messagesBox.heightProperty().addListener(observable -> cvac.messagesPane.setVvalue(1D));
 
         primaryStage.show();
     }
@@ -110,7 +113,6 @@ public class ClientViewApp extends Application {
             setOnAction(e -> {
                 changeGroup(conv);
                 groupAction.accept(conv.getID());
-                Platform.runLater(() -> cvac.messagesPane.setVvalue(cvac.messagesPane.getVmax()));
             });
         }
     }
