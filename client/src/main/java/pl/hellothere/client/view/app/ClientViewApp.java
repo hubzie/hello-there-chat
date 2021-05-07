@@ -8,9 +8,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
-import pl.hellothere.containers.data.Conversation;
-import pl.hellothere.containers.messages.Message;
-import pl.hellothere.containers.messages.TextMessage;
+import pl.hellothere.containers.socket.data.converstions.Conversation;
+import pl.hellothere.containers.socket.data.messages.Message;
+import pl.hellothere.containers.socket.data.messages.TextMessage;
 
 import java.util.Objects;
 import java.util.function.Consumer;

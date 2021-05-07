@@ -1,14 +1,11 @@
 package pl.hellothere.server.database;
 
-import pl.hellothere.containers.data.Conversation;
-import pl.hellothere.containers.data.ConversationDetails;
-import pl.hellothere.containers.data.UserData;
-import pl.hellothere.containers.messages.Message;
-import pl.hellothere.containers.messages.TextMessage;
+import pl.hellothere.containers.socket.data.UserData;
+import pl.hellothere.containers.socket.data.converstions.Conversation;
+import pl.hellothere.containers.socket.data.converstions.ConversationDetails;
+import pl.hellothere.containers.socket.data.messages.Message;
+import pl.hellothere.containers.socket.data.messages.TextMessage;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,13 +13,12 @@ import java.util.List;
 public class DatabaseClient implements AutoCloseable {
     private Connection db = null;
 
-    public DatabaseClient(String db_address, String db_login, String db_password) throws ClassNotFoundException, DatabaseException {
-        Class.forName("org.postgresql.Driver");
+    public DatabaseClient(String db_address, String db_login, String db_password) throws DatabaseInitializationException {
         try {
+            Class.forName("org.postgresql.Driver");
             db = DriverManager.getConnection(db_address, db_login, db_password);
-        } catch (SQLException e) {
-            System.out.println(e.toString());
-            throw new DatabaseConnectionException();
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new DatabaseInitializationException(e);
         }
     }
 
@@ -32,25 +28,7 @@ public class DatabaseClient implements AutoCloseable {
             if (db != null)
                 db.close();
         } catch (SQLException e) {
-            System.out.println("Unable to close connection with database: " + e.toString());
-        }
-    }
-
-    static String convert(byte[] arr) {
-        StringBuilder b = new StringBuilder();
-        for(byte a : arr)
-            b.append(String.format("%02x", a));
-        return b.toString();
-    }
-
-    static byte[] encode(String password, byte[] salt) throws DatabaseException {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            if(salt != null)
-                md.update(salt);
-            return md.digest(password.getBytes(StandardCharsets.UTF_8));
-        } catch (NoSuchAlgorithmException e) {
-            throw new DatabaseException("Unable to encode data");
+            e.printStackTrace();
         }
     }
 
@@ -60,13 +38,11 @@ public class DatabaseClient implements AutoCloseable {
 
             try (ResultSet r = s.executeQuery()) {
                 if (!r.next())
-                    throw new DatabaseAuthenticationException("No such user");
-                return encode(password, r.getBytes(1));
-            } catch (SQLException e) {
-                throw e;
+                    throw new DatabaseAuthenticationException();
+                return PasswordHasher.encode(password, r.getBytes(1));
             }
-        } catch (SQLException e) {
-            throw new DatabaseException("Cannot execute query");
+        } catch (SQLException | PasswordHasher.HasherException e) {
+            throw new DatabaseException(e);
         }
     }
 
@@ -78,7 +54,7 @@ public class DatabaseClient implements AutoCloseable {
             try (ResultSet r = s.executeQuery()) {
                 if (r.next())
                     return new UserData(r.getInt(1), r.getString(2));
-                throw new DatabaseAuthenticationException("Wrong password");
+                throw new DatabaseAuthenticationException();
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -151,64 +127,17 @@ public class DatabaseClient implements AutoCloseable {
             super();
         }
 
-        public DatabaseException(String message) {
-            super(message);
-        }
-
-        public DatabaseException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
         public DatabaseException(Throwable cause) {
-            super(cause);
-        }}
-    static public class DatabaseConnectionException extends DatabaseException {
-        public DatabaseConnectionException() {
-            super();
-        }
-
-        public DatabaseConnectionException(String message) {
-            super(message);
-        }
-
-        public DatabaseConnectionException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public DatabaseConnectionException(Throwable cause) {
-            super(cause);
-        }}
-    static public class DatabaseAuthenticationException extends DatabaseException {
-        public DatabaseAuthenticationException() {
-            super();
-        }
-
-        public DatabaseAuthenticationException(String message) {
-            super(message);
-        }
-
-        public DatabaseAuthenticationException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public DatabaseAuthenticationException(Throwable cause) {
             super(cause);
         }
     }
-    static public class InvalidData extends DatabaseException {
-        public InvalidData() {
-            super();
-        }
-
-        public InvalidData(String message) {
-            super(message);
-        }
-
-        public InvalidData(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public InvalidData(Throwable cause) {
+    static public class DatabaseInitializationException extends DatabaseException {
+        public DatabaseInitializationException(Throwable cause) {
             super(cause);
-        }}
+        }
+    }
+    static public class DatabaseAuthenticationException extends DatabaseException {
+    }
+    static public class InvalidData extends DatabaseException {
+    }
 }

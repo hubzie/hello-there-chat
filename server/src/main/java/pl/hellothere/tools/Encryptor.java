@@ -4,7 +4,7 @@ import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
 
-public class Encoder {
+public class Encryptor {
     private static final String algorithm = "AES";
 
     private final PublicKey publicKey;
@@ -12,7 +12,7 @@ public class Encoder {
     private byte[] secret;
     private final Cipher cipher;
 
-    public Encoder() {
+    public Encryptor() {
         try {
             cipher = Cipher.getInstance(algorithm);
 

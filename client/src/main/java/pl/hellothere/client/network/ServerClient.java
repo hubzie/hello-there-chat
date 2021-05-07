@@ -1,28 +1,27 @@
 package pl.hellothere.client.network;
 
-import pl.hellothere.containers.SocketPackage;
-import pl.hellothere.containers.data.*;
-import pl.hellothere.containers.messages.Message;
-import pl.hellothere.containers.socket.Info;
-import pl.hellothere.containers.socket.authorization.*;
-import pl.hellothere.tools.Receiver;
-import pl.hellothere.tools.Sender;
+import pl.hellothere.containers.socket.authorization.AuthorizationRequest;
+import pl.hellothere.containers.socket.authorization.AuthorizationResult;
+import pl.hellothere.containers.socket.connection.Info;
+import pl.hellothere.containers.socket.connection.SecurityData;
+import pl.hellothere.containers.socket.data.UserData;
+import pl.hellothere.tools.*;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ServerClient {
     private static final String address = "localhost";
     private static final int port = 8374;
+
     final Socket connection;
+
     private final Receiver receiver;
     private final Sender sender;
-    UserData user = null;
+    private final Encryptor encryptor = new Encryptor();
 
+    UserData user = null;
+/*
     public ServerClient() {
         try {
             connection = new Socket(address, port);
@@ -122,39 +121,54 @@ public class ServerClient {
     public UserData getUser() {
         return user;
     }
+*/
+    public ServerClient() throws ConnectionError {
+        try {
+            connection = new Socket(address, port);
 
-    public static class ConnectionLost extends Exception {
-        public ConnectionLost() {
+            sender = new Sender(connection.getOutputStream());
+            receiver = new Receiver(connection.getInputStream());
+
+            sender.send(new SecurityData(encryptor.getPublicKey()));
+            encryptor.setReceiverKey(receiver.<SecurityData>read().getKey());
+        } catch (IOException | CommunicationException e) {
+            throw new ConnectionError(e);
+        }
+    }
+
+    public UserData signIn(String login, String password) throws ConnectionError {
+        if(user != null)
+            throw new UserAlreadyLoggedException();
+
+        try {
+            sender.send(new AuthorizationRequest(login, encryptor.encrypt(password)));
+            AuthorizationResult ar = receiver.read();
+
+            if (ar.success())
+                return (user = ar.getUserData());
+            else if(ar.isServerError())
+                throw new ServerClientException();
+            return null;
+        } catch (CommunicationException e) {
+            throw new ServerClientException(e);
+        }
+    }
+
+    public void close() {
+        try {
+            sender.send(Info.CloseConnection);
+            connection.close();
+        } catch (Exception e) {}
+    }
+
+    public static class ServerClientException extends ConnectionError {
+        public ServerClientException() {
             super();
         }
 
-        public ConnectionLost(String message) {
-            super(message);
-        }
-
-        public ConnectionLost(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public ConnectionLost(Throwable cause) {
+        public ServerClientException(Throwable cause) {
             super(cause);
         }
     }
-    public static class ConnectionError extends RuntimeException {
-        public ConnectionError() {
-            super();
-        }
-
-        public ConnectionError(String message) {
-            super(message);
-        }
-
-        public ConnectionError(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public ConnectionError(Throwable cause) {
-            super(cause);
-        }
-    }
+    public static class UserAlreadyLoggedException extends ServerClientException {}
 }

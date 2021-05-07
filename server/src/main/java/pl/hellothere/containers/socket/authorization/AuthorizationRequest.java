@@ -4,11 +4,11 @@ import pl.hellothere.containers.SocketPackage;
 
 public class AuthorizationRequest implements SocketPackage {
     String login;
-    String password;
+    byte[] password;
 
-    AuthorizationRequest() {}
+    protected AuthorizationRequest() {}
 
-    public AuthorizationRequest(String login, String password) {
+    public AuthorizationRequest(String login, byte[] password) {
         this.login = login;
         this.password = password;
     }
@@ -17,7 +17,7 @@ public class AuthorizationRequest implements SocketPackage {
         return login;
     }
 
-    public String getPassword() {
+    public byte[] getPassword() {
         return password;
     }
 }

@@ -9,13 +9,21 @@ import java.io.OutputStream;
 public class Sender {
     ObjectOutputStream out;
 
-    public Sender(OutputStream out) throws IOException {
-        this.out = new ObjectOutputStream(out);
-        this.out.flush();
+    public Sender(OutputStream out) throws CommunicationException {
+        try {
+            this.out = new ObjectOutputStream(out);
+            this.out.flush();
+        } catch (IOException e){
+            throw new CommunicationException("Initialize sender error", e);
+        }
     }
 
-    public void send(SocketPackage pkg) throws IOException {
-        out.writeObject(pkg);
-        out.flush();
+    public void send(SocketPackage pkg) throws CommunicationException {
+        try {
+            out.writeObject(pkg);
+            out.flush();
+        } catch (IOException e) {
+            throw new CommunicationException("Send package error", e);
+        }
     }
 }

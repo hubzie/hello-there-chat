@@ -1,19 +1,13 @@
 package pl.hellothere.client.control;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.stage.Stage;
 import pl.hellothere.client.network.ServerClient;
-import pl.hellothere.client.view.app.ClientViewApp;
-import pl.hellothere.client.view.controller.ClientViewController;
-import pl.hellothere.containers.data.Conversation;
-import pl.hellothere.containers.data.ConversationDetails;
-import pl.hellothere.containers.messages.Message;
-
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import pl.hellothere.containers.socket.data.UserData;
+import pl.hellothere.tools.ConnectionError;
 
 public class Client extends Application {
+/*
     static Client client;
 
     ServerClient connection;
@@ -114,6 +108,43 @@ public class Client extends Application {
     public void close() {
         if(connection != null)
             connection.close();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+        client.close();
+    }
+*/
+    static Client client = null;
+    ServerClient connection;
+
+    @Override
+    public void start(Stage stage) {
+        client = this;
+
+        try {
+            connection = new ServerClient();
+        } catch (ConnectionError e) {
+            System.out.println("No connection");
+            return;
+        }
+
+        String login = "obiwan";
+        String password = "password";
+
+        try {
+            UserData user;
+            if((user = connection.signIn(login, password)) != null)
+                System.out.println("("+user.getID()+"): "+user.getName());
+            else
+                System.out.println("Wrong data");
+        } catch (ConnectionError e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void close() {
+        connection.close();
     }
 
     public static void main(String[] args) {

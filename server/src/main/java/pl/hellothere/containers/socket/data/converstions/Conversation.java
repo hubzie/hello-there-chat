@@ -1,14 +1,14 @@
-package pl.hellothere.containers.data;
+package pl.hellothere.containers.socket.data.converstions;
 
 import pl.hellothere.containers.SocketPackage;
 
-public class UserData implements SocketPackage {
+public class Conversation implements SocketPackage {
     int id;
     String name;
 
-    UserData() {}
+    protected Conversation() {}
 
-    public UserData(int id, String name) {
+    public Conversation(int id, String name) {
         this.id = id;
         this.name = name;
     }

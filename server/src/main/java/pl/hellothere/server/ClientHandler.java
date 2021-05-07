@@ -1,190 +1,89 @@
 package pl.hellothere.server;
 
 import pl.hellothere.containers.SocketPackage;
-import pl.hellothere.containers.data.Conversation;
-import pl.hellothere.containers.data.UserData;
-import pl.hellothere.containers.messages.Message;
-import pl.hellothere.containers.socket.Info;
-import pl.hellothere.containers.socket.authorization.AuthorizationRequest;
 import pl.hellothere.containers.socket.authorization.AuthorizationResult;
+import pl.hellothere.containers.socket.connection.Info;
+import pl.hellothere.containers.socket.connection.SecurityData;
+import pl.hellothere.containers.socket.authorization.AuthorizationRequest;
+import pl.hellothere.containers.socket.data.UserData;
 import pl.hellothere.server.database.DatabaseClient;
-import pl.hellothere.server.database.DatabaseClient.*;
-import pl.hellothere.tools.Receiver;
-import pl.hellothere.tools.Sender;
+import pl.hellothere.tools.*;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.List;
 
 class ClientHandler extends Thread {
     private final DatabaseClient db;
-    private final Socket client;
+    private final Socket connection;
+
     private final Receiver receiver;
     private final Sender sender;
+    private final Encryptor encryptor = new Encryptor();
 
-    private int conv_id = -1;
-    private UserData user = null;
+    UserData user = null;
 
-    public ClientHandler(DatabaseClient db, Socket client) throws IOException {
-        this.db = db;
-        this.client = client;
+    public ClientHandler(DatabaseClient db, Socket connection) throws ConnectionError {
+        try {
+            this.db = db;
+            this.connection = connection;
 
-        sender = new Sender(client.getOutputStream());
-        receiver = new Receiver(client.getInputStream());
+            sender = new Sender(connection.getOutputStream());
+            receiver = new Receiver(connection.getInputStream());
+
+            sender.send(new SecurityData(encryptor.getPublicKey()));
+            encryptor.setReceiverKey(receiver.<SecurityData>read().getKey());
+        } catch (IOException | CommunicationException e) {
+            throw new ConnectionError(e);
+        }
     }
 
-    void send(SocketPackage pkg) throws ConnectionLost {
+    public boolean authenticate() throws ConnectionError {
         try {
-            sender.send(pkg);
+            SocketPackage pkg = receiver.read();
+
+            if (pkg.equals(Info.CloseConnection)) {
+                connection.close();
+                return false;
+            } else if (pkg instanceof AuthorizationRequest) {
+                AuthorizationRequest ar = (AuthorizationRequest) pkg;
+
+                AuthorizationResult.Code result;
+                try {
+                    user = db.authenticate(ar.getLogin(), encryptor.decrypt(ar.getPassword()));
+                    result = AuthorizationResult.Code.OK;
+                } catch (DatabaseClient.DatabaseInitializationException e) {
+                    result = AuthorizationResult.Code.ERROR;
+                } catch (DatabaseClient.DatabaseException e) {
+                    result = AuthorizationResult.Code.SERVER_ERROR;
+                    sender.send(new AuthorizationResult(result, user));
+                    throw e;
+                }
+
+                sender.send(new AuthorizationResult(result, user));
+                return (user != null);
+            } else
+                throw new ClassNotFoundException(pkg.getClass().toString());
+        } catch (ClassNotFoundException | IOException | CommunicationException | DatabaseClient.DatabaseException e) {
+            throw new ConnectionError(e);
+        }
+    }
+
+    void startApp() throws ConnectionError {
+        try {
+            connection.close();
         } catch (IOException e) {
-            throw new ConnectionLost(e);
-        }
-    }
-
-    Object receive() throws ConnectionLost {
-        try {
-            return receiver.read();
-        } catch (IOException | ClassNotFoundException e) {
-            throw new ConnectionLost(e);
-        }
-    }
-
-    void authenticate(AuthorizationRequest msg) throws ConnectionLost {
-        AuthorizationResult.Code res;
-
-        try {
-            user = db.authenticate(msg.getLogin(), msg.getPassword());
-            res = (user != null ? AuthorizationResult.Code.OK : AuthorizationResult.Code.ERROR);
-        } catch (DatabaseException e) {
-            res = AuthorizationResult.Code.SERVER_ERROR;
-        }
-
-        try {
-            send(new AuthorizationResult(res, user));
-        } catch (Exception e) {
-            throw new ConnectionLost(e);
-        }
-    }
-
-    void sendConversationList() throws ConnectionLost {
-        try {
-            List<Conversation> list = db.getConversationList(user.getID());
-            for(Conversation c : list)
-                send(c);
-            send(Info.NoMoreConversation);
-        } catch (DatabaseException e) {
-            throw new DatabaseError(e);
-        }
-    }
-
-    void chooseConversation(int conv_id) throws ConnectionLost {
-        try {
-            send(db.getConversationDetails(conv_id));
-            this.conv_id = conv_id;
-        } catch (InvalidData e) {
-            send(Info.ConversationNotFound);
-        } catch (DatabaseException e) {
-            throw new DatabaseError(e);
-        }
-    }
-
-    void getMessages() throws ConnectionLost {
-        try {
-            List<Message> list = db.getMessages(conv_id);
-            for(Message c : list)
-                send(c);
-            send(Info.NoMoreMessages);
-        } catch (DatabaseException e) {
-            throw new DatabaseError(e);
-        }
-    }
-
-    void handleInfo(Info msg) throws ConnectionLost {
-        switch (msg.getStatus()) {
-            case CONVERSATION_LIST: sendConversationList(); break;
-            case CHOOSE_CONVERSATION: chooseConversation(msg.getData()); break;
-            case GET_MESSAGES: getMessages(); break;
-            default: throw new ConnectionError();
+            throw new ConnectionError(e);
         }
     }
 
     @Override
     public void run() {
         try {
-            while (!client.isClosed()) {
-                try {
-                    SocketPackage msg = (SocketPackage) receive();
-
-                    if (msg instanceof AuthorizationRequest) authenticate((AuthorizationRequest) msg);
-                    else if (msg instanceof Info) handleInfo((Info) msg);
-                    else throw new ConnectionError();
-                } catch (ConnectionLost e) {
-                    try {
-                        client.close();
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
-                } catch (ClassCastException e) {
-                    e.printStackTrace();
-                }
-            }
+            while(!connection.isClosed())
+                if(authenticate())
+                    startApp();
         } catch (ConnectionError e) {
             e.printStackTrace();
-        } finally {
-            try {
-                client.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
     }
-
-    public static class ConnectionLost extends Exception {
-        public ConnectionLost() {
-            super();
-        }
-
-        public ConnectionLost(String message) {
-            super(message);
-        }
-
-        public ConnectionLost(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public ConnectionLost(Throwable cause) {
-            super(cause);
-        }}
-    public static class ConnectionError extends RuntimeException {
-        public ConnectionError() {
-            super();
-        }
-
-        public ConnectionError(String message) {
-            super(message);
-        }
-
-        public ConnectionError(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public ConnectionError(Throwable cause) {
-            super(cause);
-        }}
-    public static class DatabaseError extends RuntimeException {
-        public DatabaseError() {
-            super();
-        }
-
-        public DatabaseError(String message) {
-            super(message);
-        }
-
-        public DatabaseError(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public DatabaseError(Throwable cause) {
-            super(cause);
-        }}
 }
