@@ -23,8 +23,7 @@ public class ServerClient {
 
     final Socket connection;
 
-    private final Receiver receiver;
-    private final Sender sender;
+    private final ClientCommunicator communicator;
     private final Encryptor encryptor = new Encryptor();
 
     int conv_id = -1;
@@ -34,11 +33,10 @@ public class ServerClient {
         try {
             connection = new Socket(address, port);
 
-            sender = new Sender(connection.getOutputStream());
-            receiver = new Receiver(connection.getInputStream());
+            communicator = new ClientCommunicator(connection);
 
-            sender.send(new SecurityData(encryptor.getPublicKey()));
-            encryptor.setReceiverKey(receiver.<SecurityData>read().getKey());
+            communicator.send(new SecurityData(encryptor.getPublicKey()));
+            encryptor.setReceiverKey(communicator.<SecurityData>read().getKey());
         } catch (IOException | CommunicationException e) {
             throw new ConnectionError(e);
         }
@@ -49,8 +47,8 @@ public class ServerClient {
             throw new UserAlreadyLoggedException();
 
         try {
-            sender.send(new AuthorizationRequest(login, encryptor.encrypt(password)));
-            AuthorizationResult ar = receiver.read();
+            communicator.send(new AuthorizationRequest(login, encryptor.encrypt(password)));
+            AuthorizationResult ar = communicator.read();
 
             user = ar.getUserData();
             if(ar.isServerError())
@@ -66,23 +64,23 @@ public class ServerClient {
     }
 
     public List<Conversation> getConversationList() throws CommunicationException {
-        sender.send(new ConversationListRequest());
-        return receiver.read();
+        communicator.send(new ConversationListRequest());
+        return communicator.read();
     }
 
     public ConversationDetails changeConversation(int conv_id) throws CommunicationException {
-        sender.send(new ChangeConversationRequest(this.conv_id = conv_id));
-        return receiver.read();
+        communicator.send(new ChangeConversationRequest(this.conv_id = conv_id));
+        return communicator.read();
     }
 
     public List<Message> getMessageList() throws CommunicationException {
-        sender.send(new GetMessagesRequest());
-        return receiver.read();
+        communicator.send(new GetMessagesRequest());
+        return communicator.read();
     }
 
     public void close() {
         try {
-            sender.send(Command.CloseConnection);
+            communicator.send(Command.CloseConnection);
         } catch (Exception e) {
             e.printStackTrace();
         }

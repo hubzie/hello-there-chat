@@ -22,8 +22,7 @@ class ClientHandler extends Thread {
     private final DatabaseClient db;
     private final Socket connection;
 
-    private final Receiver receiver;
-    private final Sender sender;
+    private final ServerCommunicator communicator;
     private final Encryptor encryptor = new Encryptor();
 
     int conv_id = -1;
@@ -34,11 +33,10 @@ class ClientHandler extends Thread {
             this.db = db;
             this.connection = connection;
 
-            sender = new Sender(connection.getOutputStream());
-            receiver = new Receiver(connection.getInputStream());
+            communicator = new ServerCommunicator(connection);
 
-            sender.send(new SecurityData(encryptor.getPublicKey()));
-            encryptor.setReceiverKey(receiver.<SecurityData>read().getKey());
+            communicator.send(new SecurityData(encryptor.getPublicKey()));
+            encryptor.setReceiverKey(communicator.<SecurityData>read().getKey());
         } catch (IOException | CommunicationException e) {
             throw new ConnectionError(e);
         }
@@ -46,7 +44,7 @@ class ClientHandler extends Thread {
 
     public boolean authenticate() throws ConnectionError {
         try {
-            SocketPackage pkg = receiver.read();
+            SocketPackage pkg = communicator.read();
 
             if (pkg.equals(Command.CloseConnection)) {
                 connection.close();
@@ -62,11 +60,11 @@ class ClientHandler extends Thread {
                     result = AuthorizationResult.Code.ERROR;
                 } catch (DatabaseClient.DatabaseException e) {
                     result = AuthorizationResult.Code.SERVER_ERROR;
-                    sender.send(new AuthorizationResult(result, user));
+                    communicator.send(new AuthorizationResult(result, user));
                     throw e;
                 }
 
-                sender.send(new AuthorizationResult(result, user));
+                communicator.send(new AuthorizationResult(result, user));
                 return (user != null);
             } else
                 throw new ClassNotFoundException(pkg.getClass().toString());
@@ -86,11 +84,11 @@ class ClientHandler extends Thread {
 
     void handleRequest(Request req) throws CommunicationException, ClassNotFoundException, DatabaseClient.DatabaseException {
         if (req instanceof ConversationListRequest)
-            sender.send(new ConversationList(db.getConversationList(user.getID())));
+            communicator.send(new ConversationList(db.getConversationList(user.getID())));
         else if (req instanceof ChangeConversationRequest)
-            sender.send(db.getConversationDetails(conv_id = ((ChangeConversationRequest) req).getConversationID()));
+            communicator.send(db.getConversationDetails(conv_id = ((ChangeConversationRequest) req).getConversationID()));
         else if (req instanceof GetMessagesRequest)
-            sender.send(new MessageList(db.getMessages(conv_id)));
+            communicator.send(new MessageList(db.getMessages(conv_id)));
         else throw new ClassNotFoundException();
     }
 
@@ -105,7 +103,7 @@ class ClientHandler extends Thread {
     void startApp() throws ConnectionError {
         try {
             while(isLogged()) {
-                SocketPackage pkg = receiver.read();
+                SocketPackage pkg = communicator.read();
                 if(pkg instanceof Request) handleRequest((Request) pkg);
                 else if(pkg instanceof Command) handleCommand((Command) pkg);
                 else throw new ClassNotFoundException();
