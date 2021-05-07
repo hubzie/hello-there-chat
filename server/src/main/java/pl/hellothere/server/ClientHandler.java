@@ -9,6 +9,8 @@ import pl.hellothere.containers.socket.authorization.AuthorizationRequest;
 import pl.hellothere.containers.socket.authorization.AuthorizationResult;
 import pl.hellothere.server.database.DatabaseClient;
 import pl.hellothere.server.database.DatabaseClient.*;
+import pl.hellothere.tools.Receiver;
+import pl.hellothere.tools.Sender;
 
 import java.io.*;
 import java.net.Socket;
@@ -17,8 +19,8 @@ import java.util.List;
 class ClientHandler extends Thread {
     private final DatabaseClient db;
     private final Socket client;
-    private final ObjectInputStream c_in;
-    private final ObjectOutputStream c_out;
+    private final Receiver receiver;
+    private final Sender sender;
 
     private int conv_id = -1;
     private UserData user = null;
@@ -27,15 +29,13 @@ class ClientHandler extends Thread {
         this.db = db;
         this.client = client;
 
-        c_out = new ObjectOutputStream(client.getOutputStream());
-        c_out.flush();
-        c_in = new ObjectInputStream(client.getInputStream());
+        sender = new Sender(client.getOutputStream());
+        receiver = new Receiver(client.getInputStream());
     }
 
     void send(SocketPackage pkg) throws ConnectionLost {
         try {
-            c_out.writeObject(pkg);
-            c_out.flush();
+            sender.send(pkg);
         } catch (IOException e) {
             throw new ConnectionLost(e);
         }
@@ -43,7 +43,7 @@ class ClientHandler extends Thread {
 
     Object receive() throws ConnectionLost {
         try {
-            return c_in.readObject();
+            return receiver.read();
         } catch (IOException | ClassNotFoundException e) {
             throw new ConnectionLost(e);
         }

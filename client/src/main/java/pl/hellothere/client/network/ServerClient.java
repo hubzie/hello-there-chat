@@ -5,6 +5,8 @@ import pl.hellothere.containers.data.*;
 import pl.hellothere.containers.messages.Message;
 import pl.hellothere.containers.socket.Info;
 import pl.hellothere.containers.socket.authorization.*;
+import pl.hellothere.tools.Receiver;
+import pl.hellothere.tools.Sender;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -17,16 +19,16 @@ public class ServerClient {
     private static final String address = "localhost";
     private static final int port = 8374;
     final Socket connection;
-    final ObjectOutputStream c_out;
-    final ObjectInputStream c_in;
+    private final Receiver receiver;
+    private final Sender sender;
     UserData user = null;
 
     public ServerClient() {
         try {
             connection = new Socket(address, port);
-            c_out = new ObjectOutputStream(connection.getOutputStream());
-            c_out.flush();
-            c_in = new ObjectInputStream(connection.getInputStream());
+
+            sender = new Sender(connection.getOutputStream());
+            receiver = new Receiver(connection.getInputStream());
         } catch (Exception e) {
             throw new ConnectionError(e);
         }
@@ -42,8 +44,7 @@ public class ServerClient {
 
     void send(SocketPackage pkg) throws ConnectionLost {
         try {
-            c_out.writeObject(pkg);
-            c_out.flush();
+            sender.send(pkg);
         } catch (IOException e) {
             throw new ConnectionLost(e);
         }
@@ -51,7 +52,7 @@ public class ServerClient {
 
     Object receive() throws ConnectionLost {
         try {
-            return c_in.readObject();
+            return receiver.read();
         } catch (IOException | ClassNotFoundException e) {
             throw new ConnectionLost(e);
         }
@@ -139,7 +140,6 @@ public class ServerClient {
             super(cause);
         }
     }
-
     public static class ConnectionError extends RuntimeException {
         public ConnectionError() {
             super();
