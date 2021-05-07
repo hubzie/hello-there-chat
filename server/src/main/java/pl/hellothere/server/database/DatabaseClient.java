@@ -114,10 +114,9 @@ public class DatabaseClient implements AutoCloseable {
             try (ResultSet r = s.executeQuery()) {
                 if(r.next())
                     return new ConversationDetails(r.getInt("conversation_id"), r.getString("name"));
-                throw new InvalidData();
+                throw new InvalidDataException("Invalid converstaion id: "+conv_id);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
             throw new DatabaseException(e);
         }
     }
@@ -130,6 +129,10 @@ public class DatabaseClient implements AutoCloseable {
         public DatabaseException(Throwable cause) {
             super(cause);
         }
+
+        public DatabaseException(String message) {
+            super(message);
+        }
     }
     static public class DatabaseInitializationException extends DatabaseException {
         public DatabaseInitializationException(Throwable cause) {
@@ -138,6 +141,9 @@ public class DatabaseClient implements AutoCloseable {
     }
     static public class DatabaseAuthenticationException extends DatabaseException {
     }
-    static public class InvalidData extends DatabaseException {
+    static public class InvalidDataException extends DatabaseException {
+        public InvalidDataException(String message) {
+            super(message);
+        }
     }
 }

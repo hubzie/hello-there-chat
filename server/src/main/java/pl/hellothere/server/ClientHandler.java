@@ -2,10 +2,16 @@ package pl.hellothere.server;
 
 import pl.hellothere.containers.SocketPackage;
 import pl.hellothere.containers.socket.authorization.AuthorizationResult;
-import pl.hellothere.containers.socket.connection.Info;
+import pl.hellothere.containers.socket.connection.commands.Command;
+import pl.hellothere.containers.socket.connection.requests.ChangeConversationRequest;
+import pl.hellothere.containers.socket.connection.requests.ConversationListRequest;
+import pl.hellothere.containers.socket.connection.requests.GetMessagesRequest;
+import pl.hellothere.containers.socket.connection.requests.Request;
 import pl.hellothere.containers.socket.connection.SecurityData;
 import pl.hellothere.containers.socket.authorization.AuthorizationRequest;
 import pl.hellothere.containers.socket.data.UserData;
+import pl.hellothere.containers.socket.data.converstions.ConversationList;
+import pl.hellothere.containers.socket.data.messages.MessageList;
 import pl.hellothere.server.database.DatabaseClient;
 import pl.hellothere.tools.*;
 
@@ -20,6 +26,7 @@ class ClientHandler extends Thread {
     private final Sender sender;
     private final Encryptor encryptor = new Encryptor();
 
+    int conv_id = -1;
     UserData user = null;
 
     public ClientHandler(DatabaseClient db, Socket connection) throws ConnectionError {
@@ -41,7 +48,7 @@ class ClientHandler extends Thread {
         try {
             SocketPackage pkg = receiver.read();
 
-            if (pkg.equals(Info.CloseConnection)) {
+            if (pkg.equals(Command.CloseConnection)) {
                 connection.close();
                 return false;
             } else if (pkg instanceof AuthorizationRequest) {
@@ -51,7 +58,7 @@ class ClientHandler extends Thread {
                 try {
                     user = db.authenticate(ar.getLogin(), encryptor.decrypt(ar.getPassword()));
                     result = AuthorizationResult.Code.OK;
-                } catch (DatabaseClient.DatabaseInitializationException e) {
+                } catch (DatabaseClient.DatabaseAuthenticationException e) {
                     result = AuthorizationResult.Code.ERROR;
                 } catch (DatabaseClient.DatabaseException e) {
                     result = AuthorizationResult.Code.SERVER_ERROR;
@@ -68,10 +75,42 @@ class ClientHandler extends Thread {
         }
     }
 
+    public boolean isLogged() {
+        return (user != null);
+    }
+
+    public void logOut() {
+        conv_id = -1;
+        user = null;
+    }
+
+    void handleRequest(Request req) throws CommunicationException, ClassNotFoundException, DatabaseClient.DatabaseException {
+        if (req instanceof ConversationListRequest)
+            sender.send(new ConversationList(db.getConversationList(user.getID())));
+        else if (req instanceof ChangeConversationRequest)
+            sender.send(db.getConversationDetails(conv_id = ((ChangeConversationRequest) req).getConversationID()));
+        else if (req instanceof GetMessagesRequest)
+            sender.send(new MessageList(db.getMessages(conv_id)));
+        else throw new ClassNotFoundException();
+    }
+
+    void handleCommand(Command cmd) throws IOException, ClassNotFoundException {
+        switch (cmd.getStatus()) {
+            case CLOSE_CONNECTION: connection.close();
+            case LOG_OUT: logOut(); break;
+            default: throw new ClassNotFoundException();
+        }
+    }
+
     void startApp() throws ConnectionError {
         try {
-            connection.close();
-        } catch (IOException e) {
+            while(isLogged()) {
+                SocketPackage pkg = receiver.read();
+                if(pkg instanceof Request) handleRequest((Request) pkg);
+                else if(pkg instanceof Command) handleCommand((Command) pkg);
+                else throw new ClassNotFoundException();
+            }
+        } catch (IOException | ClassNotFoundException | CommunicationException | DatabaseClient.DatabaseException e) {
             throw new ConnectionError(e);
         }
     }
