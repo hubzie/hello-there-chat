@@ -1,65 +1,16 @@
 package pl.hellothere.client.control;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 import pl.hellothere.client.network.ServerClient;
-import pl.hellothere.containers.socket.data.UserData;
+import pl.hellothere.client.view.controller.ClientViewController;
 import pl.hellothere.tools.ConnectionError;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Client extends Application {
 /*
-    static Client client;
-
-    ServerClient connection;
-
-    AtomicBoolean logging = new AtomicBoolean(false);
-
-    void signIn(String login, String password) {
-        new Thread(() -> {
-            if(!logging.compareAndSet(false, true))
-                return;
-
-            try {
-                if(connection.signIn(login, password)) {
-                        Platform.runLater(() -> {
-                            ClientViewController.getLoginView().close();
-                            startMainApp();
-                        });
-                    }
-                else
-                    Platform.runLater(ClientViewController.getLoginView()::loginFailMessage);
-            } catch (Exception e) {
-                e.printStackTrace();
-                Platform.runLater(() -> {
-                    ClientViewController.showErrorMessage("No connection");
-                    ClientViewController.getLoginView().close();
-                });
-            } finally {
-                logging.set(false);
-            }
-        }).start();
-    }
-
-    @Override
-    public void start(Stage stage) {
-        client = this;
-
-        try {
-            connection = new ServerClient();
-        } catch (ServerClient.ConnectionError e) {
-            ClientViewController.showErrorMessage("No connection");
-            return;
-        }
-
-        ClientViewController.getLoginView().setSignInAction(this::signIn);
-        try {
-            ClientViewController.getLoginView().run();
-        } catch (Exception e) {
-            e.printStackTrace();
-            ClientViewController.showErrorMessage("View error");
-        }
-    }
-
     ConversationDetails conversationDetails = null;
 
     void changeGroup(int groupId) {
@@ -104,19 +55,37 @@ public class Client extends Application {
             ClientViewController.showErrorMessage("View error");
         }
     }
-
-    public void close() {
-        if(connection != null)
-            connection.close();
-    }
-
-    public static void main(String[] args) {
-        launch(args);
-        client.close();
-    }
 */
     static Client client = null;
     ServerClient connection;
+
+    AtomicBoolean logging = new AtomicBoolean(false);
+
+    void signIn(String login, String password) {
+        new Thread(() -> {
+            if(!logging.compareAndSet(false, true))
+                return;
+
+            try {
+                if(connection.signIn(login, password)) {
+                    Platform.runLater(() -> {
+                        ClientViewController.getLoginView().close();
+                        //startMainApp();
+                    });
+                }
+                else
+                    Platform.runLater(ClientViewController.getLoginView()::loginFailMessage);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Platform.runLater(() -> {
+                    ClientViewController.showErrorMessage("No connection");
+                    ClientViewController.getLoginView().close();
+                });
+            } finally {
+                logging.set(false);
+            }
+        }).start();
+    }
 
     @Override
     public void start(Stage stage) {
@@ -125,26 +94,22 @@ public class Client extends Application {
         try {
             connection = new ServerClient();
         } catch (ConnectionError e) {
-            System.out.println("No connection");
+            ClientViewController.showErrorMessage("No connection");
             return;
         }
 
-        String login = "obiwan";
-        String password = "password";
-
+        ClientViewController.getLoginView().setSignInAction(this::signIn);
         try {
-            UserData user;
-            if((user = connection.signIn(login, password)) != null)
-                System.out.println("("+user.getID()+"): "+user.getName());
-            else
-                System.out.println("Wrong data");
-        } catch (ConnectionError e) {
+            ClientViewController.getLoginView().run();
+        } catch (Exception e) {
             e.printStackTrace();
+            ClientViewController.showErrorMessage("View error");
         }
     }
 
     public void close() {
-        connection.close();
+        if(connection != null)
+            connection.close();
     }
 
     public static void main(String[] args) {

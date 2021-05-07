@@ -136,7 +136,7 @@ public class ServerClient {
         }
     }
 
-    public UserData signIn(String login, String password) throws ConnectionError {
+    public boolean signIn(String login, String password) throws ConnectionError {
         if(user != null)
             throw new UserAlreadyLoggedException();
 
@@ -144,14 +144,17 @@ public class ServerClient {
             sender.send(new AuthorizationRequest(login, encryptor.encrypt(password)));
             AuthorizationResult ar = receiver.read();
 
-            if (ar.success())
-                return (user = ar.getUserData());
-            else if(ar.isServerError())
+            user = ar.getUserData();
+            if(ar.isServerError())
                 throw new ServerClientException();
-            return null;
+            return ar.success();
         } catch (CommunicationException e) {
             throw new ServerClientException(e);
         }
+    }
+
+    public UserData getUserData() {
+        return user;
     }
 
     public void close() {
