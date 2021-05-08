@@ -12,8 +12,8 @@ import pl.hellothere.containers.socket.authorization.AuthorizationRequest;
 import pl.hellothere.containers.socket.data.UserData;
 import pl.hellothere.containers.socket.data.converstions.ConversationList;
 import pl.hellothere.containers.socket.data.messages.MessageList;
-import pl.hellothere.containers.socket.data.notifications.Notification;
-import pl.hellothere.containers.socket.data.notifications.SampleNotification;
+import pl.hellothere.containers.socket.data.messages.TextMessage;
+import pl.hellothere.containers.socket.data.notifications.MessageNotification;
 import pl.hellothere.containers.socket.data.notifications.StopNotification;
 import pl.hellothere.server.database.DatabaseClient;
 import pl.hellothere.tools.*;
@@ -131,9 +131,8 @@ class ClientHandler extends Thread {
                 int it = 0;
                 try {
                     while (isLogged()) {
-                        System.out.println(it);
-                        communicator.send(new SampleNotification(it++));
-                        TimeUnit.MILLISECONDS.sleep(500);
+                        communicator.send(new MessageNotification(new TextMessage(user.getID(), null, "Notification #"+(it++)+": Notification testing")));
+                        TimeUnit.MILLISECONDS.sleep(1000);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
