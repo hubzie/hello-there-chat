@@ -12,11 +12,15 @@ import pl.hellothere.containers.socket.authorization.AuthorizationRequest;
 import pl.hellothere.containers.socket.data.UserData;
 import pl.hellothere.containers.socket.data.converstions.ConversationList;
 import pl.hellothere.containers.socket.data.messages.MessageList;
+import pl.hellothere.containers.socket.data.notifications.Notification;
+import pl.hellothere.containers.socket.data.notifications.SampleNotification;
+import pl.hellothere.containers.socket.data.notifications.StopNotification;
 import pl.hellothere.server.database.DatabaseClient;
 import pl.hellothere.tools.*;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 
 class ClientHandler extends Thread {
     private final DatabaseClient db;
@@ -73,11 +77,32 @@ class ClientHandler extends Thread {
         }
     }
 
-    public boolean isLogged() {
-        return (user != null);
+    boolean closed = false;
+
+    public boolean isClosed() {
+        return closed || connection.isClosed();
     }
 
-    public void logOut() {
+    public void close() {
+        try {
+            logOut();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closed = true;
+        }
+    }
+
+    public boolean isLogged() {
+        return !isClosed() && user != null;
+    }
+
+    public void logOut() throws CommunicationException {
+        if (!isClosed()) {
+            communicator.send(new StopNotification());
+            communicator.flush();
+        }
+
         conv_id = -1;
         user = null;
     }
@@ -92,9 +117,9 @@ class ClientHandler extends Thread {
         else throw new ClassNotFoundException();
     }
 
-    void handleCommand(Command cmd) throws IOException, ClassNotFoundException {
+    void handleCommand(Command cmd) throws IOException, ClassNotFoundException, CommunicationException {
         switch (cmd.getStatus()) {
-            case CLOSE_CONNECTION: connection.close();
+            case CLOSE_CONNECTION: close(); break;
             case LOG_OUT: logOut(); break;
             default: throw new ClassNotFoundException();
         }
@@ -102,7 +127,20 @@ class ClientHandler extends Thread {
 
     void startApp() throws ConnectionError {
         try {
-            while(isLogged()) {
+            new Thread(() -> {
+                int it = 0;
+                try {
+                    while (isLogged()) {
+                        System.out.println(it);
+                        communicator.send(new SampleNotification(it++));
+                        TimeUnit.MILLISECONDS.sleep(500);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).start();
+
+            while (isLogged()) {
                 SocketPackage pkg = communicator.read();
                 if(pkg instanceof Request) handleRequest((Request) pkg);
                 else if(pkg instanceof Command) handleCommand((Command) pkg);
@@ -116,7 +154,7 @@ class ClientHandler extends Thread {
     @Override
     public void run() {
         try {
-            while(!connection.isClosed())
+            while(!isClosed())
                 if(authenticate())
                     startApp();
         } catch (ConnectionError e) {

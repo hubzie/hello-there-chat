@@ -1,5 +1,6 @@
 package pl.hellothere.client.network;
 
+import pl.hellothere.client.control.Client;
 import pl.hellothere.containers.socket.authorization.AuthorizationRequest;
 import pl.hellothere.containers.socket.authorization.AuthorizationResult;
 import pl.hellothere.containers.socket.connection.SecurityData;
@@ -47,8 +48,7 @@ public class ServerClient {
             throw new UserAlreadyLoggedException();
 
         try {
-            communicator.send(new AuthorizationRequest(login, encryptor.encrypt(password)));
-            AuthorizationResult ar = communicator.read();
+            AuthorizationResult ar = communicator.sendAndRead(new AuthorizationRequest(login, encryptor.encrypt(password)));
 
             user = ar.getUserData();
             if(ar.isServerError())
@@ -64,26 +64,34 @@ public class ServerClient {
     }
 
     public List<Conversation> getConversationList() throws CommunicationException {
-        communicator.send(new ConversationListRequest());
-        return communicator.read();
+        return communicator.sendAndRead(new ConversationListRequest());
     }
 
     public ConversationDetails changeConversation(int conv_id) throws CommunicationException {
-        communicator.send(new ChangeConversationRequest(this.conv_id = conv_id));
-        return communicator.read();
+        return communicator.sendAndRead(new ChangeConversationRequest(this.conv_id = conv_id));
     }
 
     public List<Message> getMessageList() throws CommunicationException {
-        communicator.send(new GetMessagesRequest());
-        return communicator.read();
+        return communicator.sendAndRead(new GetMessagesRequest());
     }
 
     public void close() {
         try {
             communicator.send(Command.CloseConnection);
+            communicator.join();
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try {
+                connection.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    public void listen(NotificationHandler handler) {
+        communicator.listen(handler);
     }
 
     public static class ServerClientException extends ConnectionError {
