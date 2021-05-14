@@ -1,6 +1,7 @@
 package pl.hellothere.client.view.app;
 
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -23,5 +24,9 @@ public class ClientViewAppController {
         ClientViewController.getAppView().getSendAction().accept(new TextMessage(newMessageField.getText()));
         newMessageField.clear();
         Platform.runLater(() -> messagesPane.setVvalue(messagesPane.getVmax()));
+    }
+
+    @FXML private void handleLogoutButtonAction() {
+        ClientViewController.getAppView().getLogoutAction().accept(null);
     }
 }

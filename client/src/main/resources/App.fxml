@@ -22,6 +22,9 @@
 
     <bottom>
         <HBox id="bottom-box" alignment="CENTER">
+            <Button text="Logout" onAction="#handleLogoutButtonAction">
+                <HBox.margin> <Insets> <top>5</top> <right>5</right> <bottom>5</bottom> <left>5</left> </Insets> </HBox.margin>
+            </Button>
             <TextField fx:id="newMessageField" promptText="Write New Message" HBox.hgrow="ALWAYS">
                 <HBox.margin> <Insets> <top>5</top> <bottom>5</bottom> <left>5</left> </Insets> </HBox.margin>
             </TextField>

@@ -22,6 +22,7 @@ public class ClientViewApp extends Application {
     private int curUserID = -1;
     private Consumer<Integer> groupAction;
     private Consumer<Message> sendAction;
+    private Consumer<Void> logoutAction;
     private Conversation curGroup = null;
 
     public void run() throws Exception { start(new Stage()); }
@@ -33,6 +34,10 @@ public class ClientViewApp extends Application {
     public void setSendAction(Consumer<Message> sendAction) { this.sendAction = sendAction; }
 
     public Consumer<Message> getSendAction() { return sendAction; }
+
+    public void setLogoutAction(Consumer<Void> logoutAction) { this.logoutAction = logoutAction; }
+
+    public Consumer<Void> getLogoutAction() { return logoutAction; }
 
     public void changeGroup(Conversation curGroup) {
         cvac.messagesBox.getChildren().clear();
