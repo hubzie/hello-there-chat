@@ -97,10 +97,22 @@ public class Client extends Application {
         }
     }
 
+    void logout(Void v) {
+        try {
+            //todo logout from server
+            ClientViewController.getAppView().close();
+            ClientViewController.getLoginView().run();
+        } catch (Exception e) {
+            e.printStackTrace();
+            ClientViewController.showErrorMessage("View error");
+        }
+    }
+
     void startMainApp() {
         ClientViewController.getAppView().setUserID(connection.getUser().getID());
         ClientViewController.getAppView().setGroupAction(this::changeGroup);
         ClientViewController.getAppView().setSendAction(this::sendMessage);
+        ClientViewController.getAppView().setLogoutAction(this::logout);
 
         try {
             ClientViewController.getAppView().run();
