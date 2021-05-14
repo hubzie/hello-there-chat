@@ -126,7 +126,7 @@ public class ClientHandler extends Thread {
             db.getListenerManager().listen(this, conv_id, ((ChangeConversationRequest) req).getConversationID());
             communicator.send(db.getConversationDetails(conv_id = ((ChangeConversationRequest) req).getConversationID()));
         } else if (req instanceof GetMessagesRequest)
-            communicator.send(new MessageList(db.getMessages(conv_id)));
+            communicator.send(new MessageList(db.getMessages(conv_id, ((GetMessagesRequest) req).getTime())));
         else if (req instanceof SendMessageRequest)
             db.sendMessage(((SendMessageRequest) req).getContent(), user.getID(), conv_id);
         else throw new ClassNotFoundException();

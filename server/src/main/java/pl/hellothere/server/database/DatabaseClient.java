@@ -7,6 +7,7 @@ import pl.hellothere.containers.socket.data.messages.*;
 import pl.hellothere.server.listener.ListenerManager;
 
 import java.sql.*;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -90,15 +91,25 @@ public class DatabaseClient implements AutoCloseable {
         }
     }
 
-    public List<Message> getMessages(int conv_id) throws DatabaseException {
-        try (PreparedStatement s = db.prepareStatement(
-                "select *" +
-                        "from messages " +
-                        "where conversation_id = ? " +
-                        "order by send_time desc " +
-                        "limit 16"
-        )) {
+    public List<Message> getMessages(int conv_id, Date time) throws DatabaseException {
+        String statement;
+        if(time == null)
+            statement = "select *" +
+                "from messages " +
+                "where conversation_id = ? " +
+                "order by send_time desc " +
+                "limit 16";
+        else
+            statement = "select *" +
+                "from messages " +
+                "where conversation_id = ? and send_time > sendTime" +
+                "order by send_time desc " +
+                "limit 8";
+
+        try (PreparedStatement s = db.prepareStatement(statement)) {
             s.setInt(1, conv_id);
+            if(time != null)
+                s.setDate(2, (java.sql.Date) time);
 
             try (ResultSet r = s.executeQuery()) {
                 List<Message> list = new LinkedList<>();
