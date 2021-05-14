@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 import pl.hellothere.client.network.ServerClient;
 import pl.hellothere.client.view.app.ClientViewApp;
 import pl.hellothere.client.view.controller.ClientViewController;
+import pl.hellothere.containers.socket.connection.requests.SendMessageRequest;
 import pl.hellothere.containers.socket.data.converstions.Conversation;
 import pl.hellothere.containers.socket.data.converstions.ConversationDetails;
 import pl.hellothere.containers.socket.data.messages.Message;
@@ -86,9 +87,20 @@ public class Client extends Application {
         }
     }
 
+    void sendMessage(Message msg) {
+        try {
+            connection.sendMessage(msg);
+        } catch (CommunicationException e) {
+            e.printStackTrace();
+            ClientViewController.getAppView().close();
+            ClientViewController.showErrorMessage("No connection");
+        }
+    }
+
     void startMainApp() {
         ClientViewController.getAppView().setUserID(connection.getUser().getID());
         ClientViewController.getAppView().setGroupAction(this::changeGroup);
+        ClientViewController.getAppView().setSendAction(this::sendMessage);
 
         try {
             ClientViewController.getAppView().run();

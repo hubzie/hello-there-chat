@@ -21,6 +21,7 @@ public class ClientViewApp extends Application {
     private ClientViewAppController cvac;
     private int curUserID = -1;
     private Consumer<Integer> groupAction;
+    private Consumer<Message> sendAction;
     private Conversation curGroup = null;
 
     public void run() throws Exception { start(new Stage()); }
@@ -28,6 +29,10 @@ public class ClientViewApp extends Application {
     public void close() { primaryStage.close(); }
 
     public void setGroupAction(Consumer<Integer> groupAction) { this.groupAction = groupAction; }
+
+    public void setSendAction(Consumer<Message> sendAction) { this.sendAction = sendAction; }
+
+    public Consumer<Message> getSendAction() { return sendAction; }
 
     public void changeGroup(Conversation curGroup) {
         cvac.messagesBox.getChildren().clear();

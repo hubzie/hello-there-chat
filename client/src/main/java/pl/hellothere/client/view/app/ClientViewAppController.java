@@ -9,6 +9,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import pl.hellothere.client.view.controller.ClientViewController;
+import pl.hellothere.containers.socket.data.messages.TextMessage;
 
 public class ClientViewAppController {
     @FXML VBox messagesBox;
@@ -19,21 +20,7 @@ public class ClientViewAppController {
     public ClientViewAppController() { ClientViewController.getAppView().setCvlc(this); }
 
     @FXML private void handleSendButtonAction() {
-        messagesBox.getChildren().add(new HBox(){
-            {
-                getChildren().add(new Label() {
-                    {
-                        setText( newMessageField.getText() );
-                        setWrapText(true);
-                        setMinHeight(45);
-                        setMaxWidth(500);
-                        getStyleClass().add("my-message");
-                    }
-                });
-                getStyleClass().add("box");
-                setAlignment(Pos.CENTER_RIGHT);
-            }
-        });
+        ClientViewController.getAppView().getSendAction().accept(new TextMessage(newMessageField.getText()));
         newMessageField.clear();
         Platform.runLater(() -> messagesPane.setVvalue(messagesPane.getVmax()));
     }

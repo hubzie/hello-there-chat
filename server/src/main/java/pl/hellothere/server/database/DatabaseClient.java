@@ -3,8 +3,7 @@ package pl.hellothere.server.database;
 import pl.hellothere.containers.socket.data.UserData;
 import pl.hellothere.containers.socket.data.converstions.Conversation;
 import pl.hellothere.containers.socket.data.converstions.ConversationDetails;
-import pl.hellothere.containers.socket.data.messages.Message;
-import pl.hellothere.containers.socket.data.messages.TextMessage;
+import pl.hellothere.containers.socket.data.messages.*;
 import pl.hellothere.server.listener.ListenerManager;
 
 import java.sql.*;
@@ -127,22 +126,22 @@ public class DatabaseClient implements AutoCloseable {
         }
     }
 
-    void sendMessage(TextMessage msg, int conv) throws DatabaseException {
+    void sendMessage(TextMessage msg, int user, int conv) throws DatabaseException {
         try (PreparedStatement s = db.prepareStatement("insert into messages values (?, ?, now(), ?)")) {
-            s.setInt(1, msg.getSenderID());
+            s.setInt(1, user);
             s.setInt(2, conv);
             s.setString(3, msg.getContent());
 
-            s.executeBatch();
+            s.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DatabaseException(e);
         }
     }
 
-    public void sendMessage(Message msg, int conv) throws DatabaseException {
+    public void sendMessage(Message msg, int user, int conv) throws DatabaseException {
         if(msg instanceof TextMessage)
-            sendMessage((TextMessage) msg, conv);
+            sendMessage((TextMessage) msg, user, conv);
         else
             throw new InvalidDataException("Unsupported message type");
 

@@ -9,8 +9,8 @@ public class TextMessage extends Message {
         super();
     }
 
-    public TextMessage(int senderId, String content) {
-        super(senderId);
+    public TextMessage(String content) {
+        super();
         this.content = content;
     }
 
