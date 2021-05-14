@@ -112,18 +112,44 @@ public class DatabaseClient implements AutoCloseable {
         }
     }
 
-    public ConversationDetails getConversationDetails(int conv_id) throws DatabaseException {
-        try (PreparedStatement s = db.prepareStatement("select * from conversations where conversation_id = ?")) {
+    String getConversationName(int conv_id) throws DatabaseException {
+        try (PreparedStatement s = db.prepareStatement("select name from conversations where conversation_id = ?")) {
             s.setInt(1, conv_id);
 
             try (ResultSet r = s.executeQuery()) {
                 if(r.next())
-                    return new ConversationDetails(r.getInt("conversation_id"), r.getString("name"));
+                    return r.getString("name");
                 throw new InvalidDataException("Invalid converstaion id: "+conv_id);
             }
         } catch (SQLException e) {
             throw new DatabaseException(e);
         }
+    }
+
+    List<UserData> getConversationMembers(int conv_id) throws DatabaseException {
+        try (PreparedStatement s = db.prepareStatement(
+                "select user_id, name " +
+                        "from membership " +
+                        "natural join users " +
+                        "where conversation_id = ?"
+        )) {
+            s.setInt(1, conv_id);
+
+            try (ResultSet r = s.executeQuery()) {
+                List<UserData> members = new LinkedList<>();
+                while(r.next())
+                    members.add(new UserData(r.getInt(1), r.getString(2)));
+                return members;
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+    }
+
+    public ConversationDetails getConversationDetails(int conv_id) throws DatabaseException {
+        return new ConversationDetails(conv_id,
+                getConversationName(conv_id),
+                getConversationMembers(conv_id));
     }
 
     Date sendMessage(TextMessage msg, int user, int conv) throws DatabaseException {
@@ -173,6 +199,7 @@ public class DatabaseClient implements AutoCloseable {
     static public class DatabaseAuthenticationException extends DatabaseException {
     }
     static public class InvalidDataException extends DatabaseException {
+        public InvalidDataException() { super(); }
         public InvalidDataException(String message) {
             super(message);
         }

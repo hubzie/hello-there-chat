@@ -105,18 +105,16 @@ public class Client extends Application {
 
         try {
             ClientViewController.getAppView().run();
-            connection.listen(x -> {
-                Platform.runLater(() -> {
-                    try {
-                        if (x instanceof MessageNotification)
-                            ClientViewController.getAppView().addBottomMessage(((MessageNotification) x).getContent());
-                        else
-                            System.out.println(x);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
-            });
+            connection.listen(x -> Platform.runLater(() -> {
+                try {
+                    if (x instanceof MessageNotification)
+                        ClientViewController.getAppView().addBottomMessage(((MessageNotification) x).getContent());
+                    else
+                        System.out.println(x);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }));
 
             List<Conversation> list = connection.getConversationList();
             for (Conversation c : list)
