@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class ServerCommunicator extends Communicator {
     public ServerCommunicator(Socket s) throws IOException, CommunicationException {
@@ -34,7 +35,12 @@ public class ServerCommunicator extends Communicator {
     }
 
     void flush() throws CommunicationException {
-        while (!que.isEmpty())
-            super.send(que.poll());
+        try {
+            SocketPackage pkg;
+            while((pkg = que.poll(500, TimeUnit.MILLISECONDS)) != null)
+                super.send(pkg);
+        } catch (InterruptedException e) {
+            throw new CommunicationException(e);
+        }
     }
 }

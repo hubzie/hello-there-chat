@@ -1,6 +1,5 @@
 package pl.hellothere.client.network;
 
-import pl.hellothere.client.control.Client;
 import pl.hellothere.containers.socket.authorization.AuthorizationRequest;
 import pl.hellothere.containers.socket.authorization.AuthorizationResult;
 import pl.hellothere.containers.socket.connection.SecurityData;

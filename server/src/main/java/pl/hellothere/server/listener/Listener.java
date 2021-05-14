@@ -20,6 +20,6 @@ public class Listener {
 
     public void sendUpdate(Message msg) {
         for(ClientHandler h : handlers)
-            System.out.println("Notify: "+h+" - "+msg);
+            h.sendUpdate(msg);
     }
 }

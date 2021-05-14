@@ -12,7 +12,7 @@ import java.util.List;
 
 public class DatabaseClient implements AutoCloseable {
     private Connection db = null;
-    private ListenerManager listenerManager = new ListenerManager();
+    private final ListenerManager listenerManager = new ListenerManager();
 
     public DatabaseClient(String db_address, String db_login, String db_password) throws DatabaseInitializationException {
         try {
@@ -95,7 +95,7 @@ public class DatabaseClient implements AutoCloseable {
                 "select *" +
                         "from messages " +
                         "where conversation_id = ? " +
-                        "order by send_time " +
+                        "order by send_time desc " +
                         "limit 16"
         )) {
             s.setInt(1, conv_id);
@@ -126,13 +126,15 @@ public class DatabaseClient implements AutoCloseable {
         }
     }
 
-    void sendMessage(TextMessage msg, int user, int conv) throws DatabaseException {
-        try (PreparedStatement s = db.prepareStatement("insert into messages values (?, ?, now(), ?)")) {
+    Date sendMessage(TextMessage msg, int user, int conv) throws DatabaseException {
+        try (PreparedStatement s = db.prepareStatement("insert into messages values (?, ?, now(), ?) returning now()")) {
             s.setInt(1, user);
             s.setInt(2, conv);
             s.setString(3, msg.getContent());
 
-            s.executeUpdate();
+            ResultSet r = s.executeQuery();
+            r.next();
+            return r.getDate(1);
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DatabaseException(e);
@@ -140,11 +142,13 @@ public class DatabaseClient implements AutoCloseable {
     }
 
     public void sendMessage(Message msg, int user, int conv) throws DatabaseException {
+        Date sendTime;
         if(msg instanceof TextMessage)
-            sendMessage((TextMessage) msg, user, conv);
+            sendTime = sendMessage((TextMessage) msg, user, conv);
         else
             throw new InvalidDataException("Unsupported message type");
 
+        msg.fill(user, sendTime);
         listenerManager.sendUpdate(conv, msg);
     }
 

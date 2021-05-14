@@ -10,6 +10,11 @@ public class Message implements SocketPackage {
 
     protected Message() {}
 
+    public void fill(int senderId, Date sendTime) {
+        this.senderId = senderId;
+        this.sendTime = sendTime;
+    }
+
     public Message(int senderId, Date sendTime) {
         this.senderId = senderId;
         this.sendTime = sendTime;

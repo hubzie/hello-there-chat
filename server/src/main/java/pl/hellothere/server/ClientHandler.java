@@ -8,8 +8,8 @@ import pl.hellothere.containers.socket.connection.SecurityData;
 import pl.hellothere.containers.socket.authorization.AuthorizationRequest;
 import pl.hellothere.containers.socket.data.UserData;
 import pl.hellothere.containers.socket.data.converstions.ConversationList;
+import pl.hellothere.containers.socket.data.messages.Message;
 import pl.hellothere.containers.socket.data.messages.MessageList;
-import pl.hellothere.containers.socket.data.messages.TextMessage;
 import pl.hellothere.containers.socket.data.notifications.MessageNotification;
 import pl.hellothere.containers.socket.data.notifications.StopNotification;
 import pl.hellothere.server.database.DatabaseClient;
@@ -18,6 +18,7 @@ import pl.hellothere.tools.*;
 import java.io.*;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class ClientHandler extends Thread {
@@ -26,6 +27,7 @@ public class ClientHandler extends Thread {
 
     private final ServerCommunicator communicator;
     private final Encryptor encryptor = new Encryptor();
+    private final BlockingQueue<Message> notifications = new LinkedBlockingQueue<>();
 
     int conv_id = -1;
     UserData user = null;
@@ -42,6 +44,10 @@ public class ClientHandler extends Thread {
         } catch (IOException | CommunicationException e) {
             throw new ConnectionError(e);
         }
+    }
+
+    public void sendUpdate(Message msg) {
+        notifications.add(msg);
     }
 
     public boolean authenticate() throws ConnectionError {
@@ -87,6 +93,12 @@ public class ClientHandler extends Thread {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
+            try {
+                connection.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             closed = true;
         }
     }
@@ -129,6 +141,19 @@ public class ClientHandler extends Thread {
     }
 
     void startApp() throws ConnectionError {
+        Thread notifier = new Thread(() -> {
+            try {
+                while (isLogged()) {
+                    Message msg = notifications.poll(1000, TimeUnit.MILLISECONDS);
+                    if (msg != null)
+                        communicator.send(new MessageNotification(msg));
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+
+        notifier.start();
         try {
             while (isLogged()) {
                 SocketPackage pkg = communicator.read();
@@ -136,7 +161,9 @@ public class ClientHandler extends Thread {
                 else if(pkg instanceof Command) handleCommand((Command) pkg);
                 else throw new ClassNotFoundException();
             }
-        } catch (IOException | ClassNotFoundException | CommunicationException | DatabaseClient.DatabaseException e) {
+
+            notifier.join();
+        } catch (InterruptedException | IOException | ClassNotFoundException | CommunicationException | DatabaseClient.DatabaseException e) {
             throw new ConnectionError(e);
         }
     }

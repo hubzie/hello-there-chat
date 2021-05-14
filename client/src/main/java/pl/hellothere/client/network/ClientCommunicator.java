@@ -37,7 +37,7 @@ public class ClientCommunicator extends Communicator {
                             mode = Mode.STOP;
                         else if (n instanceof Notification)
                             handler.handle((Notification) n);
-                        else
+                        else if (n != null)
                             response.put(n);
                     }
                 }
