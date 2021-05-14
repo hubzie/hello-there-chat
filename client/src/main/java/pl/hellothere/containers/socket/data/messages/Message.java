@@ -10,6 +10,10 @@ public class Message implements SocketPackage {
 
     protected Message() {}
 
+    public Message(int senderId) {
+        this.senderId = senderId;
+    }
+
     public Message(int senderId, Date sendTime) {
         this.senderId = senderId;
         this.sendTime = sendTime;
@@ -20,6 +24,8 @@ public class Message implements SocketPackage {
     }
 
     public Date getSendTime() {
+        if(sendTime == null)
+            throw new RuntimeException();
         return sendTime;
     }
 }

@@ -8,6 +8,7 @@ import pl.hellothere.containers.socket.connection.commands.Command;
 import pl.hellothere.containers.socket.connection.requests.ChangeConversationRequest;
 import pl.hellothere.containers.socket.connection.requests.ConversationListRequest;
 import pl.hellothere.containers.socket.connection.requests.GetMessagesRequest;
+import pl.hellothere.containers.socket.connection.requests.SendMessageRequest;
 import pl.hellothere.containers.socket.data.UserData;
 import pl.hellothere.containers.socket.data.converstions.Conversation;
 import pl.hellothere.containers.socket.data.converstions.ConversationDetails;
@@ -73,6 +74,10 @@ public class ServerClient {
 
     public List<Message> getMessageList() throws CommunicationException {
         return communicator.sendAndRead(new GetMessagesRequest());
+    }
+
+    public void sendMessage(Message msg) throws CommunicationException {
+        communicator.send(new SendMessageRequest(msg));
     }
 
     public void close() {

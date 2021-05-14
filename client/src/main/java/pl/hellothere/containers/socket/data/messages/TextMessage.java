@@ -9,6 +9,11 @@ public class TextMessage extends Message {
         super();
     }
 
+    public TextMessage(int senderId, String content) {
+        super(senderId);
+        this.content = content;
+    }
+
     public TextMessage(int senderId, Date sendTime, String content) {
         super(senderId, sendTime);
         this.content = content;

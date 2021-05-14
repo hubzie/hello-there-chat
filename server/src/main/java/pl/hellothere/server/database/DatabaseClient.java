@@ -5,6 +5,7 @@ import pl.hellothere.containers.socket.data.converstions.Conversation;
 import pl.hellothere.containers.socket.data.converstions.ConversationDetails;
 import pl.hellothere.containers.socket.data.messages.Message;
 import pl.hellothere.containers.socket.data.messages.TextMessage;
+import pl.hellothere.server.listener.ListenerManager;
 
 import java.sql.*;
 import java.util.LinkedList;
@@ -12,6 +13,7 @@ import java.util.List;
 
 public class DatabaseClient implements AutoCloseable {
     private Connection db = null;
+    private ListenerManager listenerManager = new ListenerManager();
 
     public DatabaseClient(String db_address, String db_login, String db_password) throws DatabaseInitializationException {
         try {
@@ -20,6 +22,10 @@ public class DatabaseClient implements AutoCloseable {
         } catch (SQLException | ClassNotFoundException e) {
             throw new DatabaseInitializationException(e);
         }
+    }
+
+    public ListenerManager getListenerManager() {
+        return listenerManager;
     }
 
     @Override
@@ -119,6 +125,28 @@ public class DatabaseClient implements AutoCloseable {
         } catch (SQLException e) {
             throw new DatabaseException(e);
         }
+    }
+
+    void sendMessage(TextMessage msg, int conv) throws DatabaseException {
+        try (PreparedStatement s = db.prepareStatement("insert into messages values (?, ?, now(), ?)")) {
+            s.setInt(1, msg.getSenderID());
+            s.setInt(2, conv);
+            s.setString(3, msg.getContent());
+
+            s.executeBatch();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DatabaseException(e);
+        }
+    }
+
+    public void sendMessage(Message msg, int conv) throws DatabaseException {
+        if(msg instanceof TextMessage)
+            sendMessage((TextMessage) msg, conv);
+        else
+            throw new InvalidDataException("Unsupported message type");
+
+        listenerManager.sendUpdate(conv, msg);
     }
 
     static public class DatabaseException extends Exception {

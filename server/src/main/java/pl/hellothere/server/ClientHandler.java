@@ -3,10 +3,7 @@ package pl.hellothere.server;
 import pl.hellothere.containers.SocketPackage;
 import pl.hellothere.containers.socket.authorization.AuthorizationResult;
 import pl.hellothere.containers.socket.connection.commands.Command;
-import pl.hellothere.containers.socket.connection.requests.ChangeConversationRequest;
-import pl.hellothere.containers.socket.connection.requests.ConversationListRequest;
-import pl.hellothere.containers.socket.connection.requests.GetMessagesRequest;
-import pl.hellothere.containers.socket.connection.requests.Request;
+import pl.hellothere.containers.socket.connection.requests.*;
 import pl.hellothere.containers.socket.connection.SecurityData;
 import pl.hellothere.containers.socket.authorization.AuthorizationRequest;
 import pl.hellothere.containers.socket.data.UserData;
@@ -20,9 +17,10 @@ import pl.hellothere.tools.*;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-class ClientHandler extends Thread {
+public class ClientHandler extends Thread {
     private final DatabaseClient db;
     private final Socket connection;
 
@@ -98,6 +96,8 @@ class ClientHandler extends Thread {
     }
 
     public void logOut() throws CommunicationException {
+        db.getListenerManager().unlisten(this, conv_id);
+
         if (!isClosed()) {
             communicator.send(new StopNotification());
             communicator.flush();
@@ -110,10 +110,13 @@ class ClientHandler extends Thread {
     void handleRequest(Request req) throws CommunicationException, ClassNotFoundException, DatabaseClient.DatabaseException {
         if (req instanceof ConversationListRequest)
             communicator.send(new ConversationList(db.getConversationList(user.getID())));
-        else if (req instanceof ChangeConversationRequest)
+        else if (req instanceof ChangeConversationRequest) {
+            db.getListenerManager().listen(this, conv_id, ((ChangeConversationRequest) req).getConversationID());
             communicator.send(db.getConversationDetails(conv_id = ((ChangeConversationRequest) req).getConversationID()));
-        else if (req instanceof GetMessagesRequest)
+        } else if (req instanceof GetMessagesRequest)
             communicator.send(new MessageList(db.getMessages(conv_id)));
+        else if (req instanceof SendMessageRequest)
+            db.sendMessage(((SendMessageRequest) req).getContent(), conv_id);
         else throw new ClassNotFoundException();
     }
 
@@ -127,18 +130,6 @@ class ClientHandler extends Thread {
 
     void startApp() throws ConnectionError {
         try {
-            new Thread(() -> {
-                int it = 0;
-                try {
-                    while (isLogged()) {
-                        communicator.send(new MessageNotification(new TextMessage(user.getID(), null, "Notification #"+(it++)+": Notification testing")));
-                        TimeUnit.MILLISECONDS.sleep(1000);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }).start();
-
             while (isLogged()) {
                 SocketPackage pkg = communicator.read();
                 if(pkg instanceof Request) handleRequest((Request) pkg);
