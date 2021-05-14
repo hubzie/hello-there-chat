@@ -81,6 +81,7 @@ public class ServerClient {
 
     public void logOut() throws CommunicationException {
         communicator.send(Command.LogOut);
+        communicator.setHandler(null);
         conv_id = -1;
         user = null;
     }
@@ -101,7 +102,7 @@ public class ServerClient {
     }
 
     public void listen(NotificationHandler handler) {
-        communicator.listen(handler);
+        communicator.setHandler(handler);
     }
 
     public static class ServerClientException extends ConnectionError {

@@ -110,11 +110,6 @@ public class ClientHandler extends Thread {
     public void logOut() throws CommunicationException {
         db.getListenerManager().unlisten(this, conv_id);
 
-        if (!isClosed()) {
-            communicator.send(new StopNotification());
-            communicator.flush();
-        }
-
         conv_id = -1;
         user = null;
     }

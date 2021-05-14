@@ -16,15 +16,20 @@ public class ClientCommunicator extends Communicator {
         LISTEN, STOP
     }
 
-    static Thread listener = null;
-    static Mode mode = Mode.LISTEN;
+    NotificationHandler handler = null;
+    Thread listener = null;
+    Mode mode = Mode.LISTEN;
     BlockingQueue<Object> response = new ArrayBlockingQueue<>(1);
 
     public ClientCommunicator(Socket s) throws IOException, CommunicationException {
         super(s);
     }
 
-    public void listen(NotificationHandler handler) {
+    public void setHandler(NotificationHandler handler) {
+        this.handler = handler;
+    }
+
+    public void listen() {
         if(listener != null)
             throw new RuntimeException();
 
@@ -35,9 +40,10 @@ public class ClientCommunicator extends Communicator {
                         SocketPackage n = read();
                         if (n instanceof StopNotification)
                             mode = Mode.STOP;
-                        else if (n instanceof Notification)
-                            handler.handle((Notification) n);
-                        else if (n != null)
+                        else if (n instanceof Notification) {
+                            if (handler != null)
+                                handler.handle((Notification) n);
+                        } else
                             response.put(n);
                     }
                 }
@@ -52,9 +58,13 @@ public class ClientCommunicator extends Communicator {
         listener.start();
     }
 
-    public void join() throws InterruptedException {
-        if (listener != null)
-            listener.join();
+    public void join() throws CommunicationException {
+        try {
+            if (listener != null)
+                listener.join();
+        } catch (InterruptedException e) {
+            throw new CommunicationException(e);
+        }
     }
 
     @SuppressWarnings("unchecked")
