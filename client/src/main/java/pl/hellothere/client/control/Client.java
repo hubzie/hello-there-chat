@@ -99,9 +99,13 @@ public class Client extends Application {
 
     void logout(Void v) {
         try {
-            //todo logout from server
+            connection.logOut();
             ClientViewController.getAppView().close();
             ClientViewController.getLoginView().run();
+        } catch (CommunicationException e) {
+            e.printStackTrace();
+            ClientViewController.getAppView().close();
+            ClientViewController.showErrorMessage("No connection");
         } catch (Exception e) {
             e.printStackTrace();
             ClientViewController.showErrorMessage("View error");

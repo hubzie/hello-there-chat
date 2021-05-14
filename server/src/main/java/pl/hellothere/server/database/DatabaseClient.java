@@ -98,7 +98,7 @@ public class DatabaseClient implements AutoCloseable {
                 "from messages " +
                 "where conversation_id = ? " +
                 "order by send_time desc " +
-                "limit 16";
+                "limit 8";
         else
             statement = "select *" +
                 "from messages " +

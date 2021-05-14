@@ -79,6 +79,12 @@ public class ServerClient {
         communicator.send(new SendMessageRequest(msg));
     }
 
+    public void logOut() throws CommunicationException {
+        communicator.send(Command.LogOut);
+        conv_id = -1;
+        user = null;
+    }
+
     public void close() {
         try {
             communicator.send(Command.CloseConnection);
