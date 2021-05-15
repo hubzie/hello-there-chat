@@ -1,4 +1,4 @@
-drop table messages;
-drop table membership;
-drop table users;
-drop table conversations;
+DROP TABLE messages;
+DROP TABLE membership;
+DROP TABLE users;
+DROP TABLE conversations;

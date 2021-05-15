@@ -1,6 +1,8 @@
-package pl.hellothere.server;
+package pl.hellothere.server.client;
 
 import pl.hellothere.containers.SocketPackage;
+import pl.hellothere.containers.socket.data.notifications.StopNotification;
+import pl.hellothere.server.database.PasswordHasher;
 import pl.hellothere.tools.CommunicationException;
 import pl.hellothere.tools.Communicator;
 
@@ -11,20 +13,36 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class ServerCommunicator extends Communicator {
-    public ServerCommunicator(Socket s) throws IOException, CommunicationException {
-        super(s);
+    Thread sender = null;
+    boolean closed = false;
 
-        Thread f = new Thread(() -> {
+    public boolean isClosed() {
+        return closed;
+    }
+
+    public ServerCommunicator(Socket s) throws IOException, CommunicationException {
+        init(s);
+
+        sender = new Thread(() -> {
             try {
-                while (!s.isClosed())
+                while (!s.isClosed() && !closed)
                     flush();
             } catch (CommunicationException e) {
                 e.printStackTrace();
             }
         });
 
-        f.setDaemon(true);
-        f.start();
+        sender.setDaemon(true);
+        sender.start();
+    }
+
+    public void join() throws CommunicationException {
+        try {
+            if (sender != null)
+                sender.join();
+        } catch (InterruptedException e) {
+            throw new CommunicationException(e);
+        }
     }
 
     BlockingQueue<SocketPackage> que = new LinkedBlockingQueue<>();
@@ -37,8 +55,11 @@ public class ServerCommunicator extends Communicator {
     void flush() throws CommunicationException {
         try {
             SocketPackage pkg;
-            while((pkg = que.poll(500, TimeUnit.MILLISECONDS)) != null)
+            while((pkg = que.poll(500, TimeUnit.MILLISECONDS)) != null) {
+                if (pkg instanceof StopNotification)
+                    closed = true;
                 super.send(pkg);
+            }
         } catch (InterruptedException e) {
             throw new CommunicationException(e);
         }

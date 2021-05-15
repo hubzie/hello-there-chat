@@ -1,4 +1,4 @@
-package pl.hellothere.server;
+package pl.hellothere.server.client;
 
 import pl.hellothere.containers.SocketPackage;
 import pl.hellothere.containers.socket.authorization.AuthorizationResult;
@@ -55,7 +55,7 @@ public class ClientHandler extends Thread {
             SocketPackage pkg = communicator.read();
 
             if (pkg.equals(Command.CloseConnection)) {
-                connection.close();
+                close();
                 return false;
             } else if (pkg instanceof AuthorizationRequest) {
                 AuthorizationRequest ar = (AuthorizationRequest) pkg;
@@ -76,7 +76,7 @@ public class ClientHandler extends Thread {
                 return (user != null);
             } else
                 throw new ClassNotFoundException(pkg.getClass().toString());
-        } catch (ClassNotFoundException | IOException | CommunicationException | DatabaseClient.DatabaseException e) {
+        } catch (ClassNotFoundException | CommunicationException | DatabaseClient.DatabaseException e) {
             throw new ConnectionError(e);
         }
     }
@@ -94,8 +94,10 @@ public class ClientHandler extends Thread {
             e.printStackTrace();
         } finally {
             try {
+                communicator.send(new StopNotification());
+                communicator.join();
                 connection.close();
-            } catch (IOException e) {
+            } catch (IOException | CommunicationException e) {
                 e.printStackTrace();
             }
 

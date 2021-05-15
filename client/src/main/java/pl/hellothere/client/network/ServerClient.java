@@ -33,11 +33,10 @@ public class ServerClient {
     public ServerClient() throws ConnectionError {
         try {
             connection = new Socket(address, port);
-
             communicator = new ClientCommunicator(connection);
 
-            communicator.send(new SecurityData(encryptor.getPublicKey()));
-            encryptor.setReceiverKey(communicator.<SecurityData>read().getKey());
+            SecurityData key = communicator.sendAndRead(new SecurityData(encryptor.getPublicKey()));
+            encryptor.setReceiverKey(key.getKey());
         } catch (IOException | CommunicationException e) {
             throw new ConnectionError(e);
         }

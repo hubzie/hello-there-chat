@@ -39,7 +39,7 @@ public class DatabaseClient implements AutoCloseable {
     }
 
     byte[] getEncodedPassword(String login, String password) throws DatabaseException {
-        try (PreparedStatement s = db.prepareStatement("select salt from users where login = ?")) {
+        try (PreparedStatement s = db.prepareStatement("select salt from users where active = true and login = ?")) {
             s.setString(1, login);
 
             try (ResultSet r = s.executeQuery()) {
@@ -53,7 +53,7 @@ public class DatabaseClient implements AutoCloseable {
     }
 
     public UserData authenticate(String login, String password) throws DatabaseException {
-        try (PreparedStatement s = db.prepareStatement("select user_id, name from users where login = ? and password = ?")) {
+        try (PreparedStatement s = db.prepareStatement("select user_id, name from users where active = true and login = ? and password = ?")) {
             s.setString(1, login);
             s.setBytes(2, getEncodedPassword(login, password));
 

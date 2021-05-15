@@ -1,7 +1,7 @@
 package pl.hellothere.server.listener;
 
 import pl.hellothere.containers.socket.data.messages.Message;
-import pl.hellothere.server.ClientHandler;
+import pl.hellothere.server.client.ClientHandler;
 
 import java.util.concurrent.ConcurrentHashMap;
 
