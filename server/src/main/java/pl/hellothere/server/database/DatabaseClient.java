@@ -1,18 +1,23 @@
 package pl.hellothere.server.database;
 
+import pl.hellothere.containers.socket.authorization.RegistrationResult;
 import pl.hellothere.containers.socket.data.UserData;
 import pl.hellothere.containers.socket.data.converstions.Conversation;
 import pl.hellothere.containers.socket.data.converstions.ConversationDetails;
 import pl.hellothere.containers.socket.data.messages.*;
+import pl.hellothere.server.activator.ActivationEmailSender;
 import pl.hellothere.server.listener.ListenerManager;
 
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.sql.*;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 public class DatabaseClient implements AutoCloseable {
-    private Connection db = null;
+    private final Connection db;
     private final ListenerManager listenerManager = new ListenerManager();
 
     public DatabaseClient(String db_address, String db_login, String db_password) throws DatabaseInitializationException {
@@ -48,6 +53,61 @@ public class DatabaseClient implements AutoCloseable {
                 return PasswordHasher.encode(password, r.getBytes(1));
             }
         } catch (SQLException | PasswordHasher.HasherException e) {
+            throw new DatabaseException(e);
+        }
+    }
+
+    boolean checkIfUsed(String query, String data) throws SQLException {
+        try (PreparedStatement s = db.prepareStatement(query)) {
+            s.setString(1, data);
+
+            try (ResultSet r = s.executeQuery()) {
+                r.next();
+                if (r.getInt(1) != 0)
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    public RegistrationResult.Code register(String name, String login, String email, String password) {
+        try {
+            if(checkIfUsed("select count(*) from users where login = ?", login))
+                return RegistrationResult.Code.LOGIN_ALREADY_USED;
+            if(checkIfUsed("select count(*) from users where email = ?", email))
+                return RegistrationResult.Code.EMAIL_ALREADY_USED;
+
+            try (PreparedStatement s = db.prepareStatement("insert into users (name, login, email, password, salt, activation_token) values (?, ?, ?, ?, ?, ?)")) {
+                s.setString(1, name);
+                s.setString(2, login);
+                s.setString(3, email);
+
+                SecureRandom random = new SecureRandom();
+                byte[] salt = new byte[16];
+                random.nextBytes(salt);
+                String token = UUID.randomUUID().toString();
+
+                s.setBytes(4, PasswordHasher.encode(password, salt));
+                s.setBytes(5, salt);
+                s.setBytes(6, token.getBytes(StandardCharsets.UTF_8));
+
+                s.execute();
+                ActivationEmailSender.sendToken(token);
+
+                return RegistrationResult.Code.OK;
+            }
+        } catch (SQLException | PasswordHasher.HasherException e) {
+            e.printStackTrace();
+            return RegistrationResult.Code.SERVER_ERROR;
+        }
+    }
+
+    public boolean activateAccount(String token) throws DatabaseException {
+        try (PreparedStatement s = db.prepareStatement("update users set active = true, activation_token = null where activation_token = ?")){
+            s.setBytes(1, token.getBytes(StandardCharsets.UTF_8));
+            return (s.executeUpdate() == 1);
+        } catch (SQLException e) {
             throw new DatabaseException(e);
         }
     }

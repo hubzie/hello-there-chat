@@ -2,6 +2,8 @@ package pl.hellothere.server.client;
 
 import pl.hellothere.containers.SocketPackage;
 import pl.hellothere.containers.socket.authorization.AuthorizationResult;
+import pl.hellothere.containers.socket.authorization.RegistrationRequest;
+import pl.hellothere.containers.socket.authorization.RegistrationResult;
 import pl.hellothere.containers.socket.connection.commands.Command;
 import pl.hellothere.containers.socket.connection.requests.*;
 import pl.hellothere.containers.socket.connection.SecurityData;
@@ -48,6 +50,10 @@ public class ClientHandler extends Thread {
 
     public void sendUpdate(Message msg) {
         notifications.add(msg);
+    }
+
+    public void register(RegistrationRequest req) {
+        communicator.send(new RegistrationResult(db.register(req.getName(), req.getLogin(), req.getEmail(), encryptor.decrypt(req.getPassword()))));
     }
 
     public boolean authenticate() throws ConnectionError {

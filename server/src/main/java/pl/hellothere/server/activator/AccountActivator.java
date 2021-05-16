@@ -28,25 +28,14 @@ public class AccountActivator extends Thread {
         writer.flush();
     }
 
-    boolean parse(String request) {
+    boolean parse(String request) throws DatabaseClient.DatabaseException {
         String[] data = request.split("[ ?&]");
-        if (!data[0].equals("GET") || !data[1].equals("/activate.html"))
+
+        if (data.length != 4 || !data[0].equals("GET") || !data[1].equals("/activate.html") || !data[2].startsWith("token="))
             return false;
 
-        String token = null;
-        protocol = data[data.length-1];
-        for(int i=2;i<data.length-2;i++)
-            if(data[i].startsWith("token=")) {
-                if(token != null)
-                    return false;
-                token = data[i].substring("token=".length());
-            }
-
-        if(token == null)
-            return false;
-
-        return true;
-        //        return db.activateAccount(token);
+        protocol = data[3];
+        return db.activateAccount(data[2].substring("token=".length()));
     }
 
     @Override
@@ -55,8 +44,8 @@ public class AccountActivator extends Thread {
             if(!parse(request))
                 sendResult("404 ERROR", "Not found");
             else
-                sendResult("200 OK", "Hello world!");
-        } catch (IOException e) {
+                sendResult("200 OK", "Account activated successfully");
+        } catch (IOException | DatabaseClient.DatabaseException e) {
             e.printStackTrace();
         } finally {
             try {
