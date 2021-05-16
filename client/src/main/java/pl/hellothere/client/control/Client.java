@@ -135,10 +135,8 @@ public class Client extends Application {
             for (Conversation c : list)
                 ClientViewController.getAppView().addGroup(c);
 
-            if (!list.isEmpty()) {
-                int id = list.get(0).getID();
-                changeGroup(id);
-            }
+            if (!list.isEmpty())
+                ClientViewController.getAppView().changeGroup(list.get(0));
         } catch (ConnectionError e) {
             e.printStackTrace();
             ClientViewController.getAppView().close();

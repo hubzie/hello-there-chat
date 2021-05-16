@@ -25,6 +25,14 @@
     -fx-border-color: derive(-fx-primary-background, -5.0%);
 }
 
+#groups-pane {
+    -fx-background-color: derive(-fx-primary-background, -5.0%);
+}
+
+#groups-box {
+    -fx-background-color: derive(-fx-primary-background, -5.0%);
+}
+
 .box {
     -fx-background-color: -fx-primary-background;
     -fx-border-width: 0;
@@ -51,6 +59,16 @@
     -fx-background-radius: 3 10 10 3;
     -fx-background-color: derived(-fx-primary, -10%);
     -fx-border-insets: 3 5 3 5;
+}
+
+.message-time {
+    -fx-font-size: 11;
+}
+
+.message-box {
+    -fx-background-color: -fx-primary-background;
+    -fx-border-width: 0;
+    -fx-spacing: 5;
 }
 
 .button {
@@ -96,13 +114,14 @@
     -fx-border-color: -fx-primary-background;
     -fx-border-width: 0;
     -fx-background-insets: 2;
+    -fx-font-size: 1;
 }
 
 .scroll-bar .track {
     -fx-background-color: derive(-fx-primary-background, -5.0%);
     -fx-border-color: transparent;
-    -fx-background-radius: 0.0;
-    -fx-border-radius: 2.0;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
 }
 
 .scroll-bar:vertical .increment-button ,
@@ -116,13 +135,13 @@
  .scroll-bar .increment-arrow,
  .scroll-bar .decrement-arrow{
     -fx-shape : " ";
-    -fx-padding :0.15em 0.0;
+    -fx-padding :0.0 0.0;
 }
 
  .scroll-bar:vertical .increment-arrow,
  .scroll-bar:vertical .decrement-arrow{
     -fx-shape : " ";
-    -fx-padding :0.0 0.15em;
+    -fx-padding :0.0 0.0;
 }
 
 
@@ -137,4 +156,32 @@
 
 .scroll-bar .thumb:pressed {
     -fx-background-color :derive(-fx-primary,40%);
+}
+
+.group-button {
+    -fx-text-fill: Black;
+    -fx-font-size: 13;
+    -fx-background-color: Transparent;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0 0 0 0;
+    -fx-border-width: 10;
+    -fx-border-color: Transparent;
+}
+
+.group-button:hover {
+    -fx-background-color: derived(-fx-primary, 40%);
+    -fx-border-color: derived(-fx-primary, 40%);
+    -fx-text-fill: derived(-fx-primary-background, 100%);
+    -fx-cursor: hand;
+}
+
+.group-button:pressed {
+    -fx-background-color: derived(-fx-primary, 0%);
+    -fx-border-color: derived(-fx-primary, 0%);
+}
+
+.selected-group-button {
+    -fx-background-color: derived(-fx-primary, 0%);
+    -fx-border-color: derived(-fx-primary, 0%);
+    -fx-text-fill: derived(-fx-primary-background, 100%);
 }

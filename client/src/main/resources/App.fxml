@@ -10,10 +10,6 @@
 <BorderPane fx:controller="pl.hellothere.client.view.app.ClientViewAppController"
             xmlns:fx="http://javafx.com/fxml">
 
-    <top>
-        <HBox fx:id="appTop" id="top-box" spacing="10" alignment="BOTTOM_CENTER"/>
-    </top>
-
     <center>
         <ScrollPane fx:id="messagesPane" id="messages-pane" vbarPolicy="ALWAYS" hbarPolicy="NEVER" fitToWidth="true">
             <VBox fx:id="messagesBox" id="messages-box" spacing="10" alignment="BOTTOM_CENTER"/>
@@ -33,6 +29,12 @@
             </Button>
         </HBox>
     </bottom>
+
+    <left>
+        <ScrollPane fx:id="groupsPane" id="groups-pane" vbarPolicy="ALWAYS" hbarPolicy="NEVER" fitToWidth="true">
+            <VBox fx:id="groupsBox" id="groups-box" spacing="2" alignment="TOP_CENTER"/>
+        </ScrollPane>
+    </left>
 
     <stylesheets>
         <URL value="@AppStyleGrey.css" />

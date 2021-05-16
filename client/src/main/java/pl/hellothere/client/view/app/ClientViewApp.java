@@ -6,12 +6,17 @@ import javafx.geometry.Pos;
 import javafx.scene.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import pl.hellothere.containers.socket.data.converstions.Conversation;
 import pl.hellothere.containers.socket.data.messages.Message;
 import pl.hellothere.containers.socket.data.messages.TextMessage;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -24,6 +29,8 @@ public class ClientViewApp extends Application {
     private Consumer<Message> sendAction;
     private Consumer<Void> logoutAction;
     private Conversation curGroup = null;
+    private final HashMap<Conversation, GroupButton> ConvButtonMap = new HashMap<>();
+    private boolean scrollMessagesToBottom = false;
 
     public void run() throws Exception { start(new Stage()); }
 
@@ -39,9 +46,18 @@ public class ClientViewApp extends Application {
 
     public Consumer<Void> getLogoutAction() { return logoutAction; }
 
+    public void setScrollMessagesToBottom() {
+        scrollMessagesToBottom = true;
+    }
+
     public void changeGroup(Conversation curGroup) {
         cvac.messagesBox.getChildren().clear();
+        if(this.curGroup != null) ConvButtonMap.get(this.curGroup).getStyleClass().remove("selected-group-button");
+        ConvButtonMap.get(curGroup).getStyleClass().add("selected-group-button");
         this.curGroup = curGroup;
+        groupAction.accept(curGroup.getID());
+        cvac.messagesPane.setVvalue(1D);
+        setScrollMessagesToBottom();
     }
 
     public void addTopMessage(Message m) throws UnknownMessageTypeException {
@@ -63,7 +79,8 @@ public class ClientViewApp extends Application {
     }
 
     public void addGroup(Conversation c) {
-        cvac.appTop.getChildren().add(new GroupButton(c));
+        ConvButtonMap.put(c,new GroupButton(c));
+        cvac.groupsBox.getChildren().add(ConvButtonMap.get(c));
     }
 
     public void setUserID(int curUserID) { this.curUserID = curUserID; }
@@ -84,10 +101,19 @@ public class ClientViewApp extends Application {
         }
         root.getStyleClass().add("box");
         primaryStage.setTitle("Hello There");
-        primaryStage.setScene(new Scene(root, 800, 600));
+        primaryStage.setScene(new Scene(root, 1000, 600));
         primaryStage.setResizable(false);
 
-        cvac.messagesBox.heightProperty().addListener(observable -> cvac.messagesPane.setVvalue(1D));
+        cvac.messagesBox.heightProperty().addListener(observable -> {
+            if(scrollMessagesToBottom) {
+                cvac.messagesPane.setVvalue(1D);
+                scrollMessagesToBottom = false;
+            }
+        });
+
+        cvac.messagesPane.vvalueProperty().addListener(observable -> {
+            if(cvac.messagesPane.vvalueProperty().getValue().equals(0D)) System.out.println("load");
+        });
 
         primaryStage.show();
     }
@@ -108,7 +134,23 @@ public class ClientViewApp extends Application {
                     else getStyleClass().add("your-message");
                 }
             });
-            getStyleClass().add("box");
+            getChildren().add((m.getSenderID() == curUserID) ? 0 : 1, new BorderPane(){
+                {
+                    setBottom(new Text(){
+                        {
+                            GregorianCalendar time = new GregorianCalendar();
+                            time.setTime(m.getSendTime());
+                            setText(time.get(Calendar.YEAR)+"-"+
+                                    ((time.get(Calendar.MONTH)+1 < 10) ? 0 : "")+(time.get(Calendar.MONTH)+1)+"-"+
+                                    ((time.get(Calendar.DAY_OF_MONTH) < 10) ? 0 : "")+time.get(Calendar.DAY_OF_MONTH)+" "+
+                                    ((time.get(Calendar.HOUR_OF_DAY) < 10) ? 0 : "")+time.get(Calendar.HOUR_OF_DAY)+":"+
+                                    ((time.get(Calendar.MINUTE) < 10) ? 0 : "")+time.get(Calendar.MINUTE));
+                            getStyleClass().add("message-time");
+                        }
+                    });
+                }
+            });
+            getStyleClass().add("message-box");
             if(m.getSenderID() == curUserID)setAlignment(Pos.CENTER_RIGHT);
             else setAlignment(Pos.CENTER_LEFT);
         }
@@ -119,11 +161,10 @@ public class ClientViewApp extends Application {
 
         GroupButton(Conversation conv) {
             this.conv = conv;
+            getStyleClass().add("group-button");
+            setMaxWidth(Double.MAX_VALUE);
             setText(conv.getName());
-            setOnAction(e -> {
-                changeGroup(conv);
-                groupAction.accept(conv.getID());
-            });
+            setOnAction(e -> changeGroup(conv));
         }
     }
 
