@@ -1,6 +1,7 @@
 package pl.hellothere.client.view.app;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.*;
@@ -14,10 +15,7 @@ import pl.hellothere.containers.socket.data.converstions.Conversation;
 import pl.hellothere.containers.socket.data.messages.Message;
 import pl.hellothere.containers.socket.data.messages.TextMessage;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 
@@ -28,9 +26,11 @@ public class ClientViewApp extends Application {
     private Consumer<Integer> groupAction;
     private Consumer<Message> sendAction;
     private Consumer<Void> logoutAction;
+    private Consumer<Date> loadMessagesAction;
     private Conversation curGroup = null;
     private final HashMap<Conversation, GroupButton> ConvButtonMap = new HashMap<>();
     private boolean scrollMessagesToBottom = false;
+    private Date lastLoadedMessageDate = null;
 
     public void run() throws Exception { start(new Stage()); }
 
@@ -46,9 +46,11 @@ public class ClientViewApp extends Application {
 
     public Consumer<Void> getLogoutAction() { return logoutAction; }
 
-    public void setScrollMessagesToBottom() {
-        scrollMessagesToBottom = true;
-    }
+    public void setLoadMessagesAction(Consumer<Date> loadMessagesAction) { this.loadMessagesAction = loadMessagesAction; }
+
+    public Consumer<Date> getLoadMessagesAction() { return loadMessagesAction; }
+
+    public void setScrollMessagesToBottom() { scrollMessagesToBottom = true; }
 
     public void changeGroup(Conversation curGroup) {
         cvac.messagesBox.getChildren().clear();
@@ -63,6 +65,7 @@ public class ClientViewApp extends Application {
     public void addTopMessage(Message m) throws UnknownMessageTypeException {
         if(m instanceof TextMessage) {
             cvac.messagesBox.getChildren().add( 0, new TextMessageBox(m) );
+            lastLoadedMessageDate = m.getSendTime();
         }
         else {
             throw new UnknownMessageTypeException();
@@ -112,7 +115,14 @@ public class ClientViewApp extends Application {
         });
 
         cvac.messagesPane.vvalueProperty().addListener(observable -> {
-            if(cvac.messagesPane.vvalueProperty().getValue().equals(0D)) System.out.println("load");
+            if(cvac.messagesPane.vvalueProperty().getValue().equals(0D)) {
+                Double oldHeight = cvac.messagesBox.heightProperty().getValue();
+                loadMessagesAction.accept(lastLoadedMessageDate);
+                Platform.runLater(() -> {
+                    Double newHeight = cvac.messagesBox.heightProperty().getValue();
+                    cvac.messagesPane.setVvalue((newHeight-oldHeight)/newHeight);
+                });
+            }
         });
 
         primaryStage.show();
@@ -163,7 +173,7 @@ public class ClientViewApp extends Application {
             this.conv = conv;
             getStyleClass().add("group-button");
             setMaxWidth(Double.MAX_VALUE);
-            setText(conv.getName());
+            setText((conv.getName() == null) ? "Group" : conv.getName());
             setOnAction(e -> changeGroup(conv));
         }
     }

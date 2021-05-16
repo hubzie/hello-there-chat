@@ -158,18 +158,18 @@ public class DatabaseClient implements AutoCloseable {
                 "from messages " +
                 "where conversation_id = ? " +
                 "order by send_time desc " +
-                "limit 8";
+                "limit 16";
         else
             statement = "select *" +
                 "from messages " +
-                "where conversation_id = ? and send_time > sendTime" +
+                "where conversation_id = ? and send_time < ? " +
                 "order by send_time desc " +
                 "limit 8";
 
         try (PreparedStatement s = db.prepareStatement(statement)) {
             s.setInt(1, conv_id);
             if(time != null)
-                s.setDate(2, (java.sql.Date) time);
+                s.setTimestamp(2, new Timestamp(time.getTime()));
 
             try (ResultSet r = s.executeQuery()) {
                 List<Message> list = new LinkedList<>();
@@ -231,7 +231,7 @@ public class DatabaseClient implements AutoCloseable {
 
             ResultSet r = s.executeQuery();
             r.next();
-            return r.getDate(1);
+            return r.getTimestamp(1);
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DatabaseException(e);

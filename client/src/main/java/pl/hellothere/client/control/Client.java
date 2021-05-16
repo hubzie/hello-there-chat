@@ -134,6 +134,7 @@ public class Client extends Application {
         ClientViewController.getAppView().setGroupAction(this::changeGroup);
         ClientViewController.getAppView().setSendAction(this::sendMessage);
         ClientViewController.getAppView().setLogoutAction(this::logout);
+        ClientViewController.getAppView().setLoadMessagesAction(this::loadMoreMessages);
 
         try {
             ClientViewController.getAppView().run();
