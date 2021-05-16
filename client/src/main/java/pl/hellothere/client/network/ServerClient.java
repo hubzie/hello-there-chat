@@ -16,6 +16,7 @@ import pl.hellothere.tools.*;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Date;
 import java.util.List;
 
 public class ServerClient {
@@ -72,6 +73,10 @@ public class ServerClient {
 
     public List<Message> getMessageList() throws CommunicationException {
         return communicator.sendAndRead(new GetMessagesRequest());
+    }
+
+    public List<Message> loadMoreMessages(Date time) throws CommunicationException {
+        return communicator.sendAndRead(new GetMessagesRequest(time));
     }
 
     public void sendMessage(Message msg) throws CommunicationException {
