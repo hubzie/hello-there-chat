@@ -16,6 +16,7 @@ import pl.hellothere.tools.*;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Date;
 import java.util.List;
 
 public class ServerClient {
@@ -33,11 +34,10 @@ public class ServerClient {
     public ServerClient() throws ConnectionError {
         try {
             connection = new Socket(address, port);
-
             communicator = new ClientCommunicator(connection);
 
-            communicator.send(new SecurityData(encryptor.getPublicKey()));
-            encryptor.setReceiverKey(communicator.<SecurityData>read().getKey());
+            SecurityData key = communicator.sendAndRead(new SecurityData(encryptor.getPublicKey()));
+            encryptor.setReceiverKey(key.getKey());
         } catch (IOException | CommunicationException e) {
             throw new ConnectionError(e);
         }
@@ -75,12 +75,17 @@ public class ServerClient {
         return communicator.sendAndRead(new GetMessagesRequest());
     }
 
+    public List<Message> loadMoreMessages(Date time) throws CommunicationException {
+        return communicator.sendAndRead(new GetMessagesRequest(time));
+    }
+
     public void sendMessage(Message msg) throws CommunicationException {
         communicator.send(new SendMessageRequest(msg));
     }
 
     public void logOut() throws CommunicationException {
         communicator.send(Command.LogOut);
+        communicator.setHandler(null);
         conv_id = -1;
         user = null;
     }
@@ -101,7 +106,7 @@ public class ServerClient {
     }
 
     public void listen(NotificationHandler handler) {
-        communicator.listen(handler);
+        communicator.setHandler(handler);
     }
 
     public static class ServerClientException extends ConnectionError {

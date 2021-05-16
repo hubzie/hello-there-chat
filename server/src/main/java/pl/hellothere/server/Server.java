@@ -1,8 +1,15 @@
 package pl.hellothere.server;
 
+import pl.hellothere.server.activator.AccountActivator;
+import pl.hellothere.server.client.ClientHandler;
 import pl.hellothere.server.database.DatabaseClient;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.Arrays;
 
 public class Server {
     private static final String db_address = "jdbc:postgresql://localhost:5432/hellothere";
@@ -19,9 +26,20 @@ public class Server {
 
                 while(true) {
                     try {
-                        ClientHandler client = new ClientHandler(db, server.accept());
-                        client.start();
-                    } catch (Exception e) {}
+                        Socket socket = server.accept();
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                        String request = reader.readLine();
+
+                        if(request.equals("startMainApp")) {
+                            ClientHandler client = new ClientHandler(db, socket);
+                            client.start();
+                        } else {
+                            AccountActivator client = new AccountActivator(db, socket, request);
+                            client.start();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             } catch (Exception e) {
                 System.out.println("Unable to setup server socket on this port");

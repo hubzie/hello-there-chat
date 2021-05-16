@@ -7,6 +7,7 @@ import pl.hellothere.tools.CommunicationException;
 import pl.hellothere.tools.Communicator;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -16,15 +17,25 @@ public class ClientCommunicator extends Communicator {
         LISTEN, STOP
     }
 
-    static Thread listener = null;
-    static Mode mode = Mode.LISTEN;
+    NotificationHandler handler = null;
+    Thread listener = null;
+    Mode mode = Mode.LISTEN;
     BlockingQueue<Object> response = new ArrayBlockingQueue<>(1);
 
     public ClientCommunicator(Socket s) throws IOException, CommunicationException {
-        super(s);
+        OutputStreamWriter out = new OutputStreamWriter(s.getOutputStream());
+        out.write("startMainApp\r\n");
+        out.flush();
+
+        init(s);
+        listen();
     }
 
-    public void listen(NotificationHandler handler) {
+    public void setHandler(NotificationHandler handler) {
+        this.handler = handler;
+    }
+
+    public void listen() {
         if(listener != null)
             throw new RuntimeException();
 
@@ -35,9 +46,10 @@ public class ClientCommunicator extends Communicator {
                         SocketPackage n = read();
                         if (n instanceof StopNotification)
                             mode = Mode.STOP;
-                        else if (n instanceof Notification)
-                            handler.handle((Notification) n);
-                        else if (n != null)
+                        else if (n instanceof Notification) {
+                            if (handler != null)
+                                handler.handle((Notification) n);
+                        } else
                             response.put(n);
                     }
                 }
@@ -52,16 +64,20 @@ public class ClientCommunicator extends Communicator {
         listener.start();
     }
 
-    public void join() throws InterruptedException {
-        if (listener != null)
-            listener.join();
+    public void join() throws CommunicationException {
+        try {
+            if (listener != null)
+                listener.join();
+        } catch (InterruptedException e) {
+            throw new CommunicationException(e);
+        }
     }
 
     @SuppressWarnings("unchecked")
     public synchronized <T extends SocketPackage> T sendAndRead(SocketPackage s) throws CommunicationException {
         try {
             send(s);
-            return (T) (listener == null ? read() : response.take());
+            return (T) response.take();
         } catch (InterruptedException e) {
             throw new CommunicationException(e);
         }

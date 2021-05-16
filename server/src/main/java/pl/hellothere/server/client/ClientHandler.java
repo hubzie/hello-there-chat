@@ -1,7 +1,9 @@
-package pl.hellothere.server;
+package pl.hellothere.server.client;
 
 import pl.hellothere.containers.SocketPackage;
 import pl.hellothere.containers.socket.authorization.AuthorizationResult;
+import pl.hellothere.containers.socket.authorization.RegistrationRequest;
+import pl.hellothere.containers.socket.authorization.RegistrationResult;
 import pl.hellothere.containers.socket.connection.commands.Command;
 import pl.hellothere.containers.socket.connection.requests.*;
 import pl.hellothere.containers.socket.connection.SecurityData;
@@ -50,12 +52,16 @@ public class ClientHandler extends Thread {
         notifications.add(msg);
     }
 
+    public void register(RegistrationRequest req) {
+        communicator.send(new RegistrationResult(db.register(req.getName(), req.getLogin(), req.getEmail(), encryptor.decrypt(req.getPassword()))));
+    }
+
     public boolean authenticate() throws ConnectionError {
         try {
             SocketPackage pkg = communicator.read();
 
             if (pkg.equals(Command.CloseConnection)) {
-                connection.close();
+                close();
                 return false;
             } else if (pkg instanceof AuthorizationRequest) {
                 AuthorizationRequest ar = (AuthorizationRequest) pkg;
@@ -76,7 +82,7 @@ public class ClientHandler extends Thread {
                 return (user != null);
             } else
                 throw new ClassNotFoundException(pkg.getClass().toString());
-        } catch (ClassNotFoundException | IOException | CommunicationException | DatabaseClient.DatabaseException e) {
+        } catch (ClassNotFoundException | CommunicationException | DatabaseClient.DatabaseException e) {
             throw new ConnectionError(e);
         }
     }
@@ -94,8 +100,10 @@ public class ClientHandler extends Thread {
             e.printStackTrace();
         } finally {
             try {
+                communicator.send(new StopNotification());
+                communicator.join();
                 connection.close();
-            } catch (IOException e) {
+            } catch (IOException | CommunicationException e) {
                 e.printStackTrace();
             }
 
@@ -109,11 +117,6 @@ public class ClientHandler extends Thread {
 
     public void logOut() throws CommunicationException {
         db.getListenerManager().unlisten(this, conv_id);
-
-        if (!isClosed()) {
-            communicator.send(new StopNotification());
-            communicator.flush();
-        }
 
         conv_id = -1;
         user = null;

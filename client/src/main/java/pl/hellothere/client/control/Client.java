@@ -13,6 +13,7 @@ import pl.hellothere.containers.socket.data.notifications.MessageNotification;
 import pl.hellothere.tools.CommunicationException;
 import pl.hellothere.tools.ConnectionError;
 
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -68,6 +69,22 @@ public class Client extends Application {
     }
 
     ConversationDetails conversationDetails = null;
+
+    public void loadMoreMessages(Date time) {
+        try {
+            for(Message msg : connection.loadMoreMessages(time))
+                try {
+                    ClientViewController.getAppView().addTopMessage(msg);
+                } catch (ClientViewApp.UnknownMessageTypeException e) {
+                    e.printStackTrace();
+                    ClientViewController.showErrorMessage("Unknown Message Type");
+                }
+        } catch (CommunicationException e) {
+            e.printStackTrace();
+            ClientViewController.getAppView().close();
+            ClientViewController.showErrorMessage("No connection");
+        }
+    }
 
     void changeGroup(int groupId) {
         try {

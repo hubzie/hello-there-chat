@@ -8,10 +8,10 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class Communicator {
-    final Sender sender;
-    final Receiver receiver;
+    Sender sender;
+    Receiver receiver;
 
-    public Communicator(Socket s) throws IOException, CommunicationException {
+    public void init(Socket s) throws IOException, CommunicationException {
         sender = new Sender(new ObjectOutputStream(s.getOutputStream()));
         receiver = new Receiver(new ObjectInputStream(s.getInputStream()));
     }
