@@ -14,15 +14,15 @@ import pl.hellothere.containers.socket.data.converstions.ConversationDetails;
 import pl.hellothere.containers.socket.data.messages.Message;
 import pl.hellothere.tools.*;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 public class ServerClient {
-    private static final String address = "localhost";
-    private static final int port = 8374;
-
     final Socket connection;
 
     private final ClientCommunicator communicator;
@@ -32,13 +32,20 @@ public class ServerClient {
     UserData user = null;
 
     public ServerClient() throws ConnectionError {
-        try {
+        try (InputStream file = new FileInputStream("src/main/resources/connection.properties")){
+            Properties config = new Properties();
+            config.load(file);
+
+            String address = config.getProperty("server.address");
+            int port = Integer.parseInt(config.getProperty("server.port"));
+
             connection = new Socket(address, port);
             communicator = new ClientCommunicator(connection);
 
             SecurityData key = communicator.sendAndRead(new SecurityData(encryptor.getPublicKey()));
             encryptor.setReceiverKey(key.getKey());
         } catch (IOException | CommunicationException e) {
+            e.printStackTrace();
             throw new ConnectionError(e);
         }
     }
