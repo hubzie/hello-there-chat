@@ -3,6 +3,7 @@ package pl.hellothere.client.view.app;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.*;
 import javafx.scene.control.Button;
@@ -140,8 +141,9 @@ public class ClientViewApp extends Application {
                     setWrapText(true);
                     setMinHeight(45);
                     setMaxWidth(500);
-                    if(m.getSenderID() == curUserID)getStyleClass().add("my-message");
+                    if(m.getSenderID() == curUserID) getStyleClass().add("my-message");
                     else getStyleClass().add("your-message");
+                    HBox.setMargin(this, new Insets(0, 3, 0, 3));
                 }
             });
             getChildren().add((m.getSenderID() == curUserID) ? 0 : 1, new BorderPane(){
@@ -160,6 +162,20 @@ public class ClientViewApp extends Application {
                     });
                 }
             });
+            if(m.getSenderID() != curUserID) {
+                getChildren().add(0, new BorderPane() {
+                    {
+                        setBottom( new Label() {
+                            {
+                                setText(String.valueOf(m.getSenderID()));
+                                getStyleClass().add("message-sender");
+                            }
+                        });
+                    }
+                });
+            }
+
+
             getStyleClass().add("message-box");
             if(m.getSenderID() == curUserID)setAlignment(Pos.CENTER_RIGHT);
             else setAlignment(Pos.CENTER_LEFT);
