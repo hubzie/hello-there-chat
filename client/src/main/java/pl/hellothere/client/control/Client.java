@@ -89,6 +89,7 @@ public class Client extends Application {
     void changeGroup(int groupId) {
         try {
             conversationDetails = connection.changeConversation(groupId);
+            ClientViewController.getAppView().setConversationDetails(conversationDetails);
             for (Message m : connection.getMessageList()) {
                 try {
                     ClientViewController.getAppView().addTopMessage(m);

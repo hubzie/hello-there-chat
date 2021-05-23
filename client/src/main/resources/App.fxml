@@ -11,7 +11,7 @@
             xmlns:fx="http://javafx.com/fxml">
 
     <center>
-        <ScrollPane fx:id="messagesPane" id="messages-pane" vbarPolicy="ALWAYS" hbarPolicy="NEVER" fitToWidth="true">
+        <ScrollPane fx:id="messagesPane" id="messages-pane" vbarPolicy="ALWAYS" hbarPolicy="NEVER" fitToWidth="true" fitToHeight="true">
             <VBox fx:id="messagesBox" id="messages-box" spacing="10" alignment="BOTTOM_CENTER"/>
         </ScrollPane>
     </center>
@@ -31,7 +31,7 @@
     </bottom>
 
     <left>
-        <ScrollPane fx:id="groupsPane" id="groups-pane" vbarPolicy="ALWAYS" hbarPolicy="NEVER" fitToWidth="true">
+        <ScrollPane fx:id="groupsPane" id="groups-pane" vbarPolicy="ALWAYS" hbarPolicy="NEVER" fitToWidth="true" fitToHeight="true">
             <VBox fx:id="groupsBox" id="groups-box" spacing="2" alignment="TOP_CENTER"/>
         </ScrollPane>
     </left>

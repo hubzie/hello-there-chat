@@ -12,12 +12,16 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import pl.hellothere.containers.socket.data.UserData;
 import pl.hellothere.containers.socket.data.converstions.Conversation;
+import pl.hellothere.containers.socket.data.converstions.ConversationDetails;
 import pl.hellothere.containers.socket.data.messages.Message;
 import pl.hellothere.containers.socket.data.messages.TextMessage;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class ClientViewApp extends Application {
@@ -29,9 +33,11 @@ public class ClientViewApp extends Application {
     private Consumer<Void> logoutAction;
     private Consumer<Date> loadMessagesAction;
     private Conversation curGroup = null;
-    private final HashMap<Conversation, GroupButton> ConvButtonMap = new HashMap<>();
+    private final HashMap<Conversation, GroupButton> convButtonMap = new HashMap<>();
     private boolean scrollMessagesToBottom = false;
     private Date lastLoadedMessageDate = null;
+    ConversationDetails conversationDetails = null;
+    private final HashMap<Integer, UserData> userIdDataMap = new HashMap<>();
 
     public void run() throws Exception { start(new Stage()); }
 
@@ -51,16 +57,27 @@ public class ClientViewApp extends Application {
 
     public Consumer<Date> getLoadMessagesAction() { return loadMessagesAction; }
 
+    public void setConversationDetails(ConversationDetails conversationDetails) {
+        this.conversationDetails = conversationDetails;
+
+        userIdDataMap.clear();
+        for(UserData i : conversationDetails.getUsers()) userIdDataMap.put(i.getID(), i);
+    }
+
     public void setScrollMessagesToBottom() { scrollMessagesToBottom = true; }
 
     public void changeGroup(Conversation curGroup) {
         cvac.messagesBox.getChildren().clear();
-        if(this.curGroup != null) ConvButtonMap.get(this.curGroup).getStyleClass().remove("selected-group-button");
-        ConvButtonMap.get(curGroup).getStyleClass().add("selected-group-button");
+        if(this.curGroup != null) convButtonMap.get(this.curGroup).getStyleClass().remove("selected-group-button");
+        convButtonMap.get(curGroup).getStyleClass().add("selected-group-button");
         this.curGroup = curGroup;
         groupAction.accept(curGroup.getID());
         cvac.messagesPane.setVvalue(1D);
         setScrollMessagesToBottom();
+
+        cvac.groupsBox.getChildren().removeIf(e -> (e instanceof GroupMember));
+        int ind = cvac.groupsBox.getChildren().indexOf(convButtonMap.get(curGroup));
+        for(UserData i : conversationDetails.getUsers()) cvac.groupsBox.getChildren().add(++ind, new GroupMember(i));
     }
 
     public void addTopMessage(Message m) throws UnknownMessageTypeException {
@@ -83,8 +100,8 @@ public class ClientViewApp extends Application {
     }
 
     public void addGroup(Conversation c) {
-        ConvButtonMap.put(c,new GroupButton(c));
-        cvac.groupsBox.getChildren().add(ConvButtonMap.get(c));
+        convButtonMap.put(c,new GroupButton(c));
+        cvac.groupsBox.getChildren().add(convButtonMap.get(c));
     }
 
     public void setUserID(int curUserID) { this.curUserID = curUserID; }
@@ -167,14 +184,18 @@ public class ClientViewApp extends Application {
                     {
                         setBottom( new Label() {
                             {
-                                setText(String.valueOf(m.getSenderID()));
+                                StringBuilder sb = new StringBuilder();
+                                Pattern patt = Pattern.compile("\\b[a-zA-Z0-9]");
+                                Matcher match = patt.matcher(userIdDataMap.get(m.getSenderID()).getName());
+                                while (match.find()) sb.append(match.group());
+                                setText(sb.toString());
+
                                 getStyleClass().add("message-sender");
                             }
                         });
                     }
                 });
             }
-
 
             getStyleClass().add("message-box");
             if(m.getSenderID() == curUserID)setAlignment(Pos.CENTER_RIGHT);
@@ -191,6 +212,18 @@ public class ClientViewApp extends Application {
             setMaxWidth(Double.MAX_VALUE);
             setText((conv.getName() == null) ? "Group" : conv.getName());
             setOnAction(e -> changeGroup(conv));
+        }
+    }
+
+    public class GroupMember extends Label {
+        UserData userData;
+
+        GroupMember(UserData userData) {
+            this.userData = userData;
+            setText(userData.getName());
+            getStyleClass().add("group-member");
+            setMaxWidth(Double.MAX_VALUE);
+            setAlignment(Pos.CENTER);
         }
     }
 

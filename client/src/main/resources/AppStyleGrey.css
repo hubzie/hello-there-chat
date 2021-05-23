@@ -69,7 +69,7 @@
     -fx-text-fill: -fx-primary-text;
     -fx-background-radius: 3 3 3 3;
     -fx-background-color: derived(-fx-primary, 80%);
-    -fx-border-insets: 3 8 3 8;
+    -fx-border-insets: 2 4 2 4;
 }
 
 .message-box {
@@ -166,9 +166,9 @@
 }
 
 .group-button {
-    -fx-text-fill: Black;
+    -fx-text-fill: -fx-primary-text;
     -fx-font-size: 13;
-    -fx-background-color: Transparent;
+    -fx-background-color: derive(-fx-primary-background, -20.0%);
     -fx-background-radius: 0;
     -fx-background-insets: 0 0 0 0;
     -fx-border-width: 10;
@@ -191,4 +191,13 @@
     -fx-background-color: derived(-fx-primary, 0%);
     -fx-border-color: derived(-fx-primary, 0%);
     -fx-text-fill: derived(-fx-primary-background, 100%);
+}
+
+.group-member {
+    -fx-text-fill: -fx-primary-text;
+    -fx-font-size: 13;
+    -fx-background-color: derive(-fx-primary-background, -10.0%);
+    -fx-background-radius: 0;
+    -fx-background-insets: 0 0 0 0;
+    -fx-border-color: Transparent;
 }
