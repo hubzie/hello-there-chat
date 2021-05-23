@@ -80,7 +80,7 @@ public class ClientViewApp extends Application {
 
         cvac.groupsBox.getChildren().removeIf(e -> (e instanceof GroupMember));
         int ind = cvac.groupsBox.getChildren().indexOf(convButtonMap.get(curGroup));
-        for(UserData i : conversationDetails.getUsers()) cvac.groupsBox.getChildren().add(++ind, new GroupMember(i));
+        for(UserData i : conversationDetails.getUsers()) if(i.getID() != curUserID) cvac.groupsBox.getChildren().add(++ind, new GroupMember(i));
     }
 
     public void addTopMessage(Message m) throws UnknownMessageTypeException {
@@ -216,12 +216,37 @@ public class ClientViewApp extends Application {
             this.conv = conv;
             getStyleClass().add("group-button");
             setMaxWidth(Double.MAX_VALUE);
-            setText((conv.getName() == null) ? "Group" : conv.getName());
             setOnAction(e -> changeGroup(conv));
+            if(conv.getName() == null && conversationDetails.getUsers().size() > 2) {
+                StringBuilder autoGroupName = new StringBuilder();
+                Pattern patt = Pattern.compile("\\b[a-zA-Z0-9]");
+
+                for(UserData i : conversationDetails.getUsers()) {
+                    if(i.getID() != curUserID) {
+                        Matcher match = patt.matcher(i.getName());
+                        while (match.find()) autoGroupName.append(match.group());
+                        autoGroupName.append(", ");
+                    }
+                }
+
+                autoGroupName.setLength(autoGroupName.length() - 2);
+
+                setText(autoGroupName.toString());
+            }
+            else if(conv.getName() == null && conversationDetails.getUsers().size() == 2) {
+                for(UserData i : conversationDetails.getUsers()) {
+                    if(i.getID() != curUserID) {
+                        setText(i.getName());
+                        break;
+                    }
+                }
+            }
+            else if(conv.getName() == null) setText("Empty Group");
+            else setText(conv.getName());
         }
     }
 
-    public class GroupMember extends Label {
+    public static class GroupMember extends Label {
         UserData userData;
 
         GroupMember(UserData userData) {

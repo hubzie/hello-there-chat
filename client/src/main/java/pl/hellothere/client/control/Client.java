@@ -151,8 +151,11 @@ public class Client extends Application {
             }));
 
             List<Conversation> list = connection.getConversationList();
-            for (Conversation c : list)
+            for (Conversation c : list) {
+                ClientViewController.getAppView().setConversationDetails(connection.changeConversation(c.getID()));
                 ClientViewController.getAppView().addGroup(c);
+            }
+
 
             if (!list.isEmpty())
                 ClientViewController.getAppView().changeGroup(list.get(0));
