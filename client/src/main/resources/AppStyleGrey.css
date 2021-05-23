@@ -33,6 +33,67 @@
     -fx-background-color: derive(-fx-primary-background, -5.0%);
 }
 
+#title-bar {
+    -fx-background-color: derive(-fx-primary-background, -5.0%);
+    -fx-font-size: 12;
+}
+
+#top-title {
+    -fx-font-family: "Lucida Console";
+    -fx-font-size: 15;
+}
+
+#close-button {
+    -fx-text-fill: -fx-primary-text;
+    -fx-background-color: Transparent;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0 0 0 0;
+    -fx-border-width: 0;
+    -fx-border-color: Transparent;
+}
+
+#close-button:hover {
+    -fx-background-color: derived(Red, 20.0%);
+}
+
+#close-button:pressed {
+    -fx-background-color: derived(Red, 50.0%);
+}
+
+#minimize-button {
+    -fx-text-fill: -fx-primary-text;
+    -fx-background-color: Transparent;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0 0 0 0;
+    -fx-border-width: 0;
+    -fx-border-color: Transparent;
+}
+
+#minimize-button:hover {
+    -fx-background-color: derive(-fx-primary-background, -15.0%);
+}
+
+#minimize-button:pressed {
+    -fx-background-color: derive(-fx-primary-background, -20.0%);
+}
+
+#logout-button {
+    -fx-text-fill: -fx-primary-text;
+    -fx-background-color: Transparent;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0 0 0 0;
+    -fx-border-width: 0;
+    -fx-border-color: Transparent;
+}
+
+#logout-button:hover {
+    -fx-background-color: derive(-fx-primary-background, -15.0%);
+}
+
+#logout-button:pressed {
+    -fx-background-color: derive(-fx-primary-background, -20.0%);
+}
+
 .box {
     -fx-background-color: -fx-primary-background;
     -fx-border-width: 0;

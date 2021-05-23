@@ -12,6 +12,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import pl.hellothere.containers.socket.data.UserData;
 import pl.hellothere.containers.socket.data.converstions.Conversation;
 import pl.hellothere.containers.socket.data.converstions.ConversationDetails;
@@ -42,6 +43,8 @@ public class ClientViewApp extends Application {
     public void run() throws Exception { start(new Stage()); }
 
     public void close() { primaryStage.close(); }
+
+    public void minimize() { primaryStage.setIconified(true); }
 
     public void setGroupAction(Consumer<Integer> groupAction) { this.groupAction = groupAction; }
 
@@ -110,6 +113,8 @@ public class ClientViewApp extends Application {
         this.cvac = cvac;
     }
 
+    Stage getPrimaryStage() { return primaryStage; }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
@@ -124,6 +129,7 @@ public class ClientViewApp extends Application {
         primaryStage.setTitle("Hello There");
         primaryStage.setScene(new Scene(root, 1000, 600));
         primaryStage.setResizable(false);
+        primaryStage.initStyle(StageStyle.UNDECORATED);
 
         cvac.messagesBox.heightProperty().addListener(observable -> {
             if(scrollMessagesToBottom) {

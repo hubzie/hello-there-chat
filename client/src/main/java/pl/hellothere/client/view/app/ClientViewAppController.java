@@ -11,8 +11,8 @@ public class ClientViewAppController {
     @FXML VBox messagesBox;
     @FXML TextField newMessageField;
     @FXML ScrollPane messagesPane;
-    public ScrollPane groupsPane;
-    public VBox groupsBox;
+    @FXML ScrollPane groupsPane;
+    @FXML VBox groupsBox;
 
     public ClientViewAppController() { ClientViewController.getAppView().setCvlc(this); }
 
@@ -24,7 +24,9 @@ public class ClientViewAppController {
         }
     }
 
-    @FXML private void handleLogoutButtonAction() {
-        ClientViewController.getAppView().getLogoutAction().accept(null);
-    }
+    @FXML private void handleLogoutButtonAction() { ClientViewController.getAppView().getLogoutAction().accept(null); }
+
+    @FXML private void handleCloseButtonAction() { ClientViewController.getAppView().close(); }
+
+    @FXML private void handleMinimizeButtonAction() { ClientViewController.getAppView().minimize(); }
 }

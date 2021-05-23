@@ -7,20 +7,36 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.geometry.Insets?>
+<?import pl.hellothere.client.view.app.*?>
+<?import javafx.scene.control.Label?>
 <BorderPane fx:controller="pl.hellothere.client.view.app.ClientViewAppController"
             xmlns:fx="http://javafx.com/fxml">
 
+    <top>
+        <TitleBar id="title-bar">
+            <center>
+                <Label id="top-title" text="Hello There">
+                    <TitleBar.margin> <Insets> <top>5</top> </Insets> </TitleBar.margin>
+                </Label>
+            </center>
+            <right>
+                <HBox>
+                    <Button id="logout-button" text="Logout" onAction="#handleLogoutButtonAction" minWidth="50"/>
+                    <Button id="minimize-button" text="_" onAction="#handleMinimizeButtonAction" minWidth="50"/>
+                    <Button id="close-button" text="x" onAction="#handleCloseButtonAction" minWidth="50"/>
+                </HBox>
+            </right>
+        </TitleBar>
+    </top>
+
     <center>
-        <ScrollPane fx:id="messagesPane" id="messages-pane" vbarPolicy="ALWAYS" hbarPolicy="NEVER" fitToWidth="true" fitToHeight="true">
+        <ScrollPane fx:id="messagesPane" id="messages-pane" vbarPolicy="ALWAYS" hbarPolicy="NEVER" fitToWidth="true">
             <VBox fx:id="messagesBox" id="messages-box" spacing="10" alignment="BOTTOM_CENTER"/>
         </ScrollPane>
     </center>
 
     <bottom>
         <HBox id="bottom-box" alignment="CENTER">
-            <Button text="Logout" onAction="#handleLogoutButtonAction">
-                <HBox.margin> <Insets> <top>5</top> <right>5</right> <bottom>5</bottom> <left>5</left> </Insets> </HBox.margin>
-            </Button>
             <TextField fx:id="newMessageField" promptText="Write New Message" HBox.hgrow="ALWAYS">
                 <HBox.margin> <Insets> <top>5</top> <bottom>5</bottom> <left>5</left> </Insets> </HBox.margin>
             </TextField>
