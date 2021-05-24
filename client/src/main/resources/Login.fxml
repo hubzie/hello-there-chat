@@ -6,38 +6,57 @@
 <?import javafx.scene.layout.HBox?>
 <?import java.net.URL?>
 
-<GridPane fx:controller="pl.hellothere.client.view.login.ClientViewLoginController"
-          xmlns:fx="http://javafx.com/fxml" alignment="center" hgap="10" vgap="10">
+<?import javafx.scene.layout.BorderPane?>
+<?import pl.hellothere.client.view.login.TitleBar?>
+<BorderPane fx:controller="pl.hellothere.client.view.login.ClientViewLoginController"
+            xmlns:fx="http://javafx.com/fxml">
+    <top>
+        <TitleBar id="title-bar">
+            <right>
+                <HBox>
+                    <Button id="minimize-button" text="_" onAction="#handleMinimizeButtonAction" minWidth="50"/>
+                    <Button id="close-button" text="x" onAction="#handleCloseButtonAction" minWidth="50"/>
+                </HBox>
+            </right>
+        </TitleBar>
+    </top>
 
-    <HBox alignment="center"
-          GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2">
-        <Label id="title" text="Hello There" />
-    </HBox>
+    <center>
+        <GridPane alignment="center" hgap="10" vgap="10">
 
-    <Label text="Login:"
-           GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+            <HBox alignment="center"
+                  GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2">
+                <Label id="title" text="Hello There" />
+            </HBox>
 
-    <TextField fx:id="loginField" promptText="Enter Login"
-            GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+            <Label text="Login:"
+                   GridPane.columnIndex="0" GridPane.rowIndex="2"/>
 
-    <Label text="Password:"
-           GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+            <TextField fx:id="loginField" promptText="Enter Login"
+                       GridPane.columnIndex="1" GridPane.rowIndex="2"/>
 
-    <PasswordField fx:id="passwordField" promptText="Enter Password"
-                   GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+            <Label text="Password:"
+                   GridPane.columnIndex="0" GridPane.rowIndex="3"/>
 
-    <HBox fx:id="resultPromptBox" spacing="10" alignment="center"
-          GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.columnSpan="2">
-    </HBox>
+            <PasswordField fx:id="passwordField" promptText="Enter Password"
+                           GridPane.columnIndex="1" GridPane.rowIndex="3"/>
 
-    <HBox spacing="10" alignment="center"
-          GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.columnSpan="2">
-        <Button text="Sign In"
-                onAction="#handleSignInButtonAction"/>
-    </HBox>
+            <HBox fx:id="resultPromptBox" spacing="10" alignment="center"
+                  GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.columnSpan="2">
+            </HBox>
+
+            <HBox spacing="10" alignment="center"
+                  GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.columnSpan="2">
+                <Button text="Sign In"
+                        onAction="#handleSignInButtonAction"/>
+            </HBox>
+
+        </GridPane>
+    </center>
 
     <stylesheets>
         <URL value="@LoginGrey.css" />
     </stylesheets>
 
-</GridPane>
+</BorderPane>
+

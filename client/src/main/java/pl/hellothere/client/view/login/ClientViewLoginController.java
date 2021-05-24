@@ -1,5 +1,6 @@
 package pl.hellothere.client.view.login;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -26,4 +27,8 @@ public class ClientViewLoginController {
             ClientViewController.showErrorMessage("Already logged in");
         }
     }
+
+    @FXML private void handleMinimizeButtonAction() { ClientViewController.getLoginView().minimize(); }
+
+    @FXML private void handleCloseButtonAction() { ClientViewController.getLoginView().close(); }
 }

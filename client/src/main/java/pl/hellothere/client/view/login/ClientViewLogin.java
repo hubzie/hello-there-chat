@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -21,6 +22,8 @@ public class ClientViewLogin extends Application {
     }
 
     public void close() { primaryStage.close(); }
+
+    public void minimize() { primaryStage.setIconified(true); }
 
     public void run() throws Exception { start(new Stage()); }
 
@@ -42,6 +45,8 @@ public class ClientViewLogin extends Application {
         this.cvlc = cvlc;
     }
 
+    Stage getPrimaryStage() { return primaryStage; }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         if(signInAction == null) throw new NoSignInActionException();
@@ -56,6 +61,7 @@ public class ClientViewLogin extends Application {
         primaryStage.setTitle("Hello There");
         primaryStage.setScene(new Scene(root, 300, 220));
         primaryStage.setResizable(false);
+        primaryStage.initStyle(StageStyle.UNDECORATED);
 
         primaryStage.show();
     }
