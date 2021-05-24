@@ -1,9 +1,9 @@
 package pl.hellothere.client.view.app;
 
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import pl.hellothere.client.view.controller.ClientViewController;
 
-public class TitleBar extends BorderPane {
+public class TitleBar extends StackPane {
     double startX = 0;
     double startY = 0;
 

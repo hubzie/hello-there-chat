@@ -14,18 +14,14 @@
 
     <top>
         <TitleBar id="title-bar">
-            <center>
-                <Label id="top-title" text="Hello There">
-                    <TitleBar.margin> <Insets> <top>5</top> </Insets> </TitleBar.margin>
-                </Label>
-            </center>
-            <right>
-                <HBox>
-                    <Button id="logout-button" text="Logout" onAction="#handleLogoutButtonAction" minWidth="50"/>
-                    <Button id="minimize-button" text="_" onAction="#handleMinimizeButtonAction" minWidth="50"/>
-                    <Button id="close-button" text="x" onAction="#handleCloseButtonAction" minWidth="50"/>
+            <HBox alignment="CENTER">
+                <Label id="top-title" text="Hello There"/>
+            </HBox>
+                <HBox alignment="CENTER_RIGHT">
+                    <Button id="logout-button" text="Logout" onAction="#handleLogoutButtonAction" minWidth="50" maxHeight="Infinity"/>
+                    <Button id="minimize-button" text="_" onAction="#handleMinimizeButtonAction" minWidth="50" maxHeight="Infinity"/>
+                    <Button id="close-button" text="x" onAction="#handleCloseButtonAction" minWidth="50" maxHeight="Infinity"/>
                 </HBox>
-            </right>
         </TitleBar>
     </top>
 
