@@ -160,6 +160,7 @@
 .button:pressed {
     -fx-background-color: derived(-fx-primary, 0%);
     -fx-border-color: derived(-fx-primary, 0%);
+    -fx-text-fill: derived(-fx-primary-background, 100%);
 }
 
 .text-field {
