@@ -70,18 +70,20 @@ public class ClientViewApp extends Application {
     public void setScrollMessagesToBottom() { scrollMessagesToBottom = true; }
 
     public void changeGroup(Conversation curGroup) {
-        cvac.messagesBox.getChildren().clear();
-        if(this.curGroup != null) convButtonMap.get(this.curGroup).getStyleClass().remove("selected-group-button");
-        convButtonMap.get(curGroup).getStyleClass().add("selected-group-button");
-        this.curGroup = curGroup;
-        groupAction.accept(curGroup.getID());
-        cvac.messagesPane.setVvalue(1D);
-        setScrollMessagesToBottom();
+        if(curGroup != this.curGroup) {
+            cvac.messagesBox.getChildren().clear();
+            if(this.curGroup != null) convButtonMap.get(this.curGroup).getStyleClass().remove("selected-group-button");
+            convButtonMap.get(curGroup).getStyleClass().add("selected-group-button");
+            this.curGroup = curGroup;
+            groupAction.accept(curGroup.getID());
+            cvac.messagesPane.setVvalue(1D);
+            setScrollMessagesToBottom();
 
-        cvac.groupsBox.getChildren().removeIf(e -> (e instanceof GroupMember));
-        if(curGroup.getName() != null || conversationDetails.getUsers().size() > 2) {
-            int ind = cvac.groupsBox.getChildren().indexOf(convButtonMap.get(curGroup));
-            for(UserData i : conversationDetails.getUsers()) if(i.getID() != curUserID) cvac.groupsBox.getChildren().add(++ind, new GroupMember(i));
+            cvac.groupsBox.getChildren().removeIf(e -> (e instanceof GroupMember));
+            if(curGroup.getName() != null || conversationDetails.getUsers().size() > 2) {
+                int ind = cvac.groupsBox.getChildren().indexOf(convButtonMap.get(curGroup));
+                for(UserData i : conversationDetails.getUsers()) if(i.getID() != curUserID) cvac.groupsBox.getChildren().add(++ind, new GroupMember(i));
+            }
         }
     }
 
