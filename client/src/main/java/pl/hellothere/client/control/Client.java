@@ -48,6 +48,12 @@ public class Client extends Application {
         }).start();
     }
 
+    void register(String name, String email, String login, String password) {
+        System.out.println(name);
+        System.out.println(email);
+        System.out.println(login);
+    }
+
     @Override
     public void start(Stage stage) {
         client = this;
@@ -60,6 +66,7 @@ public class Client extends Application {
         }
 
         ClientViewController.getLoginView().setSignInAction(this::signIn);
+        ClientViewController.getRegistrationView().setRegisterAction(this::register);
         try {
             ClientViewController.getLoginView().run();
         } catch (Exception e) {

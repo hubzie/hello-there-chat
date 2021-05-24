@@ -5,9 +5,10 @@
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.layout.HBox?>
 <?import java.net.URL?>
-
 <?import javafx.scene.layout.BorderPane?>
 <?import pl.hellothere.client.view.login.TitleBar?>
+<?import javafx.geometry.Insets?>
+
 <BorderPane fx:controller="pl.hellothere.client.view.login.ClientViewLoginController"
             xmlns:fx="http://javafx.com/fxml">
     <top>
@@ -22,9 +23,9 @@
     </top>
 
     <center>
-        <GridPane alignment="center" hgap="10" vgap="10">
+        <GridPane alignment="CENTER" hgap="10" vgap="10">
 
-            <HBox alignment="center"
+            <HBox alignment="CENTER"
                   GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2">
                 <Label id="title" text="Hello There" />
             </HBox>
@@ -41,14 +42,20 @@
             <PasswordField fx:id="passwordField" promptText="Enter Password"
                            GridPane.columnIndex="1" GridPane.rowIndex="3"/>
 
-            <HBox fx:id="resultPromptBox" spacing="10" alignment="center"
+            <HBox fx:id="resultPromptBox" spacing="10" alignment="CENTER"
                   GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.columnSpan="2">
             </HBox>
 
-            <HBox spacing="10" alignment="center"
-                  GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.columnSpan="2">
-                <Button text="Sign In"
-                        onAction="#handleSignInButtonAction"/>
+            <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.columnSpan="2">
+                <Button id="register-button" text="Register"
+                        onAction="#handleRegisterButtonAction"/>
+            </HBox>
+
+            <HBox spacing="10" alignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="5" GridPane.columnSpan="2">
+                <Button text="Sign In" GridPane.columnIndex="1" GridPane.rowIndex="5" GridPane.columnSpan="2"
+                        onAction="#handleSignInButtonAction">
+                    <HBox.margin> <Insets> <right>10</right> </Insets> </HBox.margin>
+                </Button>
             </HBox>
 
         </GridPane>

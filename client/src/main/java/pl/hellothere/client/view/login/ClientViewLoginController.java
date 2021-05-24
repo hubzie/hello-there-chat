@@ -1,6 +1,5 @@
 package pl.hellothere.client.view.login;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -31,4 +30,16 @@ public class ClientViewLoginController {
     @FXML private void handleMinimizeButtonAction() { ClientViewController.getLoginView().minimize(); }
 
     @FXML private void handleCloseButtonAction() { ClientViewController.getLoginView().close(); }
+
+    @FXML private void handleRegisterButtonAction() {
+        try {
+            ClientViewController.getRegistrationView().run();
+            ClientViewController.getRegistrationView().setLogin(loginField.getText());
+            ClientViewController.getRegistrationView().setPassword(passwordField.getText());
+            ClientViewController.getLoginView().close();
+        } catch (Exception e) {
+            ClientViewController.showErrorMessage("View Error");
+            e.printStackTrace();
+        }
+    }
 }
