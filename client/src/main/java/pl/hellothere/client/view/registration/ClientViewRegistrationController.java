@@ -24,6 +24,8 @@ public class ClientViewRegistrationController {
 
     public void handleMinimizeButtonAction() { ClientViewController.getRegistrationView().minimize(); }
 
+    public void clearResultPrompt() { resultPromptBox.getChildren().clear(); }
+
     public void handleCloseButtonAction() {
         try {
             ClientViewController.getLoginView().run();

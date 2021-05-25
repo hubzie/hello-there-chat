@@ -29,6 +29,8 @@ public class ClientViewRegistration extends Application {
 
     public void setPassword(String s) { cvrc.setPasswordField(s); }
 
+    public void clearResultPrompt() { cvrc.clearResultPrompt(); }
+
     void setCvrc(ClientViewRegistrationController cvrc) {
         this.cvrc = cvrc;
     }
