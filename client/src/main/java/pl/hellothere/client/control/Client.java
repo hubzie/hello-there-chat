@@ -49,9 +49,32 @@ public class Client extends Application {
     }
 
     void register(String name, String email, String login, String password) {
-        System.out.println(name);
-        System.out.println(email);
-        System.out.println(login);
+        try {
+            switch (connection.register(name, login, email, password)) {
+                case OK:
+                    Platform.runLater(() -> {
+                        ClientViewController.getRegistrationView().close();
+                        try {
+                            ClientViewController.getLoginView().run();
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                    break;
+                case LOGIN_ALREADY_USED:
+                    ClientViewController.getRegistrationView().clearResultPrompt();
+                    ClientViewController.showErrorMessage("Podany login jest już użyty");
+                    break;
+                case EMAIL_ALREADY_USED:
+                    ClientViewController.getRegistrationView().clearResultPrompt();
+                    ClientViewController.showErrorMessage("Podany email jest już użyty");
+                    break;
+            }
+        } catch (CommunicationException e) {
+            e.printStackTrace();
+            ClientViewController.getRegistrationView().close();
+            ClientViewController.showErrorMessage("No connection");
+        }
     }
 
     @Override

@@ -1,3 +1,6 @@
+select setval('user_id', 4);
+select setval('conversation_id', 3);
+
 insert into users values (1, 'Obi-Wan Kenobi', 'obiwan', 'obiwan@jedi.org', decode('86f6dd6a13336803807e59563860f2dae0b683646de45ce87165d65053ec0c79', 'hex'), decode('baf43f0c7876e669398b09d6051c4877', 'hex'), true, null); -- password = 'password'
 insert into users values (2, 'Chancellor Palpatine', 'sith', 'senat@gov.org', decode('2ef9fa00636f4ac3e3a55b4b60c4ace01b8ce5d19504d88cc73537eba0d19f4a', 'hex'), decode('5fcf65256dfb18f364392e1ff410065d', 'hex'), true, null); -- password = 'abc123'
 insert into users values (3, 'Anakin Skywalker', 'asky', 'asky@jedi.org', decode('9ab2c7546e46676c7a62ba4ea45d2f80ca4ed7b0d03139c805091ce1304aea98', 'hex'), decode('c2eaf428d182a1f89e1d09635c0d9a48', 'hex'), true, null); -- password = 'password123'

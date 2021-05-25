@@ -2,6 +2,8 @@ package pl.hellothere.client.network;
 
 import pl.hellothere.containers.socket.authorization.AuthorizationRequest;
 import pl.hellothere.containers.socket.authorization.AuthorizationResult;
+import pl.hellothere.containers.socket.authorization.RegistrationRequest;
+import pl.hellothere.containers.socket.authorization.RegistrationResult;
 import pl.hellothere.containers.socket.connection.SecurityData;
 import pl.hellothere.containers.socket.connection.commands.Command;
 import pl.hellothere.containers.socket.connection.requests.ChangeConversationRequest;
@@ -48,6 +50,13 @@ public class ServerClient {
             e.printStackTrace();
             throw new ConnectionError(e);
         }
+    }
+
+    public RegistrationResult.Code register(String name, String login, String email, String password) throws CommunicationException {
+        RegistrationResult res = communicator.sendAndRead(new RegistrationRequest(name, login, email, encryptor.encrypt(password)));
+        if (res.getCode().equals(RegistrationResult.Code.SERVER_ERROR))
+            throw new CommunicationException();
+        return res.getCode();
     }
 
     public boolean signIn(String login, String password) throws ConnectionError {

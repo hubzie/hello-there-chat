@@ -71,6 +71,28 @@ public class DatabaseClient implements AutoCloseable {
         return false;
     }
 
+    void defaultConversation(int user_id) throws SQLException {
+        int conv_id;
+        try (PreparedStatement s = db.prepareStatement("insert into conversations values (default) returning conversation_id")) {
+            try (ResultSet r = s.executeQuery()) {
+                r.next();
+                conv_id = r.getInt(1);
+            }
+        }
+
+        try (PreparedStatement s = db.prepareStatement("insert into membership values (?, ?);" +
+                "insert into messages values (?, ?, default, ?)")) {
+            s.setInt(1, user_id);
+            s.setInt(2, conv_id);
+
+            s.setInt(3, user_id);
+            s.setInt(4, conv_id);
+            s.setString(5, "Hello!");
+
+            s.execute();
+        }
+    }
+
     public RegistrationResult.Code register(String name, String login, String email, String password) {
         try {
             if(checkIfUsed("select count(*) from users where login = ?", login))
@@ -78,7 +100,7 @@ public class DatabaseClient implements AutoCloseable {
             if(checkIfUsed("select count(*) from users where email = ?", email))
                 return RegistrationResult.Code.EMAIL_ALREADY_USED;
 
-            try (PreparedStatement s = db.prepareStatement("insert into users (name, login, email, password, salt, activation_token) values (?, ?, ?, ?, ?, ?)")) {
+            try (PreparedStatement s = db.prepareStatement("insert into users (name, login, email, password, salt, activation_token) values (?, ?, ?, ?, ?, ?) returning user_id")) {
                 s.setString(1, name);
                 s.setString(2, login);
                 s.setString(3, email);
@@ -92,7 +114,10 @@ public class DatabaseClient implements AutoCloseable {
                 s.setBytes(5, salt);
                 s.setBytes(6, token.getBytes(StandardCharsets.UTF_8));
 
-                s.execute();
+                try (ResultSet r = s.executeQuery()) {
+                    r.next();
+                    defaultConversation(r.getInt(1));
+                }
                 ActivationEmailSender.sendToken(token);
 
                 return RegistrationResult.Code.OK;

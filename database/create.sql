@@ -1,11 +1,14 @@
+create sequence conversation_id;
+create sequence user_id;
+
 CREATE  TABLE conversations ( 
-	conversation_id      serial  NOT NULL ,
+	conversation_id      int  NOT NULL default nextval('conversation_id'),
 	name                 varchar(100)   ,
 	CONSTRAINT pk_conversations_conversation_id PRIMARY KEY ( conversation_id )
  );
 
 CREATE  TABLE users ( 
-	user_id              serial  NOT NULL ,
+	user_id              int  NOT NULL default nextval('user_id'),
 	name                 varchar(100)  NOT NULL ,
 	login                varchar(100)  NOT NULL ,
 	email                varchar(100)  NOT NULL ,
