@@ -53,7 +53,14 @@ public class ClientHandler extends Thread {
     }
 
     public void register(RegistrationRequest req) {
-        communicator.send(new RegistrationResult(db.register(req.getName(), req.getLogin(), req.getEmail(), encryptor.decrypt(req.getPassword()))));
+        RegistrationResult res = null;
+        try {
+            res = new RegistrationResult(db.register(req.getName(), req.getLogin(), req.getEmail(), encryptor.decrypt(req.getPassword())));
+        } catch (Exception e) {
+            res = new RegistrationResult(RegistrationResult.Code.SERVER_ERROR);
+        }
+
+        communicator.send(res);
     }
 
     public boolean authenticate() throws ConnectionError {
@@ -62,6 +69,9 @@ public class ClientHandler extends Thread {
 
             if (pkg.equals(Command.CloseConnection)) {
                 close();
+                return false;
+            } else if (pkg instanceof RegistrationRequest) {
+                register((RegistrationRequest) pkg);
                 return false;
             } else if (pkg instanceof AuthorizationRequest) {
                 AuthorizationRequest ar = (AuthorizationRequest) pkg;
