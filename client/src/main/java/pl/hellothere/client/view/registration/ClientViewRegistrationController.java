@@ -24,7 +24,15 @@ public class ClientViewRegistrationController {
 
     public void handleMinimizeButtonAction() { ClientViewController.getRegistrationView().minimize(); }
 
-    public void handleCloseButtonAction() { ClientViewController.getRegistrationView().close(); }
+    public void handleCloseButtonAction() {
+        try {
+            ClientViewController.getLoginView().run();
+        } catch (Exception e) {
+            ClientViewController.showErrorMessage("Login Error");
+            e.printStackTrace();
+        }
+        ClientViewController.getRegistrationView().close();
+    }
 
     public void handleRegisterButtonAction() {
         resultPromptBox.getChildren().clear();
