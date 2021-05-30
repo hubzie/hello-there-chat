@@ -53,6 +53,7 @@ public class Client extends Application {
             switch (connection.register(name, login, email, password)) {
                 case OK:
                     Platform.runLater(() -> {
+                        ClientViewController.showErrorMessage("Konto zostało założone i oczekuje na aktywację");
                         ClientViewController.getRegistrationView().close();
                         try {
                             ClientViewController.getLoginView().run();

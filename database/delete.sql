@@ -1,7 +1,7 @@
-DROP SEQUENCE user_id;
-DROP SEQUENCE conversation_id;
+DROP TABLE IF EXISTS messages;
+DROP TABLE IF EXISTS membership;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS conversations;
 
-DROP TABLE messages;
-DROP TABLE membership;
-DROP TABLE users;
-DROP TABLE conversations;
+DROP SEQUENCE IF EXISTS user_id;
+DROP SEQUENCE IF EXISTS conversation_id;

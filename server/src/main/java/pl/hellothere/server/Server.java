@@ -37,6 +37,9 @@ public class Server {
                         BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                         String request = reader.readLine();
 
+                        if (request == null)
+                            continue;
+
                         if(request.equals("startMainApp")) {
                             ClientHandler client = new ClientHandler(db, socket);
                             client.start();
