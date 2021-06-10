@@ -5,7 +5,6 @@ import pl.hellothere.server.database.DatabaseClient;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Arrays;
 
 public class AccountActivator extends Thread {
     private final DatabaseClient db;

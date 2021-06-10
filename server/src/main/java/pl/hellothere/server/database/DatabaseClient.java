@@ -6,6 +6,7 @@ import pl.hellothere.containers.socket.data.converstions.Conversation;
 import pl.hellothere.containers.socket.data.converstions.ConversationDetails;
 import pl.hellothere.containers.socket.data.messages.*;
 import pl.hellothere.server.activator.ActivationEmailSender;
+import pl.hellothere.server.activator.EmailActivatorException;
 import pl.hellothere.server.listener.ListenerManager;
 
 import java.nio.charset.StandardCharsets;
@@ -19,12 +20,14 @@ import java.util.UUID;
 public class DatabaseClient implements AutoCloseable {
     private final Connection db;
     private final ListenerManager listenerManager = new ListenerManager();
+    private final ActivationEmailSender emailSender;
 
     public DatabaseClient(String db_address, String db_login, String db_password) throws DatabaseInitializationException {
         try {
             Class.forName("org.postgresql.Driver");
             db = DriverManager.getConnection(db_address, db_login, db_password);
-        } catch (SQLException | ClassNotFoundException e) {
+            emailSender = new ActivationEmailSender();
+        } catch (SQLException | ClassNotFoundException | EmailActivatorException e) {
             throw new DatabaseInitializationException(e);
         }
     }
@@ -118,11 +121,11 @@ public class DatabaseClient implements AutoCloseable {
                     r.next();
                     defaultConversation(r.getInt(1));
                 }
-                ActivationEmailSender.sendToken(token);
+                emailSender.sendToken(email, token);
 
                 return RegistrationResult.Code.OK;
             }
-        } catch (SQLException | PasswordHasher.HasherException e) {
+        } catch (SQLException | PasswordHasher.HasherException | EmailActivatorException e) {
             e.printStackTrace();
             return RegistrationResult.Code.SERVER_ERROR;
         }
