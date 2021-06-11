@@ -55,7 +55,10 @@ public class ClientViewApp extends Application {
         stickerStage.close();
     }
 
-    public void minimize() { primaryStage.setIconified(true); }
+    public void minimize() {
+        primaryStage.setIconified(true);
+        stickerStage.hide();
+    }
 
     public void setGroupAction(Consumer<Integer> groupAction) { this.groupAction = groupAction; }
 
