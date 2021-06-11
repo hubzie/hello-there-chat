@@ -202,7 +202,12 @@ public class DatabaseClient implements AutoCloseable {
             try (ResultSet r = s.executeQuery()) {
                 List<Message> list = new LinkedList<>();
                 while(r.next())
-                    list.add(new TextMessage(r.getInt("user_id"), r.getTimestamp("send_time"), r.getString("content")));
+                    list.add(Message.createMessage(
+                            r.getInt("user_id"),
+                            r.getTimestamp("send_time"),
+                            r.getString("content"),
+                            r.getString("type")
+                    ));
                 return list;
             }
         } catch (SQLException e) {
@@ -251,30 +256,20 @@ public class DatabaseClient implements AutoCloseable {
                 getConversationMembers(conv_id));
     }
 
-    Date sendMessage(TextMessage msg, int user, int conv) throws DatabaseException {
-        try (PreparedStatement s = db.prepareStatement("insert into messages values (?, ?, now(), ?) returning now()")) {
+    public void sendMessage(Message msg, int user, int conv) throws DatabaseException {
+        try (PreparedStatement s = db.prepareStatement("insert into messages values (?, ?, now(), ?, ?) returning now()")) {
             s.setInt(1, user);
             s.setInt(2, conv);
             s.setString(3, msg.getContent());
+            s.setString(4, msg.getType());
 
             ResultSet r = s.executeQuery();
             r.next();
-            return r.getTimestamp(1);
+            msg.fill(user, r.getTimestamp(1));
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DatabaseException(e);
         }
-    }
-
-    public void sendMessage(Message msg, int user, int conv) throws DatabaseException {
-        Date sendTime;
-        if(msg instanceof TextMessage)
-            sendTime = sendMessage((TextMessage) msg, user, conv);
-        else
-            throw new InvalidDataException("Unsupported message type");
-
-        msg.fill(user, sendTime);
-        listenerManager.sendUpdate(conv, msg);
     }
 
     static public class DatabaseException extends Exception {
