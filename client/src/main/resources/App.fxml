@@ -33,11 +33,14 @@
 
     <bottom>
         <HBox id="bottom-box" alignment="CENTER">
-            <TextField fx:id="newMessageField" promptText="Write New Message" HBox.hgrow="ALWAYS">
+            <Button text="Stickers" onAction="#handleStickerButtonAction">
                 <HBox.margin> <Insets> <top>5</top> <bottom>5</bottom> <left>5</left> </Insets> </HBox.margin>
+            </Button>
+            <TextField fx:id="newMessageField" promptText="Write New Message" HBox.hgrow="ALWAYS">
+                <HBox.margin> <Insets> <top>5</top> <right>5</right> <bottom>5</bottom> <left>5</left> </Insets> </HBox.margin>
             </TextField>
             <Button text="Send" onAction="#handleSendButtonAction">
-                <HBox.margin> <Insets> <top>5</top> <right>5</right> <bottom>5</bottom> <left>5</left> </Insets> </HBox.margin>
+                <HBox.margin> <Insets> <top>5</top> <right>5</right> <bottom>5</bottom> </Insets> </HBox.margin>
             </Button>
         </HBox>
     </bottom>

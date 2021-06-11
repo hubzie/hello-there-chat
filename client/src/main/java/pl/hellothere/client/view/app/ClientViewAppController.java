@@ -7,7 +7,6 @@ import javafx.scene.layout.VBox;
 import pl.hellothere.client.view.controller.ClientViewController;
 import pl.hellothere.containers.socket.data.messages.Message;
 import pl.hellothere.containers.socket.data.messages.MessageType;
-import pl.hellothere.containers.socket.data.messages.TextMessage;
 
 public class ClientViewAppController {
     @FXML VBox messagesBox;
@@ -16,7 +15,7 @@ public class ClientViewAppController {
     @FXML ScrollPane groupsPane;
     @FXML VBox groupsBox;
 
-    public ClientViewAppController() { ClientViewController.getAppView().setCvlc(this); }
+    public ClientViewAppController() { ClientViewController.getAppView().setCvac(this); }
 
     @FXML private void handleSendButtonAction() {
         if(!newMessageField.getText().equals("")) {
@@ -31,4 +30,9 @@ public class ClientViewAppController {
     @FXML private void handleCloseButtonAction() { ClientViewController.getAppView().close(); }
 
     @FXML private void handleMinimizeButtonAction() { ClientViewController.getAppView().minimize(); }
+
+    public void handleStickerButtonAction() {
+        if(!ClientViewController.getAppView().getStickerStage().isShowing()) ClientViewController.getAppView().showStickerSelect();
+        else ClientViewController.getAppView().hideStickerSelect();
+    }
 }

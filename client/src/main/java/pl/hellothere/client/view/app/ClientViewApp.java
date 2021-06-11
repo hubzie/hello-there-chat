@@ -8,7 +8,10 @@ import javafx.geometry.Pos;
 import javafx.scene.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -17,8 +20,11 @@ import pl.hellothere.containers.socket.data.UserData;
 import pl.hellothere.containers.socket.data.converstions.Conversation;
 import pl.hellothere.containers.socket.data.converstions.ConversationDetails;
 import pl.hellothere.containers.socket.data.messages.Message;
+import pl.hellothere.containers.socket.data.messages.MessageType;
+import pl.hellothere.containers.socket.data.messages.StickerMessage;
 import pl.hellothere.containers.socket.data.messages.TextMessage;
 
+import java.io.File;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -39,10 +45,14 @@ public class ClientViewApp extends Application {
     private Date lastLoadedMessageDate = null;
     ConversationDetails conversationDetails = null;
     private final HashMap<Integer, UserData> userIdDataMap = new HashMap<>();
+    private final Stage stickerStage = new Stage();
 
     public void run() throws Exception { start(new Stage()); }
 
-    public void close() { primaryStage.close(); }
+    public void close() {
+        primaryStage.close();
+        stickerStage.close();
+    }
 
     public void minimize() { primaryStage.setIconified(true); }
 
@@ -88,7 +98,7 @@ public class ClientViewApp extends Application {
     }
 
     public void addTopMessage(Message m) throws UnknownMessageTypeException {
-        if(m instanceof TextMessage) {
+        if(m instanceof TextMessage || m instanceof StickerMessage) {
             cvac.messagesBox.getChildren().add( 0, new TextMessageBox(m) );
             lastLoadedMessageDate = m.getSendTime();
         }
@@ -98,7 +108,7 @@ public class ClientViewApp extends Application {
     }
 
     public void addBottomMessage(Message m) throws UnknownMessageTypeException {
-        if(m instanceof TextMessage) {
+        if(m instanceof TextMessage || m instanceof StickerMessage) {
             cvac.messagesBox.getChildren().add( new TextMessageBox(m) );
         }
         else {
@@ -113,11 +123,23 @@ public class ClientViewApp extends Application {
 
     public void setUserID(int curUserID) { this.curUserID = curUserID; }
 
-    void setCvlc(ClientViewAppController cvac) {
+    void setCvac(ClientViewAppController cvac) {
         this.cvac = cvac;
     }
 
     Stage getPrimaryStage() { return primaryStage; }
+
+    Stage getStickerStage() { return stickerStage; }
+
+    void showStickerSelect() {
+        stickerStage.setX(primaryStage.getX());
+        stickerStage.setY(primaryStage.getY() + primaryStage.getHeight());
+        stickerStage.show();
+    }
+
+    void hideStickerSelect() {
+        stickerStage.hide();
+    }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -154,18 +176,34 @@ public class ClientViewApp extends Application {
         });
 
         primaryStage.show();
-    }
 
-    public static void main(String[] args) {
-        launch(args);
+
+        stickerStage.initStyle(StageStyle.UNDECORATED);
+        FlowPane stickerPane = new FlowPane();
+        stickerStage.setScene(new Scene(stickerPane, 250, 250));
+        for (File curFile : Objects.requireNonNull(new File("src/main/resources/stickers").listFiles())) {
+            if(curFile.isFile()) stickerPane.getChildren().add(new StickerButton(curFile.getName()));
+        }
     }
 
     public class TextMessageBox extends HBox {
         TextMessageBox(Message m) {
             getChildren().add(new Label() {
                 {
-                    setText( ((TextMessage) m).getContent() );
-                    setWrapText(true);
+                    if(m instanceof TextMessage) {
+                        setText( m.getContent() );
+                        setWrapText(true);
+                    }
+
+                    if(m instanceof StickerMessage) {
+                        Image img = new Image("stickers/"+m.getContent());
+                        ImageView imgView = new ImageView(img);
+                        imgView.setPreserveRatio(true);
+                        imgView.setFitHeight(200);
+                        imgView.setFitWidth(200);
+                        setGraphic(imgView);
+                    }
+
                     setMinHeight(45);
                     setMaxWidth(500);
                     if(m.getSenderID() == curUserID) getStyleClass().add("my-message");
@@ -259,6 +297,26 @@ public class ClientViewApp extends Application {
             getStyleClass().add("group-member");
             setMaxWidth(Double.MAX_VALUE);
             setAlignment(Pos.CENTER);
+        }
+    }
+
+    public class StickerButton extends Button {
+        String stickerName;
+
+        StickerButton(String stickerName) {
+            this.stickerName = stickerName;
+            Image img = new Image("stickers/"+stickerName);
+            ImageView imgView = new ImageView(img);
+            imgView.setPreserveRatio(true);
+            imgView.setFitHeight(50);
+            imgView.setFitWidth(50);
+            setGraphic(imgView);
+
+            setOnAction(e -> {
+                System.out.println(stickerName);
+                sendAction.accept(Message.createMessage(stickerName, MessageType.Sticker));
+                setScrollMessagesToBottom();
+            });
         }
     }
 

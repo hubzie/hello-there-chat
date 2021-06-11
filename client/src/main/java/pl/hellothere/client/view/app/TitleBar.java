@@ -16,6 +16,8 @@ public class TitleBar extends StackPane {
         setOnMouseDragged(event -> {
             ClientViewController.getAppView().getPrimaryStage().setX(event.getScreenX() - startX);
             ClientViewController.getAppView().getPrimaryStage().setY(event.getScreenY() - startY);
+            ClientViewController.getAppView().getStickerStage().setX(event.getScreenX() - startX);
+            ClientViewController.getAppView().getStickerStage().setY(event.getScreenY() - startY + ClientViewController.getAppView().getPrimaryStage().getHeight());
         });
     }
 }
