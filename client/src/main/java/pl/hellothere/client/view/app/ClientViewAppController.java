@@ -6,6 +6,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import pl.hellothere.client.view.controller.ClientViewController;
 import pl.hellothere.containers.socket.data.messages.Message;
+import pl.hellothere.containers.socket.data.messages.MessageType;
 import pl.hellothere.containers.socket.data.messages.TextMessage;
 
 public class ClientViewAppController {
@@ -19,7 +20,7 @@ public class ClientViewAppController {
 
     @FXML private void handleSendButtonAction() {
         if(!newMessageField.getText().equals("")) {
-            ClientViewController.getAppView().getSendAction().accept(Message.createMessage(newMessageField.getText(), TextMessage.TYPE));
+            ClientViewController.getAppView().getSendAction().accept(Message.createMessage(newMessageField.getText(), MessageType.Text));
             newMessageField.clear();
             ClientViewController.getAppView().setScrollMessagesToBottom();
         }

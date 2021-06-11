@@ -206,7 +206,7 @@ public class DatabaseClient implements AutoCloseable {
                             r.getInt("user_id"),
                             r.getTimestamp("send_time"),
                             r.getString("content"),
-                            r.getString("type")
+                            MessageType.fromString(r.getString("type"))
                     ));
                 return list;
             }
@@ -261,7 +261,7 @@ public class DatabaseClient implements AutoCloseable {
             s.setInt(1, user);
             s.setInt(2, conv);
             s.setString(3, msg.getContent());
-            s.setString(4, msg.getType());
+            s.setString(4, msg.getType().toString());
 
             ResultSet r = s.executeQuery();
             r.next();
