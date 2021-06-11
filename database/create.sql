@@ -32,7 +32,8 @@ CREATE  TABLE messages (
 	user_id              integer  NOT NULL ,
 	conversation_id      integer  NOT NULL ,
 	send_time            timestamp DEFAULT current_timestamp NOT NULL ,
-	content              text  NOT NULL 
+	content              text  NOT NULL ,
+	type                 char(1) NOT NULL
  );
 
 ALTER TABLE membership ADD CONSTRAINT fk_membership_users FOREIGN KEY ( user_id ) REFERENCES users( user_id );
