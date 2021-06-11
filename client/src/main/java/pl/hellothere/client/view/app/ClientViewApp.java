@@ -25,6 +25,7 @@ import pl.hellothere.containers.socket.data.messages.StickerMessage;
 import pl.hellothere.containers.socket.data.messages.TextMessage;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -182,7 +183,9 @@ public class ClientViewApp extends Application {
         FlowPane stickerPane = new FlowPane();
         stickerStage.setScene(new Scene(stickerPane, 250, 250));
         for (File curFile : Objects.requireNonNull(new File("src/main/resources/stickers").listFiles())) {
-            if(curFile.isFile()) stickerPane.getChildren().add(new StickerButton(curFile.getName()));
+            String mimetype = Files.probeContentType(curFile.toPath());
+            if(curFile.isFile() && mimetype != null && mimetype.split("/")[0].equals("image"))
+                stickerPane.getChildren().add(new StickerButton(curFile.getName()));
         }
     }
 
@@ -313,7 +316,7 @@ public class ClientViewApp extends Application {
             setGraphic(imgView);
 
             setOnAction(e -> {
-                System.out.println(stickerName);
+                // System.out.println(stickerName);
                 sendAction.accept(Message.createMessage(stickerName, MessageType.Sticker));
                 setScrollMessagesToBottom();
             });

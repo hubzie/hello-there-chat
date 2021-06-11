@@ -266,6 +266,7 @@ public class DatabaseClient implements AutoCloseable {
             ResultSet r = s.executeQuery();
             r.next();
             msg.fill(user, r.getTimestamp(1));
+            listenerManager.sendUpdate(conv, msg);
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DatabaseException(e);
