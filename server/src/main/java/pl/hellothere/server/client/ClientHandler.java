@@ -13,17 +13,17 @@ import pl.hellothere.containers.socket.data.converstions.AddableUsersList;
 import pl.hellothere.containers.socket.data.converstions.ConversationList;
 import pl.hellothere.containers.socket.data.messages.Message;
 import pl.hellothere.containers.socket.data.messages.MessageList;
+import pl.hellothere.containers.socket.data.notifications.ErrorNotification;
 import pl.hellothere.containers.socket.data.notifications.MessageNotification;
 import pl.hellothere.containers.socket.data.notifications.StopNotification;
 import pl.hellothere.server.database.DatabaseClient;
 import pl.hellothere.server.database.exceptions.DatabaseAuthenticationException;
 import pl.hellothere.server.database.exceptions.DatabaseException;
-import pl.hellothere.server.database.exceptions.DatabaseSQLException;
+import pl.hellothere.server.database.exceptions.DatabaseUpdateException;
 import pl.hellothere.tools.*;
 
 import java.io.*;
 import java.net.Socket;
-import java.sql.SQLException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -200,8 +200,8 @@ public class ClientHandler extends Thread {
                     if (pkg instanceof Request) handleRequest((Request) pkg);
                     else if (pkg instanceof Command) handleCommand((Command) pkg);
                     else throw new ClassNotFoundException();
-                } catch (DatabaseSQLException e) {
-                    e.printStackTrace();
+                } catch (DatabaseUpdateException e) {
+                    communicator.send(new ErrorNotification(e.getMessage()));
                 }
             }
 

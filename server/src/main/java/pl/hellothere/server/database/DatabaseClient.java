@@ -259,7 +259,7 @@ public class DatabaseClient implements AutoCloseable {
             try (ResultSet r = s.executeQuery()) {
                 r.next();
                 if(r.getInt(1) != 1)
-                    throw new DatabaseSQLException("Wystąpił błąd");
+                    throw new DatabaseUpdateException("Wystąpił błąd");
             }
         } catch (SQLException e) {
             throw new DatabaseException(e);
@@ -289,7 +289,7 @@ public class DatabaseClient implements AutoCloseable {
             s.setInt(1, conv_id);
             s.setInt(2, user_id);
             if(s.executeUpdate() != 1)
-                throw new DatabaseSQLException("Nie można usunąć użytkownika");
+                throw new DatabaseUpdateException("Nie można usunąć użytkownika");
         } catch (SQLException e) {
             throw DatabaseException.convert(e,null,null);
         }

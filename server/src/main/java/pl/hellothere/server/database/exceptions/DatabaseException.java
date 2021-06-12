@@ -9,9 +9,9 @@ public class DatabaseException extends Exception {
 
     public static DatabaseException convert(SQLException e, String foreign, String unique) {
         if (e.getSQLState().equals("23503")) // FOREIGN KEY
-            return new DatabaseSQLException(foreign);
+            return new DatabaseUpdateException(foreign);
         else if (e.getSQLState().equals("23505")) // UNIQUE KEY
-            return new DatabaseSQLException(unique);
+            return new DatabaseUpdateException(unique);
         else
             return new DatabaseException(e);
     }

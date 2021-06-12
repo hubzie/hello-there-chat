@@ -1,6 +1,7 @@
 package pl.hellothere.client.network;
 
 import pl.hellothere.containers.SocketPackage;
+import pl.hellothere.containers.socket.data.notifications.ErrorNotification;
 import pl.hellothere.containers.socket.data.notifications.Notification;
 import pl.hellothere.containers.socket.data.notifications.StopNotification;
 import pl.hellothere.tools.CommunicationException;
@@ -46,6 +47,7 @@ public class ClientCommunicator extends Communicator {
                         SocketPackage n = read();
                         if (n instanceof StopNotification)
                             mode = Mode.STOP;
+                        else if (n instanceof ErrorNotification); // TODO
                         else if (n instanceof Notification) {
                             if (handler != null)
                                 handler.handle((Notification) n);
