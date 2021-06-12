@@ -7,6 +7,7 @@ import pl.hellothere.containers.socket.data.converstions.ConversationDetails;
 import pl.hellothere.containers.socket.data.messages.*;
 import pl.hellothere.server.activator.ActivationEmailSender;
 import pl.hellothere.server.activator.EmailActivatorException;
+import pl.hellothere.server.database.exceptions.*;
 import pl.hellothere.server.listener.ListenerManager;
 
 import java.nio.charset.StandardCharsets;
@@ -46,7 +47,7 @@ public class DatabaseClient implements AutoCloseable {
         }
     }
 
-    byte[] getEncodedPassword(String login, String password) throws DatabaseException {
+    byte[] getEncodedPassword(String login, String password) throws DatabaseException, DatabaseAuthenticationException {
         try (PreparedStatement s = db.prepareStatement("select salt from users where active = true and login = ?")) {
             s.setString(1, login);
 
@@ -55,12 +56,12 @@ public class DatabaseClient implements AutoCloseable {
                     throw new DatabaseAuthenticationException();
                 return PasswordHasher.encode(password, r.getBytes(1));
             }
-        } catch (SQLException | PasswordHasher.HasherException e) {
-            throw new DatabaseException(e);
+        } catch (SQLException e) {
+            throw DatabaseException.convert(e,null,null);
         }
     }
 
-    boolean checkIfUsed(String query, String data) throws SQLException {
+    boolean checkIfUsed(String query, String data) throws DatabaseException {
         try (PreparedStatement s = db.prepareStatement(query)) {
             s.setString(1, data);
 
@@ -69,31 +70,11 @@ public class DatabaseClient implements AutoCloseable {
                 if (r.getInt(1) != 0)
                     return true;
             }
+        } catch (SQLException e) {
+            throw DatabaseException.convert(e,null,null);
         }
 
         return false;
-    }
-
-    void defaultConversation(int user_id) throws SQLException {
-        int conv_id;
-        try (PreparedStatement s = db.prepareStatement("insert into conversations values (default) returning conversation_id")) {
-            try (ResultSet r = s.executeQuery()) {
-                r.next();
-                conv_id = r.getInt(1);
-            }
-        }
-
-        try (PreparedStatement s = db.prepareStatement("insert into membership values (?, ?);" +
-                "insert into messages values (?, ?, default, ?)")) {
-            s.setInt(1, user_id);
-            s.setInt(2, conv_id);
-
-            s.setInt(3, user_id);
-            s.setInt(4, conv_id);
-            s.setString(5, "Hello!");
-
-            s.execute();
-        }
     }
 
     public RegistrationResult.Code register(String name, String login, String email, String password) {
@@ -103,7 +84,7 @@ public class DatabaseClient implements AutoCloseable {
             if(checkIfUsed("select count(*) from users where email = ?", email))
                 return RegistrationResult.Code.EMAIL_ALREADY_USED;
 
-            try (PreparedStatement s = db.prepareStatement("insert into users (name, login, email, password, salt, activation_token) values (?, ?, ?, ?, ?, ?) returning user_id")) {
+            try (PreparedStatement s = db.prepareStatement("insert into users (name, login, email, password, salt, activation_token) values (?, ?, ?, ?, ?, ?)")) {
                 s.setString(1, name);
                 s.setString(2, login);
                 s.setString(3, email);
@@ -117,15 +98,12 @@ public class DatabaseClient implements AutoCloseable {
                 s.setBytes(5, salt);
                 s.setBytes(6, token.getBytes(StandardCharsets.UTF_8));
 
-                try (ResultSet r = s.executeQuery()) {
-                    r.next();
-                    defaultConversation(r.getInt(1));
-                }
+                s.execute();
                 emailSender.sendToken(email, token);
 
                 return RegistrationResult.Code.OK;
             }
-        } catch (SQLException | PasswordHasher.HasherException | EmailActivatorException e) {
+        } catch (SQLException | DatabaseException | HasherException | EmailActivatorException e) {
             e.printStackTrace();
             return RegistrationResult.Code.SERVER_ERROR;
         }
@@ -136,11 +114,11 @@ public class DatabaseClient implements AutoCloseable {
             s.setBytes(1, token.getBytes(StandardCharsets.UTF_8));
             return (s.executeUpdate() == 1);
         } catch (SQLException e) {
-            throw new DatabaseException(e);
+            throw DatabaseException.convert(e,null,null);
         }
     }
 
-    public UserData authenticate(String login, String password) throws DatabaseException {
+    public UserData authenticate(String login, String password) throws DatabaseException, DatabaseAuthenticationException {
         try (PreparedStatement s = db.prepareStatement("select user_id, name from users where active = true and login = ? and password = ?")) {
             s.setString(1, login);
             s.setBytes(2, getEncodedPassword(login, password));
@@ -151,21 +129,21 @@ public class DatabaseClient implements AutoCloseable {
                 throw new DatabaseAuthenticationException();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new DatabaseException(e);
+            throw DatabaseException.convert(e,null,null);
         }
     }
 
-    public List<Conversation> getConversationList(int user_id) throws DatabaseException {
+    public List<Conversation> getConversationList(int user_id, int count) throws DatabaseException {
         try (PreparedStatement s = db.prepareStatement(
                 "select conversation_id, name " +
                 "from conversations " +
                 "natural join (select conversation_id from membership where user_id = ?) member " +
                 "natural join (select conversation_id, max(send_time) as last_update from messages group by conversation_id ) last " +
                 "order by last_update " +
-                "limit 8"
+                "limit ?"
         )) {
             s.setInt(1, user_id);
+            s.setInt(2, count);
 
             try (ResultSet r = s.executeQuery()) {
                 List<Conversation> list = new LinkedList<>();
@@ -174,8 +152,7 @@ public class DatabaseClient implements AutoCloseable {
                 return list;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new DatabaseException(e);
+            throw DatabaseException.convert(e,null,null);
         }
     }
 
@@ -211,8 +188,7 @@ public class DatabaseClient implements AutoCloseable {
                 return list;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new DatabaseException(e);
+            throw DatabaseException.convert(e,null,null);
         }
     }
 
@@ -226,7 +202,7 @@ public class DatabaseClient implements AutoCloseable {
                 throw new InvalidDataException("Invalid converstaion id: "+conv_id);
             }
         } catch (SQLException e) {
-            throw new DatabaseException(e);
+            throw DatabaseException.convert(e,null,null);
         }
     }
 
@@ -246,7 +222,7 @@ public class DatabaseClient implements AutoCloseable {
                 return members;
             }
         } catch (SQLException e) {
-            throw new DatabaseException(e);
+            throw DatabaseException.convert(e,null,null);
         }
     }
 
@@ -268,11 +244,31 @@ public class DatabaseClient implements AutoCloseable {
                 return members;
             }
         } catch (SQLException e) {
+            throw DatabaseException.convert(e,null,null);
+        }
+    }
+
+    void verifyAction(int conv_id, int user_id) throws DatabaseException {
+        if(conv_id == -1 || user_id == -1)
+            return;
+
+        try (PreparedStatement s = db.prepareStatement("select count(*) from membership where id_conversation = ? and id_user = ?")) {
+            s.setInt(1, user_id);
+            s.setInt(2, conv_id);
+
+            try (ResultSet r = s.executeQuery()) {
+                r.next();
+                if(r.getInt(1) != 1)
+                    throw new DatabaseSQLException("Wystąpił błąd");
+            }
+        } catch (SQLException e) {
             throw new DatabaseException(e);
         }
     }
 
     public void addMember(int conv_id, int user_id) throws DatabaseException {
+        verifyAction(conv_id, user_id);
+
         try (PreparedStatement s = db.prepareStatement(
                 "insert into membership values (?,?)"
         )) {
@@ -280,19 +276,22 @@ public class DatabaseClient implements AutoCloseable {
             s.setInt(2, conv_id);
             s.execute();
         } catch (SQLException e) {
-            throw new DatabaseException(e);
+            throw DatabaseException.convert(e,"Konwersacja nie istnieje","Użytkownik już należy do konwersacji");
         }
     }
 
     public void removeMember(int conv_id, int user_id) throws DatabaseException {
+        verifyAction(conv_id, user_id);
+
         try (PreparedStatement s = db.prepareStatement(
                 "delete from membership where conversation_id = ? and user_id = ?"
         )) {
             s.setInt(1, conv_id);
             s.setInt(2, user_id);
-            s.execute();
+            if(s.executeUpdate() != 1)
+                throw new DatabaseSQLException("Nie można usunąć użytkownika");
         } catch (SQLException e) {
-            throw new DatabaseException(e);
+            throw DatabaseException.convert(e,null,null);
         }
 
         try (PreparedStatement s = db.prepareStatement(
@@ -303,10 +302,10 @@ public class DatabaseClient implements AutoCloseable {
             try (ResultSet r = s.executeQuery()) {
                 r.next();
                 if(r.getInt(1) == 0)
-                    deleteConversation(conv_id);
+                    deleteConversation(conv_id,-1);
             }
         } catch (SQLException e) {
-            throw new DatabaseException(e);
+            throw DatabaseException.convert(e,null,null);
         }
     }
 
@@ -320,26 +319,31 @@ public class DatabaseClient implements AutoCloseable {
                 conv_id = r.getInt(1);
             }
         } catch (SQLException e) {
-            throw new DatabaseException(e);
+            throw DatabaseException.convert(e,null,null);
         }
 
         return conv_id;
     }
 
-    public void renameConversation(int conv_id, String name) throws DatabaseException {
+    public void renameConversation(int conv_id, int user_id, String name) throws DatabaseException {
+        verifyAction(conv_id, user_id);
+
         try (PreparedStatement s = db.prepareStatement(
                 "update conversations set name = ? where conversation_id = ?"
         )) {
             s.setString(1, name);
             s.setInt(2, conv_id);
 
-            s.executeUpdate();
+            if(s.executeUpdate() != 1)
+                throw new DatabaseException("Konwersacja nie istnieje");
         } catch (SQLException e) {
-            throw new DatabaseException(e);
+            throw DatabaseException.convert(e,null,null);
         }
     }
 
-    public void deleteConversation(int conv_id) throws DatabaseException {
+    public void deleteConversation(int conv_id, int user_id) throws DatabaseException {
+        verifyAction(conv_id, user_id);
+
         try (PreparedStatement s = db.prepareStatement(
                 "delete from membership where conversation_id = ?;" +
                         "delete from conversations where conversation_id = ?"
@@ -349,7 +353,7 @@ public class DatabaseClient implements AutoCloseable {
 
             s.execute();
         } catch (SQLException e) {
-            throw new DatabaseException(e);
+            throw DatabaseException.convert(e,null,"Nie można usunąć konwersacji");
         }
     }
 
@@ -359,47 +363,21 @@ public class DatabaseClient implements AutoCloseable {
                 getConversationMembers(conv_id));
     }
 
-    public void sendMessage(Message msg, int user, int conv) throws DatabaseException {
+    public void sendMessage(Message msg, int conv_id, int user_id) throws DatabaseException {
+        verifyAction(conv_id, user_id);
+
         try (PreparedStatement s = db.prepareStatement("insert into messages values (?, ?, now(), ?, ?) returning now()")) {
-            s.setInt(1, user);
-            s.setInt(2, conv);
+            s.setInt(1, user_id);
+            s.setInt(2, conv_id);
             s.setString(3, msg.getContent());
             s.setString(4, msg.getType().toString());
 
             ResultSet r = s.executeQuery();
             r.next();
-            msg.fill(user, r.getTimestamp(1));
-            listenerManager.sendUpdate(conv, msg);
+            msg.fill(user_id, r.getTimestamp(1));
+            listenerManager.sendUpdate(conv_id, msg);
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new DatabaseException(e);
-        }
-    }
-
-    static public class DatabaseException extends Exception {
-        public DatabaseException() {
-            super();
-        }
-
-        public DatabaseException(Throwable cause) {
-            super(cause);
-        }
-
-        public DatabaseException(String message) {
-            super(message);
-        }
-    }
-    static public class DatabaseInitializationException extends DatabaseException {
-        public DatabaseInitializationException(Throwable cause) {
-            super(cause);
-        }
-    }
-    static public class DatabaseAuthenticationException extends DatabaseException {
-    }
-    static public class InvalidDataException extends DatabaseException {
-        public InvalidDataException() { super(); }
-        public InvalidDataException(String message) {
-            super(message);
+            throw DatabaseException.convert(e,"Nie można wysłać wiadomości",null);
         }
     }
 }

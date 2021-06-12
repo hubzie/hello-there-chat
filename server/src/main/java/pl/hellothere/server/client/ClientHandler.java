@@ -16,10 +16,14 @@ import pl.hellothere.containers.socket.data.messages.MessageList;
 import pl.hellothere.containers.socket.data.notifications.MessageNotification;
 import pl.hellothere.containers.socket.data.notifications.StopNotification;
 import pl.hellothere.server.database.DatabaseClient;
+import pl.hellothere.server.database.exceptions.DatabaseAuthenticationException;
+import pl.hellothere.server.database.exceptions.DatabaseException;
+import pl.hellothere.server.database.exceptions.DatabaseSQLException;
 import pl.hellothere.tools.*;
 
 import java.io.*;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -54,7 +58,7 @@ public class ClientHandler extends Thread {
     }
 
     void register(RegistrationRequest req) {
-        RegistrationResult res = null;
+        RegistrationResult res;
         try {
             res = new RegistrationResult(db.register(req.getName(), req.getLogin(), req.getEmail(), encryptor.decrypt(req.getPassword())));
         } catch (Exception e) {
@@ -81,9 +85,9 @@ public class ClientHandler extends Thread {
                 try {
                     user = db.authenticate(ar.getLogin(), encryptor.decrypt(ar.getPassword()));
                     result = AuthorizationResult.Code.OK;
-                } catch (DatabaseClient.DatabaseAuthenticationException e) {
+                } catch (DatabaseAuthenticationException e) {
                     result = AuthorizationResult.Code.ERROR;
-                } catch (DatabaseClient.DatabaseException e) {
+                } catch (DatabaseException e) {
                     result = AuthorizationResult.Code.SERVER_ERROR;
                     communicator.send(new AuthorizationResult(result, user));
                     throw e;
@@ -93,7 +97,7 @@ public class ClientHandler extends Thread {
                 return (user != null);
             } else
                 throw new ClassNotFoundException(pkg.getClass().toString());
-        } catch (ClassNotFoundException | CommunicationException | DatabaseClient.DatabaseException e) {
+        } catch (ClassNotFoundException | CommunicationException | DatabaseException e) {
             throw new ConnectionError(e);
         }
     }
@@ -133,31 +137,31 @@ public class ClientHandler extends Thread {
         user = null;
     }
 
-    void manageMembers(ManageMembersRequest req) throws DatabaseClient.DatabaseException {
+    void manageMembers(ManageMembersRequest req) throws DatabaseException {
         switch (req.getType()) {
             case ADD: db.addMember(conv_id, req.getId()); break;
             case REMOVE: db.removeMember(conv_id, req.getId()); break;
         }
     }
 
-    void modifyConversation(ModifyConversationRequest req) throws DatabaseClient.DatabaseException {
+    void modifyConversation(ModifyConversationRequest req) throws DatabaseException {
         switch (req.getType()) {
             case CREATE: db.addMember(db.createConversation(), user.getID()); break;
-            case DELETE: db.deleteConversation(req.getID()); break;
-            case RENAME: db.renameConversation(req.getID(), req.getName()); break;
+            case DELETE: db.deleteConversation(req.getID(), user.getID()); break;
+            case RENAME: db.renameConversation(req.getID(), user.getID(), req.getName()); break;
         }
     }
 
-    void handleRequest(Request req) throws CommunicationException, ClassNotFoundException, DatabaseClient.DatabaseException {
+    void handleRequest(Request req) throws CommunicationException, ClassNotFoundException, DatabaseException {
         if (req instanceof ConversationListRequest)
-            communicator.send(new ConversationList(db.getConversationList(user.getID())));
+            communicator.send(new ConversationList(db.getConversationList(user.getID(), ((ConversationListRequest) req).getCount())));
         else if (req instanceof ChangeConversationRequest) {
             db.getListenerManager().listen(this, conv_id, ((ChangeConversationRequest) req).getConversationID());
             communicator.send(db.getConversationDetails(conv_id = ((ChangeConversationRequest) req).getConversationID()));
         } else if (req instanceof GetMessagesRequest)
             communicator.send(new MessageList(db.getMessages(conv_id, ((GetMessagesRequest) req).getTime())));
         else if (req instanceof SendMessageRequest)
-            db.sendMessage(((SendMessageRequest) req).getContent(), user.getID(), conv_id);
+            db.sendMessage(((SendMessageRequest) req).getContent(), conv_id, user.getID());
         else if (req instanceof ManageMembersRequest)
             manageMembers((ManageMembersRequest) req);
         else if (req instanceof ModifyConversationRequest)
@@ -192,13 +196,17 @@ public class ClientHandler extends Thread {
         try {
             while (isLogged()) {
                 SocketPackage pkg = communicator.read();
-                if(pkg instanceof Request) handleRequest((Request) pkg);
-                else if(pkg instanceof Command) handleCommand((Command) pkg);
-                else throw new ClassNotFoundException();
+                try {
+                    if (pkg instanceof Request) handleRequest((Request) pkg);
+                    else if (pkg instanceof Command) handleCommand((Command) pkg);
+                    else throw new ClassNotFoundException();
+                } catch (DatabaseSQLException e) {
+                    e.printStackTrace();
+                }
             }
 
             notifier.join();
-        } catch (InterruptedException | IOException | ClassNotFoundException | CommunicationException | DatabaseClient.DatabaseException e) {
+        } catch (InterruptedException | IOException | ClassNotFoundException | CommunicationException | DatabaseException e) {
             throw new ConnectionError(e);
         }
     }

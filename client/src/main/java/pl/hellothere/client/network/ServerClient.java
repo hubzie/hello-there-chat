@@ -29,6 +29,7 @@ public class ServerClient {
     private final Encryptor encryptor = new Encryptor();
 
     int conv_id = -1;
+    int conv_cnt = 8;
     UserData user = null;
 
     public ServerClient() throws ConnectionError {
@@ -78,7 +79,12 @@ public class ServerClient {
     }
 
     public List<Conversation> getConversationList() throws CommunicationException {
-        return communicator.sendAndRead(new ConversationListRequest());
+        return communicator.sendAndRead(new ConversationListRequest(conv_cnt));
+    }
+
+    public List<Conversation> loadMoreConversationsAndReload() throws CommunicationException {
+        conv_cnt += 8;
+        return getConversationList();
     }
 
     public ConversationDetails changeConversation(int conv_id) throws CommunicationException {
