@@ -27,7 +27,9 @@ public class Server {
 
         try (DatabaseClient db = new DatabaseClient(db_address, db_login, db_password)) {
             System.out.println("Connection with database set up successfully");
-
+            db.addMember(5,1);
+            db.addMember(5,1);
+/*
             try (ServerSocket server = new ServerSocket(port)) {
                 System.out.println("Server socket created");
 
@@ -51,7 +53,7 @@ public class Server {
                         e.printStackTrace();
                     }
                 }
-            }
+            }*/
         }
     }
 }
