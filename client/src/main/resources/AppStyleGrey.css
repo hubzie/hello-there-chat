@@ -2,9 +2,14 @@
     -fx-primary: Grey;
     -fx-primary-text: Black;
     -fx-primary-background: WhiteSmoke;
+/*    -fx-background-color: -fx-primary-background;*/
+/*    -fx-border-color: red;
+    -fx-border-width: 0;*/
 }
 .root {
     -fx-background-color: -fx-primary-background;
+/*    -fx-border-color: red;
+    -fx-border-width: 0;*/
 }
 
 #messages-box {

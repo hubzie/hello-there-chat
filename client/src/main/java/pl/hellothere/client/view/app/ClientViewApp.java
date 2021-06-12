@@ -8,6 +8,7 @@ import javafx.geometry.Pos;
 import javafx.scene.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -183,14 +184,20 @@ public class ClientViewApp extends Application {
 
 
         stickerStage.initStyle(StageStyle.UNDECORATED);
+        ScrollPane stickerScroll = new ScrollPane();
         FlowPane stickerPane = new FlowPane();
-        stickerStage.setScene(new Scene(stickerPane, 250, 250));
+        stickerPane.setHgap(2);
+        stickerPane.setPrefWrapLength(245);
+        stickerScroll.setContent(stickerPane);
+        stickerStage.setScene(new Scene(stickerScroll, 245, 250));
         for (File curFile : Objects.requireNonNull(new File("src/main/resources/stickers").listFiles())) {
             String mimetype = Files.probeContentType(curFile.toPath());
             if(curFile.isFile() && mimetype != null && mimetype.split("/")[0].equals("image"))
                 stickerPane.getChildren().add(new StickerButton(curFile.getName()));
         }
-        stickerStage.getScene().getRoot().getStylesheets().add("AppStyleGrey.css");
+        stickerStage.getScene().getStylesheets().add("AppStyleGrey.css");
+        stickerStage.getScene().getRoot().setStyle("-fx-border-width: 2; -fx-border-color: WhiteSmoke;");
+        //stickerStage.getScene().getRoot().getStylesheets().add("AppStyleGrey.css");
     }
 
     public class TextMessageBox extends HBox {

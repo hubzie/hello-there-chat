@@ -295,4 +295,7 @@
 
 .sticker-button {
     -fx-background-color: Transparent;
+    -fx-border-color: Transparent;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
 }
