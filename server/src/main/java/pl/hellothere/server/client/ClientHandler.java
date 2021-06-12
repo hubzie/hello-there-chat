@@ -9,6 +9,7 @@ import pl.hellothere.containers.socket.connection.requests.*;
 import pl.hellothere.containers.socket.connection.SecurityData;
 import pl.hellothere.containers.socket.authorization.AuthorizationRequest;
 import pl.hellothere.containers.socket.data.UserData;
+import pl.hellothere.containers.socket.data.converstions.AddableUsersList;
 import pl.hellothere.containers.socket.data.converstions.ConversationList;
 import pl.hellothere.containers.socket.data.messages.Message;
 import pl.hellothere.containers.socket.data.messages.MessageList;
@@ -52,7 +53,7 @@ public class ClientHandler extends Thread {
         notifications.add(msg);
     }
 
-    public void register(RegistrationRequest req) {
+    void register(RegistrationRequest req) {
         RegistrationResult res = null;
         try {
             res = new RegistrationResult(db.register(req.getName(), req.getLogin(), req.getEmail(), encryptor.decrypt(req.getPassword())));
@@ -63,7 +64,7 @@ public class ClientHandler extends Thread {
         communicator.send(res);
     }
 
-    public boolean authenticate() throws ConnectionError {
+    boolean authenticate() throws ConnectionError {
         try {
             SocketPackage pkg = communicator.read();
 
@@ -103,7 +104,7 @@ public class ClientHandler extends Thread {
         return closed || connection.isClosed();
     }
 
-    public void close() {
+    void close() {
         try {
             logOut();
         } catch (Exception e) {
@@ -125,11 +126,26 @@ public class ClientHandler extends Thread {
         return !isClosed() && user != null;
     }
 
-    public void logOut() throws CommunicationException {
+    void logOut() {
         db.getListenerManager().unlisten(this, conv_id);
 
         conv_id = -1;
         user = null;
+    }
+
+    void manageMembers(ManageMembersRequest req) throws DatabaseClient.DatabaseException {
+        switch (req.getType()) {
+            case ADD: db.addMember(conv_id, req.getId()); break;
+            case REMOVE: db.removeMember(conv_id, req.getId()); break;
+        }
+    }
+
+    void modifyConversation(ModifyConversationRequest req) throws DatabaseClient.DatabaseException {
+        switch (req.getType()) {
+            case CREATE: db.addMember(db.createConversation(), user.getID()); break;
+            case DELETE: db.deleteConversation(req.getID()); break;
+            case RENAME: db.renameConversation(req.getID(), req.getName()); break;
+        }
     }
 
     void handleRequest(Request req) throws CommunicationException, ClassNotFoundException, DatabaseClient.DatabaseException {
@@ -142,6 +158,12 @@ public class ClientHandler extends Thread {
             communicator.send(new MessageList(db.getMessages(conv_id, ((GetMessagesRequest) req).getTime())));
         else if (req instanceof SendMessageRequest)
             db.sendMessage(((SendMessageRequest) req).getContent(), user.getID(), conv_id);
+        else if (req instanceof ManageMembersRequest)
+            manageMembers((ManageMembersRequest) req);
+        else if (req instanceof ModifyConversationRequest)
+            modifyConversation((ModifyConversationRequest) req);
+        else if (req instanceof AddableUserListRequest)
+            communicator.send(new AddableUsersList(db.getAddableUserList(conv_id, ((AddableUserListRequest) req).getPrefix())));
         else throw new ClassNotFoundException();
     }
 

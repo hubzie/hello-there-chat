@@ -250,6 +250,109 @@ public class DatabaseClient implements AutoCloseable {
         }
     }
 
+    public List<UserData> getAddableUserList(int conv_id, String prefix) throws DatabaseException {
+        try (PreparedStatement s = db.prepareStatement(
+                "select user_id, name " +
+                        "from users u " +
+                        "where ? not in ( select conversation_id from membership m where m.user_id = u.user_id ) " +
+                        "and name ilike ? || '%' " +
+                        "limit 8"
+        )) {
+            s.setInt(1, conv_id);
+            s.setString(2, prefix);
+
+            try (ResultSet r = s.executeQuery()) {
+                List<UserData> members = new LinkedList<>();
+                while(r.next())
+                    members.add(new UserData(r.getInt(1), r.getString(2)));
+                return members;
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+    }
+
+    public void addMember(int conv_id, int user_id) throws DatabaseException {
+        try (PreparedStatement s = db.prepareStatement(
+                "insert into membership values (?,?)"
+        )) {
+            s.setInt(1, user_id);
+            s.setInt(2, conv_id);
+            s.execute();
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+    }
+
+    public void removeMember(int conv_id, int user_id) throws DatabaseException {
+        try (PreparedStatement s = db.prepareStatement(
+                "delete from membership where conversation_id = ? and user_id = ?"
+        )) {
+            s.setInt(1, conv_id);
+            s.setInt(2, user_id);
+            s.execute();
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+
+        try (PreparedStatement s = db.prepareStatement(
+                "select count(*) from membership where conversation_id = ?"
+        )) {
+            s.setInt(1, conv_id);
+
+            try (ResultSet r = s.executeQuery()) {
+                r.next();
+                if(r.getInt(1) == 0)
+                    deleteConversation(conv_id);
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+    }
+
+    public int createConversation() throws DatabaseException {
+        int conv_id;
+        try (PreparedStatement s = db.prepareStatement(
+                "insert into conversations (name) values (null) returning conversation_id"
+        )) {
+            try (ResultSet r = s.executeQuery()){
+                r.next();
+                conv_id = r.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+
+        return conv_id;
+    }
+
+    public void renameConversation(int conv_id, String name) throws DatabaseException {
+        try (PreparedStatement s = db.prepareStatement(
+                "update conversations set name = ? where conversation_id = ?"
+        )) {
+            s.setString(1, name);
+            s.setInt(2, conv_id);
+
+            s.executeUpdate();
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+    }
+
+    public void deleteConversation(int conv_id) throws DatabaseException {
+        try (PreparedStatement s = db.prepareStatement(
+                "delete from membership where conversation_id = ?;" +
+                        "delete from conversations where conversation_id = ?"
+        )) {
+            s.setInt(1, conv_id);
+            s.setInt(2, conv_id);
+
+            s.execute();
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+    }
+
     public ConversationDetails getConversationDetails(int conv_id) throws DatabaseException {
         return new ConversationDetails(conv_id,
                 getConversationName(conv_id),
