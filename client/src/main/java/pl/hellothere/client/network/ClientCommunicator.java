@@ -47,7 +47,6 @@ public class ClientCommunicator extends Communicator {
                         SocketPackage n = read();
                         if (n instanceof StopNotification)
                             mode = Mode.STOP;
-                        else if (n instanceof ErrorNotification); // TODO
                         else if (n instanceof Notification) {
                             if (handler != null)
                                 handler.handle((Notification) n);

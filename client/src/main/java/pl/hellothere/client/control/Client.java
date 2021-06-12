@@ -3,13 +3,17 @@ package pl.hellothere.client.control;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import pl.hellothere.client.network.NotificationHandler;
 import pl.hellothere.client.network.ServerClient;
 import pl.hellothere.client.view.app.ClientViewApp;
 import pl.hellothere.client.view.controller.ClientViewController;
 import pl.hellothere.containers.socket.data.converstions.Conversation;
 import pl.hellothere.containers.socket.data.converstions.ConversationDetails;
 import pl.hellothere.containers.socket.data.messages.Message;
+import pl.hellothere.containers.socket.data.notifications.ErrorNotification;
 import pl.hellothere.containers.socket.data.notifications.MessageNotification;
+import pl.hellothere.containers.socket.data.notifications.Notification;
+import pl.hellothere.containers.socket.data.notifications.RefreshNotification;
 import pl.hellothere.tools.CommunicationException;
 import pl.hellothere.tools.ConnectionError;
 
@@ -170,16 +174,31 @@ public class Client extends Application {
 
         try {
             ClientViewController.getAppView().run();
-            connection.listen(x -> Platform.runLater(() -> {
-                try {
-                    if (x instanceof MessageNotification)
-                        ClientViewController.getAppView().addBottomMessage(((MessageNotification) x).getContent());
-                    else
-                        System.out.println(x);
-                } catch (Exception e) {
-                    e.printStackTrace();
+            connection.listen(new NotificationHandler(){
+                @Override
+                public void handle(Notification action) {
+                    Platform.runLater(() -> {
+                        try {
+                            if (action instanceof MessageNotification)
+                                ClientViewController.getAppView().addBottomMessage(((MessageNotification) action).getContent());
+                            else
+                                System.out.println(action);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
                 }
-            }));
+
+                @Override
+                public void handle(ErrorNotification action) {
+                    Platform.runLater(() -> ClientViewController.showErrorMessage(action.getMessage()));
+                }
+
+                @Override
+                public void handle(RefreshNotification action) {
+                    Platform.runLater(() -> {});
+                }
+            });
 
             List<Conversation> list = connection.getConversationList();
             for (Conversation c : list) {
