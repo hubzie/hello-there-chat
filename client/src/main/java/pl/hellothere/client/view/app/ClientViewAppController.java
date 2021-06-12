@@ -14,6 +14,7 @@ public class ClientViewAppController {
     @FXML ScrollPane messagesPane;
     @FXML ScrollPane groupsPane;
     @FXML VBox groupsBox;
+    private boolean isDarkMode = false;
 
     public ClientViewAppController() { ClientViewController.getAppView().setCvac(this); }
 
@@ -34,5 +35,20 @@ public class ClientViewAppController {
     public void handleStickerButtonAction() {
         if(!ClientViewController.getAppView().getStickerStage().isShowing()) ClientViewController.getAppView().showStickerSelect();
         else ClientViewController.getAppView().hideStickerSelect();
+    }
+
+    public void handleChangeStyleButtonAction() {
+        ClientViewController.getAppView().getPrimaryStage().getScene().getRoot().getStylesheets().clear();
+
+        if(!isDarkMode) {
+            ClientViewController.getAppView().getPrimaryStage().getScene().getRoot().getStylesheets().add("AppStyleDarkGrey.css");
+            ClientViewController.getAppView().getStickerStage().getScene().getRoot().setStyle("-fx-background-color: derive(Grey, -70.0%);");
+        }
+        else {
+            ClientViewController.getAppView().getPrimaryStage().getScene().getRoot().getStylesheets().add("AppStyleGrey.css");
+            ClientViewController.getAppView().getStickerStage().getScene().getRoot().setStyle("-fx-background-color: WhiteSmoke;");
+        }
+
+        isDarkMode = !isDarkMode;
     }
 }

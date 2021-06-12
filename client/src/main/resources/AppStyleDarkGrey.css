@@ -1,14 +1,14 @@
 * {
-    -fx-primary: Grey;
-    -fx-primary-text: Black;
-    -fx-primary-background: WhiteSmoke;
+    -fx-primary: derive(Grey, -20.0%);
+    -fx-primary-text: derive(White, -10.0%);
+    -fx-primary-background: derive(Grey, -70.0%);
 }
 .root {
-    -fx-background-color: -fx-primary-background;
+    -fx-background-color: derive(-fx-primary-background, -5.0%);
 }
 
 #messages-box {
-    -fx-background-color: -fx-primary-background;
+    -fx-background-color: derive(-fx-primary-background, -5.0%);
 }
 
 #top-box {
@@ -42,6 +42,7 @@
     -fx-font-family: "Lucida Console";
     -fx-font-size: 15;
     -fx-border-width: 7 0 7 0;
+    -fx-text-fill: -fx-primary-text;
 }
 
 #close-button {
@@ -71,11 +72,11 @@
 }
 
 #minimize-button:hover {
-    -fx-background-color: derive(-fx-primary-background, -15.0%);
+    -fx-background-color: derive(-fx-primary-background, 15.0%);
 }
 
 #minimize-button:pressed {
-    -fx-background-color: derive(-fx-primary-background, -20.0%);
+    -fx-background-color: derive(-fx-primary-background, 10.0%);
 }
 
 #logout-button {
@@ -88,11 +89,11 @@
 }
 
 #logout-button:hover {
-    -fx-background-color: derive(-fx-primary-background, -15.0%);
+    -fx-background-color: derive(-fx-primary-background, 15.0%);
 }
 
 #logout-button:pressed {
-    -fx-background-color: derive(-fx-primary-background, -20.0%);
+    -fx-background-color: derive(-fx-primary-background, 10.0%);
 }
 
 #change-style-button {
@@ -105,11 +106,11 @@
 }
 
 #change-style-button:hover {
-    -fx-background-color: derive(-fx-primary-background, -15.0%);
+    -fx-background-color: derive(-fx-primary-background, 15.0%);
 }
 
 #change-style-button:pressed {
-    -fx-background-color: derive(-fx-primary-background, -20.0%);
+    -fx-background-color: derive(-fx-primary-background, 10.0%);
 }
 
 .box {
@@ -127,32 +128,33 @@
 }
 
 .my-message {
-    -fx-text-fill: -fx-primary-text;
+    -fx-text-fill: derive(-fx-primary-text, 100%);
     -fx-background-radius: 7 3 3 7;
-    -fx-background-color: derived(-fx-primary, 80%);
+    -fx-background-color: derived(-fx-primary, 40%);
     -fx-border-insets: 3 6 3 6;
 }
 
 .your-message {
-    -fx-text-fill: derived(-fx-primary-background, 100%);
+    -fx-text-fill: derive(-fx-primary-text, 100%);
     -fx-background-radius: 3 7 7 3;
-    -fx-background-color: derived(-fx-primary, -10%);
+    -fx-background-color: derived(-fx-primary, -20%);
     -fx-border-insets: 3 6 3 6;
 }
 
 .message-time {
     -fx-font-size: 11;
+    -fx-fill: -fx-primary-text;
 }
 
 .message-sender {
-    -fx-text-fill: -fx-primary-text;
+    -fx-text-fill: derive(-fx-primary-text, 100%);
     -fx-background-radius: 3 3 3 3;
-    -fx-background-color: derived(-fx-primary, 80%);
+    -fx-background-color: derived(-fx-primary, 40%);
     -fx-border-insets: 2 4 2 4;
 }
 
 .message-box {
-    -fx-background-color: -fx-primary-background;
+    -fx-background-color: derive(-fx-primary-background, -5.0%);
     -fx-border-width: 0;
     -fx-spacing: 0;
 }
@@ -160,16 +162,16 @@
 .button {
     -fx-background-color: derived(-fx-primary-background, 100%);
     -fx-background-radius: 5;
-    -fx-text-fill: -fx-primary-text;
+    -fx-text-fill: derived(-fx-primary-text, 100%);
     -fx-border-width: 2;
-    -fx-border-color: derived(-fx-primary, 40%);
+    -fx-border-color: derived(-fx-primary-background, 100%);
     -fx-border-radius: 5;
     -fx-background-insets: 2 0 2 0;
 }
 
 .button:hover {
     -fx-background-color: derived(-fx-primary, 20%);
-    -fx-text-fill: derived(-fx-primary-background, 100%);
+    -fx-text-fill: derived(-fx-primary-text, 100%);
     -fx-border-color: derived(-fx-primary, 20%);
     -fx-cursor: hand;
 }
@@ -177,21 +179,22 @@
 .button:pressed {
     -fx-background-color: derived(-fx-primary, 0%);
     -fx-border-color: derived(-fx-primary, 0%);
-    -fx-text-fill: derived(-fx-primary-background, 100%);
+    -fx-text-fill: derived(-fx-primary-text, 100%);
 }
 
 .text-field {
-    -fx-text-fill: -fx-primary-text;
+    -fx-text-fill: derived(-fx-primary-text, 100%);
     -fx-background-color: derived(-fx-primary-background, 100%);
     -fx-background-radius: 5;
     -fx-border-width: 2;
-    -fx-border-color: derived(-fx-primary, 40%);
+    -fx-border-color: derived(-fx-primary-background, 100%);
     -fx-border-radius: 5;
     -fx-highlight-fill: derived(-fx-primary, 20%);
+    -fx-prompt-text-fill: derive(-fx-control-inner-background, -10%);
 }
 
 .text-field:focused {
-    -fx-prompt-text-fill: derive(-fx-control-inner-background, -30%);
+    -fx-prompt-text-fill: derive(-fx-control-inner-background, -10%);
 }
 
 .scroll-pane {
@@ -248,7 +251,7 @@
 .group-button {
     -fx-text-fill: -fx-primary-text;
     -fx-font-size: 13;
-    -fx-background-color: derive(-fx-primary-background, -20.0%);
+    -fx-background-color: derive(-fx-primary-background, -30.0%);
     -fx-background-radius: 0;
     -fx-background-insets: 0 0 0 0;
     -fx-border-width: 10;
@@ -256,8 +259,8 @@
 }
 
 .group-button:hover {
-    -fx-background-color: derived(-fx-primary, 40%);
-    -fx-border-color: derived(-fx-primary, 40%);
+    -fx-background-color: derived(-fx-primary, 20%);
+    -fx-border-color: derived(-fx-primary, 20%);
     -fx-text-fill: -fx-primary-text;
     -fx-cursor: hand;
 }
@@ -265,26 +268,26 @@
 .group-button:pressed {
     -fx-background-color: derived(-fx-primary, 0%);
     -fx-border-color: derived(-fx-primary, 0%);
-    -fx-text-fill: derived(-fx-primary-background, 100%);
+    -fx-text-fill: -fx-primary-text;
 }
 
 .selected-group-button {
     -fx-background-color: derived(-fx-primary, 0%);
     -fx-border-color: derived(-fx-primary, 0%);
-    -fx-text-fill: derived(-fx-primary-background, 100%);
+    -fx-text-fill: -fx-primary-text;
 }
 
 .selected-group-button:hover {
     -fx-background-color: derived(-fx-primary, 0%);
     -fx-border-color: derived(-fx-primary, 0%);
-    -fx-text-fill: derived(-fx-primary-background, 100%);
+    -fx-text-fill: -fx-primary-text;
     -fx-cursor: default;
 }
 
 .group-member {
     -fx-text-fill: -fx-primary-text;
     -fx-font-size: 13;
-    -fx-background-color: derive(-fx-primary-background, -10.0%);
+    -fx-background-color: derive(-fx-primary-background, 5.0%);
     -fx-background-radius: 0;
     -fx-background-insets: 0 0 0 0;
     -fx-border-color: Transparent;
@@ -292,7 +295,4 @@
 
 .sticker-button {
     -fx-background-color: Transparent;
-    -fx-border-color: Transparent;
-    -fx-background-radius: 0;
-    -fx-border-radius: 0;
 }

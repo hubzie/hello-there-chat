@@ -190,6 +190,7 @@ public class ClientViewApp extends Application {
             if(curFile.isFile() && mimetype != null && mimetype.split("/")[0].equals("image"))
                 stickerPane.getChildren().add(new StickerButton(curFile.getName()));
         }
+        stickerStage.getScene().getRoot().getStylesheets().add("AppStyleGrey.css");
     }
 
     public class TextMessageBox extends HBox {
@@ -317,9 +318,9 @@ public class ClientViewApp extends Application {
             imgView.setFitHeight(50);
             imgView.setFitWidth(50);
             setGraphic(imgView);
+            getStyleClass().add("sticker-button");
 
             setOnAction(e -> {
-                // System.out.println(stickerName);
                 sendAction.accept(Message.createMessage(stickerName, MessageType.Sticker));
                 setScrollMessagesToBottom();
             });
