@@ -6,11 +6,9 @@ import pl.hellothere.containers.socket.authorization.RegistrationRequest;
 import pl.hellothere.containers.socket.authorization.RegistrationResult;
 import pl.hellothere.containers.socket.connection.SecurityData;
 import pl.hellothere.containers.socket.connection.commands.Command;
-import pl.hellothere.containers.socket.connection.requests.ChangeConversationRequest;
-import pl.hellothere.containers.socket.connection.requests.ConversationListRequest;
-import pl.hellothere.containers.socket.connection.requests.GetMessagesRequest;
-import pl.hellothere.containers.socket.connection.requests.SendMessageRequest;
+import pl.hellothere.containers.socket.connection.requests.*;
 import pl.hellothere.containers.socket.data.UserData;
+import pl.hellothere.containers.socket.data.converstions.AddableUsersList;
 import pl.hellothere.containers.socket.data.converstions.Conversation;
 import pl.hellothere.containers.socket.data.converstions.ConversationDetails;
 import pl.hellothere.containers.socket.data.messages.Message;
@@ -94,6 +92,18 @@ public class ServerClient {
     public List<Message> loadMoreMessages(Date time) throws CommunicationException {
         return communicator.sendAndRead(new GetMessagesRequest(time));
     }
+
+    public void addConversation(String name) throws CommunicationException { communicator.send(ModifyConversationRequest.create(name)); }
+
+    public void removeConversation(int id) throws CommunicationException { communicator.send(ModifyConversationRequest.delete(id)); }
+
+    public void renameConversation(int id, String name) throws CommunicationException { communicator.send(ModifyConversationRequest.rename(id, name)); }
+
+    public List<UserData> getAddableUserList(String prefix) throws CommunicationException { return communicator.sendAndRead(new AddableUserListRequest(prefix)); }
+
+    public void addMember(int id) throws CommunicationException { communicator.send(new ManageMembersRequest(ManageMembersRequest.Type.ADD, id)); }
+
+    public void removeMember(int id) throws CommunicationException { communicator.send(new ManageMembersRequest(ManageMembersRequest.Type.REMOVE, id)); }
 
     public void sendMessage(Message msg) throws CommunicationException {
         communicator.send(new SendMessageRequest(msg));

@@ -12,4 +12,12 @@ public enum MessageType {
     public String toString() {
         return type;
     }
+
+    public static MessageType fromString(String s) throws MessageTypeNotFoundException {
+        switch (s) {
+            case "T": return Text;
+            case "S": return Sticker;
+            default: throw new MessageTypeNotFoundException();
+        }
+    }
 }
