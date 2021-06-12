@@ -1,5 +1,7 @@
 package pl.hellothere.server.database;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import pl.hellothere.containers.socket.authorization.ModifyUserResult;
 import pl.hellothere.containers.socket.authorization.RegistrationResult;
 import pl.hellothere.containers.socket.data.UserData;
 import pl.hellothere.containers.socket.data.converstions.Conversation;
@@ -13,10 +15,8 @@ import pl.hellothere.server.listener.ListenerManager;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.sql.*;
+import java.util.*;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
 
 public class DatabaseClient implements AutoCloseable {
     private final Connection db;
@@ -47,7 +47,7 @@ public class DatabaseClient implements AutoCloseable {
         }
     }
 
-    byte[] getEncodedPassword(String login, String password) throws DatabaseException, DatabaseAuthenticationException {
+    byte[] getEncodedPassword(String login, String password) throws DatabaseException {
         try (PreparedStatement s = db.prepareStatement("select salt from users where active = true and login = ?")) {
             s.setString(1, login);
 
@@ -77,6 +77,13 @@ public class DatabaseClient implements AutoCloseable {
         return false;
     }
 
+    static byte[] generateSalt() {
+        SecureRandom random = new SecureRandom();
+        byte[] salt = new byte[16];
+        random.nextBytes(salt);
+        return salt;
+    }
+
     public RegistrationResult.Code register(String name, String login, String email, String password) {
         try {
             if(checkIfUsed("select count(*) from users where login = ?", login))
@@ -89,10 +96,8 @@ public class DatabaseClient implements AutoCloseable {
                 s.setString(2, login);
                 s.setString(3, email);
 
-                SecureRandom random = new SecureRandom();
-                byte[] salt = new byte[16];
-                random.nextBytes(salt);
-                String token = UUID.randomUUID().toString();
+                byte[] salt = generateSalt();
+                String token = RandomStringUtils.randomAlphabetic(32);
 
                 s.setBytes(4, PasswordHasher.encode(password, salt));
                 s.setBytes(5, salt);
@@ -118,7 +123,7 @@ public class DatabaseClient implements AutoCloseable {
         }
     }
 
-    public UserData authenticate(String login, String password) throws DatabaseException, DatabaseAuthenticationException {
+    public UserData authenticate(String login, String password) throws DatabaseException {
         try (PreparedStatement s = db.prepareStatement("select user_id, name from users where active = true and login = ? and password = ?")) {
             s.setString(1, login);
             s.setBytes(2, getEncodedPassword(login, password));
@@ -132,6 +137,31 @@ public class DatabaseClient implements AutoCloseable {
             throw DatabaseException.convert(e,null,null);
         }
     }
+
+    public ModifyUserResult.Code modifyUser(int id, String name, String login, String password) {
+        try {
+            if(checkIfUsed("select count(*) from users where login = ? and user_id <> "+id, login))
+                return ModifyUserResult.Code.LOGIN_ALREADY_USED;
+
+            try (PreparedStatement s = db.prepareStatement("update users set (name, login, password, salt) = (?, ?, ?, ?) where user_id = ?")) {
+                s.setString(1, name);
+                s.setString(2, login);
+
+                byte[] salt = generateSalt();
+
+                s.setBytes(3, PasswordHasher.encode(password, salt));
+                s.setBytes(4, salt);
+                s.setInt(5, id);
+
+                if(s.executeUpdate() != 1)
+                    return ModifyUserResult.Code.SERVER_ERROR;
+
+                return ModifyUserResult.Code.OK;
+            }
+        } catch (SQLException | DatabaseException | HasherException e) {
+            e.printStackTrace();
+            return ModifyUserResult.Code.SERVER_ERROR;
+        }}
 
     public List<Conversation> getConversationList(int user_id, int count) throws DatabaseException {
         try (PreparedStatement s = db.prepareStatement(

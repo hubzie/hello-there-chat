@@ -1,13 +1,10 @@
 package pl.hellothere.server.client;
 
 import pl.hellothere.containers.SocketPackage;
-import pl.hellothere.containers.socket.authorization.AuthorizationResult;
-import pl.hellothere.containers.socket.authorization.RegistrationRequest;
-import pl.hellothere.containers.socket.authorization.RegistrationResult;
+import pl.hellothere.containers.socket.authorization.*;
 import pl.hellothere.containers.socket.connection.commands.Command;
 import pl.hellothere.containers.socket.connection.requests.*;
 import pl.hellothere.containers.socket.connection.SecurityData;
-import pl.hellothere.containers.socket.authorization.AuthorizationRequest;
 import pl.hellothere.containers.socket.data.UserData;
 import pl.hellothere.containers.socket.data.converstions.AddableUsersList;
 import pl.hellothere.containers.socket.data.converstions.ConversationList;
@@ -152,6 +149,17 @@ public class ClientHandler extends Thread {
         }
     }
 
+    void modifyUser(ModifyUserRequest req) {
+        ModifyUserResult res;
+        try {
+            res = new ModifyUserResult(db.modifyUser(req.getID(), req.getName(), req.getLogin(), encryptor.decrypt(req.getPassword())));
+        } catch (Exception e) {
+            res = new ModifyUserResult(ModifyUserResult.Code.SERVER_ERROR);
+        }
+
+        communicator.send(res);
+    }
+
     void handleRequest(Request req) throws CommunicationException, ClassNotFoundException, DatabaseException {
         if (req instanceof ConversationListRequest)
             communicator.send(new ConversationList(db.getConversationList(user.getID(), ((ConversationListRequest) req).getCount())));
@@ -166,6 +174,8 @@ public class ClientHandler extends Thread {
             manageMembers((ManageMembersRequest) req);
         else if (req instanceof ModifyConversationRequest)
             modifyConversation((ModifyConversationRequest) req);
+        else if (req instanceof ModifyUserRequest)
+            modifyUser((ModifyUserRequest) req);
         else if (req instanceof AddableUserListRequest)
             communicator.send(new AddableUsersList(db.getAddableUserList(conv_id, ((AddableUserListRequest) req).getPrefix())));
         else throw new ClassNotFoundException();

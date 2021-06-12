@@ -1,9 +1,6 @@
 package pl.hellothere.client.network;
 
-import pl.hellothere.containers.socket.authorization.AuthorizationRequest;
-import pl.hellothere.containers.socket.authorization.AuthorizationResult;
-import pl.hellothere.containers.socket.authorization.RegistrationRequest;
-import pl.hellothere.containers.socket.authorization.RegistrationResult;
+import pl.hellothere.containers.socket.authorization.*;
 import pl.hellothere.containers.socket.connection.SecurityData;
 import pl.hellothere.containers.socket.connection.commands.Command;
 import pl.hellothere.containers.socket.connection.requests.*;
@@ -76,6 +73,13 @@ public class ServerClient {
 
     public UserData getUser() {
         return user;
+    }
+
+    public ModifyUserResult.Code modifyUser(int id, String name, String login, String password) throws CommunicationException {
+        ModifyUserResult res = communicator.sendAndRead(new ModifyUserRequest(id, name, login, encryptor.encrypt(password)));
+        if (res.getCode().equals(ModifyUserResult.Code.SERVER_ERROR))
+            throw new CommunicationException();
+        return res.getCode();
     }
 
     public List<Conversation> getConversationList() throws CommunicationException {
