@@ -259,7 +259,7 @@ public class DatabaseClient implements AutoCloseable {
             try (ResultSet r = s.executeQuery()) {
                 r.next();
                 if(r.getInt(1) != 1)
-                    throw new DatabaseUpdateException("Wystąpił błąd");
+                    throw new DatabaseUpdateException("You aren't member of this conversation");
             }
         } catch (SQLException e) {
             throw new DatabaseException(e);
@@ -276,7 +276,7 @@ public class DatabaseClient implements AutoCloseable {
             s.setInt(2, conv_id);
             s.execute();
         } catch (SQLException e) {
-            throw DatabaseException.convert(e,"Konwersacja nie istnieje","Użytkownik już należy do konwersacji");
+            throw DatabaseException.convert(e,"Conversation doesn't exsit","User is already a member of this conversation");
         }
     }
 
@@ -289,7 +289,7 @@ public class DatabaseClient implements AutoCloseable {
             s.setInt(1, conv_id);
             s.setInt(2, user_id);
             if(s.executeUpdate() != 1)
-                throw new DatabaseUpdateException("Nie można usunąć użytkownika");
+                throw new DatabaseUpdateException("Unable to remove member");
         } catch (SQLException e) {
             throw DatabaseException.convert(e,null,null);
         }
@@ -335,7 +335,7 @@ public class DatabaseClient implements AutoCloseable {
             s.setInt(2, conv_id);
 
             if(s.executeUpdate() != 1)
-                throw new DatabaseException("Konwersacja nie istnieje");
+                throw new DatabaseException("Conversation doesn't exist");
         } catch (SQLException e) {
             throw DatabaseException.convert(e,null,null);
         }
@@ -353,7 +353,7 @@ public class DatabaseClient implements AutoCloseable {
 
             s.execute();
         } catch (SQLException e) {
-            throw DatabaseException.convert(e,null,"Nie można usunąć konwersacji");
+            throw DatabaseException.convert(e,null,"Unable to delete conversation");
         }
     }
 
@@ -377,7 +377,7 @@ public class DatabaseClient implements AutoCloseable {
             msg.fill(user_id, r.getTimestamp(1));
             listenerManager.sendUpdate(conv_id, msg);
         } catch (SQLException e) {
-            throw DatabaseException.convert(e,"Nie można wysłać wiadomości",null);
+            throw DatabaseException.convert(e,"Unable to send message",null);
         }
     }
 }
