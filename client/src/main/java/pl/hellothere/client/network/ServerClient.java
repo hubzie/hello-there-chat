@@ -26,7 +26,7 @@ public class ServerClient {
     private final Encryptor encryptor = new Encryptor();
 
     int conv_id = -1;
-    int conv_cnt = 8;
+    int conv_cnt = 16;
     UserData user = null;
 
     public ServerClient() throws ConnectionError {

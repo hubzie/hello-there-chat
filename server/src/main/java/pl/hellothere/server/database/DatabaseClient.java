@@ -7,6 +7,8 @@ import pl.hellothere.containers.socket.data.UserData;
 import pl.hellothere.containers.socket.data.converstions.Conversation;
 import pl.hellothere.containers.socket.data.converstions.ConversationDetails;
 import pl.hellothere.containers.socket.data.messages.*;
+import pl.hellothere.containers.socket.data.notifications.MessageNotification;
+import pl.hellothere.containers.socket.data.notifications.RefreshNotification;
 import pl.hellothere.server.activator.ActivationEmailSender;
 import pl.hellothere.server.activator.EmailActivatorException;
 import pl.hellothere.server.database.exceptions.*;
@@ -20,7 +22,8 @@ import java.util.Date;
 
 public class DatabaseClient implements AutoCloseable {
     private final Connection db;
-    private final ListenerManager listenerManager = new ListenerManager();
+    private final ListenerManager conversationListener = new ListenerManager();
+    private final ListenerManager userListener = new ListenerManager();
     private final ActivationEmailSender emailSender;
 
     public DatabaseClient(String db_address, String db_login, String db_password) throws DatabaseInitializationException {
@@ -33,9 +36,11 @@ public class DatabaseClient implements AutoCloseable {
         }
     }
 
-    public ListenerManager getListenerManager() {
-        return listenerManager;
+    public ListenerManager getConversationListener() {
+        return conversationListener;
     }
+
+    public ListenerManager getUserListener() { return userListener; }
 
     @Override
     public void close() {
@@ -168,8 +173,8 @@ public class DatabaseClient implements AutoCloseable {
                 "select conversation_id, name " +
                 "from conversations " +
                 "natural join (select conversation_id from membership where user_id = ?) member " +
-                "natural join (select conversation_id, max(send_time) as last_update from messages group by conversation_id ) last " +
-                "order by last_update " +
+                "left join (select conversation_id, max(send_time) as last_update from messages group by conversation_id ) last using (conversation_id) " +
+                "order by last_update desc nulls last " +
                 "limit ?"
         )) {
             s.setInt(1, user_id);
@@ -222,7 +227,7 @@ public class DatabaseClient implements AutoCloseable {
         }
     }
 
-    String getConversationName(int conv_id) throws DatabaseException {
+    String getConversationName(int conv_id, int user_id) throws DatabaseException {
         try (PreparedStatement s = db.prepareStatement("select name from conversations where conversation_id = ?")) {
             s.setInt(1, conv_id);
 
@@ -236,7 +241,7 @@ public class DatabaseClient implements AutoCloseable {
         }
     }
 
-    List<UserData> getConversationMembers(int conv_id) throws DatabaseException {
+    List<UserData> getConversationMembers(int conv_id, int user_id) throws DatabaseException {
         try (PreparedStatement s = db.prepareStatement(
                 "select user_id, name " +
                         "from membership " +
@@ -282,9 +287,9 @@ public class DatabaseClient implements AutoCloseable {
         if(conv_id == -1 || user_id == -1)
             return;
 
-        try (PreparedStatement s = db.prepareStatement("select count(*) from membership where id_conversation = ? and id_user = ?")) {
-            s.setInt(1, user_id);
-            s.setInt(2, conv_id);
+        try (PreparedStatement s = db.prepareStatement("select count(*) from membership where conversation_id = ? and user_id = ?")) {
+            s.setInt(1, conv_id);
+            s.setInt(2, user_id);
 
             try (ResultSet r = s.executeQuery()) {
                 r.next();
@@ -305,6 +310,8 @@ public class DatabaseClient implements AutoCloseable {
             s.setInt(1, user_id);
             s.setInt(2, conv_id);
             s.execute();
+
+            conversationListener.sendUpdate(conv_id, new RefreshNotification(RefreshNotification.Context.CONVERSATION_DATA));
         } catch (SQLException e) {
             throw DatabaseException.convert(e,"Conversation doesn't exsit","User is already a member of this conversation");
         }
@@ -321,6 +328,7 @@ public class DatabaseClient implements AutoCloseable {
             if(s.executeUpdate() != 1)
                 throw new DatabaseUpdateException("Unable to remove member");
         } catch (SQLException e) {
+            conversationListener.sendUpdate(conv_id, new RefreshNotification(RefreshNotification.Context.CONVERSATION_LIST));
             throw DatabaseException.convert(e,null,null);
         }
 
@@ -366,6 +374,8 @@ public class DatabaseClient implements AutoCloseable {
 
             if(s.executeUpdate() != 1)
                 throw new DatabaseException("Conversation doesn't exist");
+
+            conversationListener.sendUpdate(conv_id, new RefreshNotification(RefreshNotification.Context.CONVERSATION_DATA));
         } catch (SQLException e) {
             throw DatabaseException.convert(e,null,null);
         }
@@ -382,15 +392,23 @@ public class DatabaseClient implements AutoCloseable {
             s.setInt(2, conv_id);
 
             s.execute();
+
+            conversationListener.sendUpdate(conv_id, new RefreshNotification(RefreshNotification.Context.CONVERSATION_LIST));
         } catch (SQLException e) {
             throw DatabaseException.convert(e,null,"Unable to delete conversation");
         }
     }
 
-    public ConversationDetails getConversationDetails(int conv_id) throws DatabaseException {
-        return new ConversationDetails(conv_id,
-                getConversationName(conv_id),
-                getConversationMembers(conv_id));
+    public ConversationDetails getConversationDetails(int conv_id, int user_id) throws DatabaseException {
+        try {
+            verifyAction(conv_id, user_id);
+            return new ConversationDetails(conv_id,
+                    getConversationName(conv_id, user_id),
+                    getConversationMembers(conv_id, user_id));
+        } catch (DatabaseUpdateException e) {
+            e.printStackTrace();
+            return new ConversationDetails(-1, null, null);
+        }
     }
 
     public void sendMessage(Message msg, int conv_id, int user_id) throws DatabaseException {
@@ -405,7 +423,10 @@ public class DatabaseClient implements AutoCloseable {
             ResultSet r = s.executeQuery();
             r.next();
             msg.fill(user_id, r.getTimestamp(1));
-            listenerManager.sendUpdate(conv_id, msg);
+            conversationListener.sendUpdate(conv_id, new MessageNotification(msg));
+
+            for(UserData u : getConversationMembers(conv_id, -1))
+                userListener.sendUpdate(u.getID(), new RefreshNotification(RefreshNotification.Context.CONVERSATION_LIST));
         } catch (SQLException e) {
             throw DatabaseException.convert(e,"Unable to send message",null);
         }

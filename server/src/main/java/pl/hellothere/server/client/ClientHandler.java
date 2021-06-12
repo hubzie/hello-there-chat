@@ -12,6 +12,7 @@ import pl.hellothere.containers.socket.data.messages.Message;
 import pl.hellothere.containers.socket.data.messages.MessageList;
 import pl.hellothere.containers.socket.data.notifications.ErrorNotification;
 import pl.hellothere.containers.socket.data.notifications.MessageNotification;
+import pl.hellothere.containers.socket.data.notifications.Notification;
 import pl.hellothere.containers.socket.data.notifications.StopNotification;
 import pl.hellothere.server.database.DatabaseClient;
 import pl.hellothere.server.database.exceptions.DatabaseAuthenticationException;
@@ -31,7 +32,7 @@ public class ClientHandler extends Thread {
 
     private final ServerCommunicator communicator;
     private final Encryptor encryptor = new Encryptor();
-    private final BlockingQueue<Message> notifications = new LinkedBlockingQueue<>();
+    private final BlockingQueue<Notification> notifications = new LinkedBlockingQueue<>();
 
     int conv_id = -1;
     UserData user = null;
@@ -50,7 +51,7 @@ public class ClientHandler extends Thread {
         }
     }
 
-    public void sendUpdate(Message msg) {
+    public void sendUpdate(Notification msg) {
         notifications.add(msg);
     }
 
@@ -128,7 +129,9 @@ public class ClientHandler extends Thread {
     }
 
     void logOut() {
-        db.getListenerManager().unlisten(this, conv_id);
+        if(user != null)
+            db.getUserListener().unlisten(this, user.getID());
+        db.getConversationListener().unlisten(this, conv_id);
 
         conv_id = -1;
         user = null;
@@ -164,8 +167,8 @@ public class ClientHandler extends Thread {
         if (req instanceof ConversationListRequest)
             communicator.send(new ConversationList(db.getConversationList(user.getID(), ((ConversationListRequest) req).getCount())));
         else if (req instanceof ChangeConversationRequest) {
-            db.getListenerManager().listen(this, conv_id, ((ChangeConversationRequest) req).getConversationID());
-            communicator.send(db.getConversationDetails(conv_id = ((ChangeConversationRequest) req).getConversationID()));
+            db.getConversationListener().listen(this, conv_id, ((ChangeConversationRequest) req).getConversationID());
+            communicator.send(db.getConversationDetails(conv_id = ((ChangeConversationRequest) req).getConversationID(), user.getID()));
         } else if (req instanceof GetMessagesRequest)
             communicator.send(new MessageList(db.getMessages(conv_id, ((GetMessagesRequest) req).getTime())));
         else if (req instanceof SendMessageRequest)
@@ -193,9 +196,9 @@ public class ClientHandler extends Thread {
         Thread notifier = new Thread(() -> {
             try {
                 while (isLogged()) {
-                    Message msg = notifications.poll(1000, TimeUnit.MILLISECONDS);
+                    Notification msg = notifications.poll(1000, TimeUnit.MILLISECONDS);
                     if (msg != null)
-                        communicator.send(new MessageNotification(msg));
+                        communicator.send(msg);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -203,6 +206,8 @@ public class ClientHandler extends Thread {
         });
 
         notifier.start();
+
+        db.getUserListener().listen(this, -1, user.getID());
         try {
             while (isLogged()) {
                 SocketPackage pkg = communicator.read();

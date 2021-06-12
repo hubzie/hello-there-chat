@@ -1,6 +1,6 @@
 package pl.hellothere.server.listener;
 
-import pl.hellothere.containers.socket.data.messages.Message;
+import pl.hellothere.containers.socket.data.notifications.Notification;
 import pl.hellothere.server.client.ClientHandler;
 
 import java.util.Collections;
@@ -18,7 +18,7 @@ public class Listener {
         handlers.remove(handler);
     }
 
-    public void sendUpdate(Message msg) {
+    public void sendUpdate(Notification msg) {
         for(ClientHandler h : handlers)
             h.sendUpdate(msg);
     }

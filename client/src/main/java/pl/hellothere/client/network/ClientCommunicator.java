@@ -1,9 +1,7 @@
 package pl.hellothere.client.network;
 
 import pl.hellothere.containers.SocketPackage;
-import pl.hellothere.containers.socket.data.notifications.ErrorNotification;
-import pl.hellothere.containers.socket.data.notifications.Notification;
-import pl.hellothere.containers.socket.data.notifications.StopNotification;
+import pl.hellothere.containers.socket.data.notifications.*;
 import pl.hellothere.tools.CommunicationException;
 import pl.hellothere.tools.Communicator;
 
@@ -48,8 +46,14 @@ public class ClientCommunicator extends Communicator {
                         if (n instanceof StopNotification)
                             mode = Mode.STOP;
                         else if (n instanceof Notification) {
-                            if (handler != null)
-                                handler.handle((Notification) n);
+                            if (handler != null) {
+                                if (n instanceof ErrorNotification)
+                                    handler.handle((ErrorNotification) n);
+                                else if (n instanceof RefreshNotification)
+                                    handler.handle((RefreshNotification) n);
+                                else
+                                    handler.handle((Notification) n);
+                            }
                         } else
                             response.put(n);
                     }
