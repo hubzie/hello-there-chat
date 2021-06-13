@@ -30,6 +30,8 @@ import pl.hellothere.tools.QuadConsumer;
 import pl.hellothere.tools.QuadFunction;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -239,6 +241,14 @@ public class ClientViewApp extends Application {
         }
         stickerStage.getScene().getStylesheets().add("AppStyleGrey.css");
         stickerStage.getScene().getRoot().setStyle("-fx-border-width: 2; -fx-border-color: WhiteSmoke;");
+
+        Properties prop = new Properties();
+        try {
+            prop.load(new FileInputStream("src/main/resources/style.properties"));
+            if(prop.getProperty("style.mode").equals("dark")) cvac.handleChangeStyleButtonAction();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public class TextMessageBox extends HBox {

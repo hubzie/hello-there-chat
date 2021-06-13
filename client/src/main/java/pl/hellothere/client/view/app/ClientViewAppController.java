@@ -9,6 +9,9 @@ import pl.hellothere.client.view.controller.ClientViewController;
 import pl.hellothere.containers.socket.data.messages.Message;
 import pl.hellothere.containers.socket.data.messages.MessageType;
 
+import java.io.*;
+import java.util.Properties;
+
 public class ClientViewAppController {
     @FXML VBox messagesBox;
     @FXML TextField newMessageField;
@@ -17,7 +20,9 @@ public class ClientViewAppController {
     @FXML VBox groupsBox;
     private boolean isDarkMode = false;
 
-    public ClientViewAppController() { ClientViewController.getAppView().setCvac(this); }
+    public ClientViewAppController() {
+        ClientViewController.getAppView().setCvac(this);
+    }
 
     @FXML private void handleSendButtonAction() {
         if(!newMessageField.getText().equals("")) {
@@ -48,6 +53,14 @@ public class ClientViewAppController {
             ((ScrollPane)ClientViewController.getAppView().getStickerStage().getScene().getRoot()).getContent().setStyle("-fx-background-color: derive(Grey, -70.0%);");
             ClientViewController.getAppView().getStickerStage().getScene().getRoot().getStylesheets().add("AppStyleDarkGrey.css");
             ClientViewController.getAppView().getStickerStage().getScene().getRoot().setStyle("-fx-border-width: 2; -fx-border-color: derive(Grey, -70.0%); -fx-background-color: derive(Grey, -70.0%); -fx-background: derive(Grey, -70.0%);");
+
+            try {
+                Properties prop = new Properties();
+                prop.setProperty("style.mode", "dark");
+                prop.store(new FileOutputStream("src/main/resources/style.properties"), null);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         else {
             ClientViewController.getAppView().getPrimaryStage().getScene().getRoot().getStylesheets().add("AppStyleGrey.css");
@@ -55,6 +68,14 @@ public class ClientViewAppController {
             ((ScrollPane)ClientViewController.getAppView().getStickerStage().getScene().getRoot()).getContent().setStyle("-fx-background-color: WhiteSmoke;");
             ClientViewController.getAppView().getStickerStage().getScene().getRoot().getStylesheets().add("AppStyleGrey.css");
             ClientViewController.getAppView().getStickerStage().getScene().getRoot().setStyle("-fx-border-width: 2; -fx-border-color: WhiteSmoke; -fx-background-color: WhiteSmoke;");
+
+            try {
+                Properties prop = new Properties();
+                prop.setProperty("style.mode", "light");
+                prop.store(new FileOutputStream("src/main/resources/style.properties"), null);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         isDarkMode = !isDarkMode;
