@@ -223,7 +223,7 @@ public class Client extends Application {
                     Platform.runLater(() -> {
                         try {
                             switch (action.getContext()) {
-                                case CONVERSATION_DATA: reloadGroup(); break;
+                                case CONVERSATION_DATA: reloadGroup();
                                 case CONVERSATION_LIST: reloadConversationList(); break;
                             }
                         } catch (CommunicationException e) {

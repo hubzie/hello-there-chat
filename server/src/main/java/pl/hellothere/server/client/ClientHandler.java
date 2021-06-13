@@ -168,7 +168,7 @@ public class ClientHandler extends Thread {
             db.getConversationListener().listen(this, conv_id, ((ChangeConversationRequest) req).getConversationID());
             communicator.send(db.getConversationDetails(conv_id = ((ChangeConversationRequest) req).getConversationID(), user.getID()));
         } else if (req instanceof GetMessagesRequest)
-            communicator.send(new MessageList(db.getMessages(conv_id, ((GetMessagesRequest) req).getTime())));
+            communicator.send(new MessageList(db.getMessages(conv_id, user.getID(), ((GetMessagesRequest) req).getTime())));
         else if (req instanceof SendMessageRequest)
             db.sendMessage(((SendMessageRequest) req).getContent(), conv_id, user.getID());
         else if (req instanceof ManageMembersRequest)
