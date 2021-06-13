@@ -8,15 +8,11 @@ public class ClientViewGroupModificationController {
     public TextField groupNameField;
     public ListView<ClientViewGroupModification.PrettyUserData> possibleMembersList = new ListView<>();
 
-    public ClientViewGroupModificationController() {
-        ClientViewController.getGroupModificationView().setCvgcc(this);
-    }
+    public ClientViewGroupModificationController() { ClientViewController.getGroupModificationView().setCvgcc(this); }
 
     public ListView<ClientViewGroupModification.PrettyUserData> getMembersList() { return possibleMembersList; }
 
     public void setGroupNameField(String groupName) { groupNameField.setText(groupName); }
-
-    public void handleMinimizeButtonAction() { ClientViewController.getGroupModificationView().minimize(); }
 
     public void handleCloseButtonAction() { ClientViewController.getGroupModificationView().close(); }
 

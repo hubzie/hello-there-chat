@@ -8,6 +8,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import pl.hellothere.client.view.controller.ClientViewController;
@@ -40,15 +41,15 @@ public class ClientViewGroupModification extends Application {
         cvgmc.getMembersList().setItems(possibleMembers);
         cvgmc.getMembersList().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         cvgmc.setGroupNameField(ClientViewController.getAppView().getCurrentGroup().getName());
+
+        primaryStage.hide();
         primaryStage.show();
     }
 
     public void close() {
-        primaryStage.close();
+        if(primaryStage != null) primaryStage.close();
         isRunning = false;
     }
-
-    public void minimize() { primaryStage.setIconified(true); }
 
     Stage getPrimaryStage() { return this.primaryStage; }
 
@@ -67,6 +68,9 @@ public class ClientViewGroupModification extends Application {
         primaryStage.setScene(new Scene(root, 350, 350));
         primaryStage.setResizable(false);
         primaryStage.initStyle(StageStyle.UNDECORATED);
+
+        primaryStage.initModality(Modality.WINDOW_MODAL);
+        primaryStage.initOwner(ClientViewController.getAppView().getPrimaryStage());
 
         primaryStage.show();
     }

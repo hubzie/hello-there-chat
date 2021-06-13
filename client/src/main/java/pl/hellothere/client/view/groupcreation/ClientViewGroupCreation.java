@@ -4,8 +4,10 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import pl.hellothere.client.view.controller.ClientViewController;
 
 import java.util.Objects;
 
@@ -22,11 +24,9 @@ public class ClientViewGroupCreation extends Application {
     }
 
     public void close() {
-        primaryStage.close();
+        if(primaryStage != null) primaryStage.close();
         isRunning = false;
     }
-
-    public void minimize() { primaryStage.setIconified(true); }
 
     Stage getPrimaryStage() { return this.primaryStage; }
 
@@ -46,6 +46,10 @@ public class ClientViewGroupCreation extends Application {
         primaryStage.setResizable(false);
         primaryStage.initStyle(StageStyle.UNDECORATED);
 
+        primaryStage.initModality(Modality.WINDOW_MODAL);
+        primaryStage.initOwner(ClientViewController.getAppView().getPrimaryStage());
+
+        primaryStage.hide();
         primaryStage.show();
     }
 

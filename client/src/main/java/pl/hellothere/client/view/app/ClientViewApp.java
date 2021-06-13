@@ -17,6 +17,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import pl.hellothere.client.view.controller.ClientViewController;
 import pl.hellothere.containers.socket.data.UserData;
 import pl.hellothere.containers.socket.data.converstions.Conversation;
 import pl.hellothere.containers.socket.data.converstions.ConversationDetails;
@@ -60,11 +61,15 @@ public class ClientViewApp extends Application {
     public void close() {
         primaryStage.close();
         stickerStage.close();
+        ClientViewController.getGroupCreationView().close();
+        ClientViewController.getGroupModificationView().close();
     }
 
     public void minimize() {
         primaryStage.setIconified(true);
         stickerStage.hide();
+        ClientViewController.getGroupCreationView().close();
+        ClientViewController.getGroupModificationView().close();
     }
 
     public void setGroupAction(Consumer<Integer> groupAction) { this.groupAction = groupAction; }
@@ -157,9 +162,11 @@ public class ClientViewApp extends Application {
 
     public BiConsumer<Integer, String> getRenameConversationAction() { return renameConversationAction; }
 
+    public Stage getPrimaryStage() { return primaryStage; }
+
     void setCvac(ClientViewAppController cvac) { this.cvac = cvac; }
 
-    Stage getPrimaryStage() { return primaryStage; }
+//    Stage getPrimaryStage() { return primaryStage; }
 
     Stage getStickerStage() { return stickerStage; }
 

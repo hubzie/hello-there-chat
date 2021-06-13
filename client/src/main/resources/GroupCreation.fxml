@@ -10,7 +10,6 @@
         <TitleBar id="title-bar">
             <right>
                 <HBox>
-                    <Button id="minimize-button" text="_" onAction="#handleMinimizeButtonAction" minWidth="50"/>
                     <Button id="close-button" text="x" onAction="#handleCloseButtonAction" minWidth="50"/>
                 </HBox>
             </right>

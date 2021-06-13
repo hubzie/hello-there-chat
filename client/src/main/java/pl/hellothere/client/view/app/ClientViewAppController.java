@@ -63,6 +63,7 @@ public class ClientViewAppController {
     public void handleCreateConversationButtonAction() {
         try {
             ClientViewController.getGroupCreationView().run();
+            if(ClientViewController.getGroupModificationView() != null) ClientViewController.getGroupModificationView().close();
         } catch (Exception e) {
             ClientViewController.showErrorMessage("View Error");
             e.printStackTrace();
@@ -72,6 +73,7 @@ public class ClientViewAppController {
     public void handleModifyConversationButtonAction() {
         try {
             ClientViewController.getGroupModificationView().run();
+            if(ClientViewController.getGroupCreationView() != null) ClientViewController.getGroupCreationView().close();
         } catch (Exception e) {
             ClientViewController.showErrorMessage("View Error");
             e.printStackTrace();
