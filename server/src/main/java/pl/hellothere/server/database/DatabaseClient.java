@@ -313,6 +313,7 @@ public class DatabaseClient implements AutoCloseable {
 
             conversationListener.sendUpdate(conv_id, new RefreshNotification(RefreshNotification.Context.CONVERSATION_DATA));
         } catch (SQLException e) {
+            e.printStackTrace();
             throw DatabaseException.convert(e,"Conversation doesn't exsit","User is already a member of this conversation");
         }
     }
@@ -347,16 +348,19 @@ public class DatabaseClient implements AutoCloseable {
         }
     }
 
-    public int createConversation() throws DatabaseException {
+    public int createConversation(String name) throws DatabaseException {
         int conv_id;
         try (PreparedStatement s = db.prepareStatement(
-                "insert into conversations (name) values (null) returning conversation_id"
+                "insert into conversations (name) values (?) returning conversation_id"
         )) {
+            s.setString(1, name);
+
             try (ResultSet r = s.executeQuery()){
                 r.next();
                 conv_id = r.getInt(1);
             }
         } catch (SQLException e) {
+            e.printStackTrace();
             throw DatabaseException.convert(e,null,null);
         }
 

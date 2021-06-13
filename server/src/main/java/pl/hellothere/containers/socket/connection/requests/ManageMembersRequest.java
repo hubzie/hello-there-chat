@@ -16,5 +16,5 @@ public class ManageMembersRequest extends Request {
     }
 
     public Type getType() { return type; }
-    public int getId() { return id; }
+    public int getID() { return id; }
 }
