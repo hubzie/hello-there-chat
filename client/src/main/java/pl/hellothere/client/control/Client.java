@@ -175,6 +175,8 @@ public class Client extends Application {
     }
 
     void reloadConversationList() throws CommunicationException {
+        System.out.println("RELOADED");
+
         List<Conversation> list = connection.getConversationList();
 
         ClientViewController.getAppView().clearGroups();

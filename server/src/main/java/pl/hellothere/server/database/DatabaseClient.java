@@ -287,8 +287,8 @@ public class DatabaseClient implements AutoCloseable {
                 "select user_id, name " +
                         "from users u " +
                         "where ? not in ( select conversation_id from membership m where m.user_id = u.user_id ) " +
-                        "and name ilike ? || '%' " +
-                        "limit 8"
+                        "and name ilike ? || '%' "
+//                        + "limit 8"
         )) {
             s.setInt(1, conv_id);
             s.setString(2, prefix);
@@ -313,12 +313,12 @@ public class DatabaseClient implements AutoCloseable {
             s.setInt(1, target);
             s.setInt(2, conv_id);
             s.execute();
-
-            userListener.sendUpdate(target, new RefreshNotification(RefreshNotification.Context.CONVERSATION_LIST));
-            conversationListener.sendUpdate(conv_id, new RefreshNotification(RefreshNotification.Context.CONVERSATION_DATA));
         } catch (SQLException e) {
             e.printStackTrace();
             throw DatabaseException.convert(e,"Conversation doesn't exsit","User is already a member of this conversation");
+        } finally {
+            userListener.sendUpdate(target, new RefreshNotification(RefreshNotification.Context.CONVERSATION_LIST));
+            conversationListener.sendUpdate(conv_id, new RefreshNotification(RefreshNotification.Context.CONVERSATION_DATA));
         }
     }
 
@@ -333,9 +333,10 @@ public class DatabaseClient implements AutoCloseable {
             if(s.executeUpdate() != 1)
                 throw new DatabaseUpdateException("Unable to remove member");
         } catch (SQLException e) {
+            throw DatabaseException.convert(e,null,null);
+        } finally {
             userListener.sendUpdate(target, new RefreshNotification(RefreshNotification.Context.CONVERSATION_LIST));
             conversationListener.sendUpdate(conv_id, new RefreshNotification(RefreshNotification.Context.CONVERSATION_DATA));
-            throw DatabaseException.convert(e,null,null);
         }
 
         try (PreparedStatement s = db.prepareStatement(
