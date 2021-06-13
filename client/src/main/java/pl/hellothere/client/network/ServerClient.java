@@ -109,7 +109,9 @@ public class ServerClient {
 
     public void renameConversation(int id, String name) throws CommunicationException { communicator.send(ModifyConversationRequest.rename(id, name)); }
 
-    public List<UserData> getAddableUserList(String prefix) throws CommunicationException { return communicator.sendAndRead(new AddableUserListRequest(prefix)); }
+    public List<UserData> getAddableUserList(String prefix) throws CommunicationException {
+        return ((AddableUsersList) communicator.sendAndRead(new AddableUserListRequest(prefix))).getList();
+    }
 
     public void addMember(int id) throws CommunicationException { communicator.send(new ManageMembersRequest(ManageMembersRequest.Type.ADD, id)); }
 
