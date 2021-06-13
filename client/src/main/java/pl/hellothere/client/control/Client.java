@@ -7,6 +7,7 @@ import pl.hellothere.client.network.NotificationHandler;
 import pl.hellothere.client.network.ServerClient;
 import pl.hellothere.client.view.app.ClientViewApp;
 import pl.hellothere.client.view.controller.ClientViewController;
+import pl.hellothere.containers.socket.authorization.ModifyUserResult;
 import pl.hellothere.containers.socket.data.UserData;
 import pl.hellothere.containers.socket.data.converstions.Conversation;
 import pl.hellothere.containers.socket.data.converstions.ConversationDetails;
@@ -233,6 +234,16 @@ public class Client extends Application {
         }
     }
 
+    ModifyUserResult.Code modifyUser(int id, String name, String login, String password) {
+        try {
+            return connection.modifyUser(id,name,login,password);
+        } catch (CommunicationException e) {
+            e.printStackTrace();
+            ClientViewController.showErrorMessage("No connection");
+            return ModifyUserResult.Code.SERVER_ERROR;
+        }
+    }
+
     void startMainApp() {
         ClientViewController.getAppView().setUserID(connection.getUser().getID());
         ClientViewController.getAppView().setGroupAction(this::changeGroup);
@@ -243,6 +254,7 @@ public class Client extends Application {
         ClientViewController.getAppView().setAddConversationAction(this::addConversation);
         ClientViewController.getAppView().setAddMemberAction(this::addMember);
         ClientViewController.getAppView().setRenameConversationAction(this::renameConversation);
+        ClientViewController.getAppView().setModifyUserAction(this::modifyUser);
 
         try {
             ClientViewController.getAppView().run();

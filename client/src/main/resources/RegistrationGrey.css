@@ -105,3 +105,11 @@
 #title-modify-conversation {
     -fx-font-size: 20;
 }
+
+#user-data-pane {
+    -fx-primary-background: derived(WhiteSmoke, -5%);
+}
+
+#title-user-data {
+    -fx-font-size: 20;
+}

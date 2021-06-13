@@ -79,4 +79,13 @@ public class ClientViewAppController {
             e.printStackTrace();
         }
     }
+
+    public void handleUserDataButtonAction() {
+        try {
+            ClientViewController.getUserModificationView().run();
+        } catch (Exception e) {
+            ClientViewController.showErrorMessage("View Error");
+            e.printStackTrace();
+        }
+    }
 }

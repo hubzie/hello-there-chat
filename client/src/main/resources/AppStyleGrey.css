@@ -112,6 +112,23 @@
     -fx-background-color: derive(-fx-primary-background, -20.0%);
 }
 
+#user-data-button {
+    -fx-text-fill: -fx-primary-text;
+    -fx-background-color: Transparent;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0 0 0 0;
+    -fx-border-width: 0;
+    -fx-border-color: Transparent;
+}
+
+#user-data-button:hover {
+    -fx-background-color: derive(-fx-primary-background, -15.0%);
+}
+
+#user-data-button:pressed {
+    -fx-background-color: derive(-fx-primary-background, -20.0%);
+}
+
 #modify-group-button {
     -fx-text-fill: -fx-primary-text;
     -fx-background-color: Transparent;

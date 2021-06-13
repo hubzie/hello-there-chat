@@ -19,6 +19,7 @@
             </HBox>
                 <HBox alignment="CENTER_RIGHT">
                     <Button id="change-style-button" text="Style" onAction="#handleChangeStyleButtonAction" minWidth="50" maxHeight="Infinity"/>
+                    <Button id="user-data-button" text="UserData" onAction="#handleUserDataButtonAction" minWidth="50" maxHeight="Infinity"/>
                     <Button id="logout-button" text="Logout" onAction="#handleLogoutButtonAction" minWidth="50" maxHeight="Infinity"/>
                     <Button id="minimize-button" text="_" onAction="#handleMinimizeButtonAction" minWidth="50" maxHeight="Infinity"/>
                     <Button id="close-button" text="x" onAction="#handleCloseButtonAction" minWidth="50" maxHeight="Infinity"/>

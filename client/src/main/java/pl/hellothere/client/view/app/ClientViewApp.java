@@ -18,6 +18,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import pl.hellothere.client.view.controller.ClientViewController;
+import pl.hellothere.containers.socket.authorization.ModifyUserResult;
 import pl.hellothere.containers.socket.data.UserData;
 import pl.hellothere.containers.socket.data.converstions.Conversation;
 import pl.hellothere.containers.socket.data.converstions.ConversationDetails;
@@ -25,6 +26,8 @@ import pl.hellothere.containers.socket.data.messages.Message;
 import pl.hellothere.containers.socket.data.messages.MessageType;
 import pl.hellothere.containers.socket.data.messages.StickerMessage;
 import pl.hellothere.containers.socket.data.messages.TextMessage;
+import pl.hellothere.tools.QuadConsumer;
+import pl.hellothere.tools.QuadFunction;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -48,13 +51,14 @@ public class ClientViewApp extends Application {
     private final HashMap<Conversation, GroupButton> convButtonMap = new HashMap<>();
     private boolean scrollMessagesToBottom = false;
     private Date lastLoadedMessageDate = null;
-    ConversationDetails conversationDetails = null;
+    private ConversationDetails conversationDetails = null;
     private final HashMap<Integer, UserData> userIdDataMap = new HashMap<>();
     private final Stage stickerStage = new Stage();
     private Function<String, List<UserData>> listUsersFunction;
     private Consumer<String> addConversationAction;
     private Consumer<Integer> addMemberAction;
     private BiConsumer<Integer, String> renameConversationAction;
+    private QuadFunction<Integer,String,String,String,ModifyUserResult.Code> modifyUserAction;
 
     public void run() throws Exception { start(new Stage()); }
 
@@ -162,11 +166,15 @@ public class ClientViewApp extends Application {
 
     public BiConsumer<Integer, String> getRenameConversationAction() { return renameConversationAction; }
 
+    public void setModifyUserAction(QuadFunction<Integer,String,String,String,ModifyUserResult.Code> modifyUserAction) { this.modifyUserAction = modifyUserAction; }
+
+    public QuadFunction<Integer,String,String,String,ModifyUserResult.Code> getModifyUserAction() { return modifyUserAction; }
+
+    public int getCurUserID() { return curUserID; }
+
     public Stage getPrimaryStage() { return primaryStage; }
 
     void setCvac(ClientViewAppController cvac) { this.cvac = cvac; }
-
-//    Stage getPrimaryStage() { return primaryStage; }
 
     Stage getStickerStage() { return stickerStage; }
 
