@@ -23,7 +23,7 @@
 
             <HBox alignment="center"
                   GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2">
-                <Label id="title" text="Modify Group" />
+                <Label id="title-modify-conversation" text="Modify Group" />
             </HBox>
 
             <Label text="Change Group Name:"

@@ -101,3 +101,7 @@
 #group-modification-pane {
     -fx-primary-background: derived(WhiteSmoke, -5%);
 }
+
+#title-modify-conversation {
+    -fx-font-size: 20;
+}
