@@ -114,7 +114,7 @@ public class ClientViewApp extends Application {
             cvac.groupsBox.getChildren().removeIf(e -> (e instanceof GroupMember));
             if(curGroup.getName() != null || conversationDetails.getUsers().size() > 2) {
                 int ind = cvac.groupsBox.getChildren().indexOf(convButtonMap.get(curGroup));
-                for(UserData i : conversationDetails.getUsers()) if(i.getID() != curUserID) cvac.groupsBox.getChildren().add(++ind, new GroupMember(i));
+                for(UserData i : conversationDetails.getUsers()) /*if(i.getID() != curUserID)*/ cvac.groupsBox.getChildren().add(++ind, new GroupMember(i));
             }
         }
     }
