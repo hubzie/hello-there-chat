@@ -301,13 +301,13 @@ public class DatabaseClient implements AutoCloseable {
         }
     }
 
-    public void addMember(int conv_id, int user_id) throws DatabaseException {
+    public void addMember(int conv_id, int user_id, int target) throws DatabaseException {
         verifyAction(conv_id, user_id);
 
         try (PreparedStatement s = db.prepareStatement(
                 "insert into membership values (?,?)"
         )) {
-            s.setInt(1, user_id);
+            s.setInt(1, target);
             s.setInt(2, conv_id);
             s.execute();
 
@@ -317,14 +317,14 @@ public class DatabaseClient implements AutoCloseable {
         }
     }
 
-    public void removeMember(int conv_id, int user_id) throws DatabaseException {
+    public void removeMember(int conv_id, int user_id, int target) throws DatabaseException {
         verifyAction(conv_id, user_id);
 
         try (PreparedStatement s = db.prepareStatement(
                 "delete from membership where conversation_id = ? and user_id = ?"
         )) {
             s.setInt(1, conv_id);
-            s.setInt(2, user_id);
+            s.setInt(2, target);
             if(s.executeUpdate() != 1)
                 throw new DatabaseUpdateException("Unable to remove member");
         } catch (SQLException e) {

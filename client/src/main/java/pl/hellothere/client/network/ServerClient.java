@@ -103,7 +103,7 @@ public class ServerClient {
         return communicator.sendAndRead(new GetMessagesRequest(time));
     }
 
-    public void addConversation(String name) throws CommunicationException { communicator.send(ModifyConversationRequest.create(name)); }
+    public void createConversation(String name) throws CommunicationException { communicator.send(ModifyConversationRequest.create(name)); }
 
     public void removeConversation(int id) throws CommunicationException { communicator.send(ModifyConversationRequest.delete(id)); }
 

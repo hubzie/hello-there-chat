@@ -139,14 +139,14 @@ public class ClientHandler extends Thread {
 
     void manageMembers(ManageMembersRequest req) throws DatabaseException {
         switch (req.getType()) {
-            case ADD: db.addMember(conv_id, req.getId()); break;
-            case REMOVE: db.removeMember(conv_id, req.getId()); break;
+            case ADD: db.addMember(conv_id, user.getID(), req.getId()); break;
+            case REMOVE: db.removeMember(conv_id, user.getID(), req.getId()); break;
         }
     }
 
     void modifyConversation(ModifyConversationRequest req) throws DatabaseException {
         switch (req.getType()) {
-            case CREATE: db.addMember(db.createConversation(), user.getID()); break;
+            case CREATE: db.addMember(db.createConversation(), -1, user.getID()); break;
             case DELETE: db.deleteConversation(req.getID(), user.getID()); break;
             case RENAME: db.renameConversation(req.getID(), user.getID(), req.getName()); break;
         }
