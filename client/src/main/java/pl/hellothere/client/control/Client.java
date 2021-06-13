@@ -178,6 +178,9 @@ public class Client extends Application {
     void reloadConversationList() throws CommunicationException {
         List<Conversation> list = connection.getConversationList();
 
+        if (list.isEmpty())
+            return;
+
         if (conversationDetails == null || !conversationDetails.isValid())
             changeGroup(list.get(0).getID());
 
