@@ -223,6 +223,15 @@ public class Client extends Application {
         }
     }
 
+    void renameConversation(int id, String name) {
+        try {
+            connection.renameConversation(id, name);
+        } catch (CommunicationException e) {
+            e.printStackTrace();
+            ClientViewController.showErrorMessage("No connection");
+        }
+    }
+
     void startMainApp() {
         ClientViewController.getAppView().setUserID(connection.getUser().getID());
         ClientViewController.getAppView().setGroupAction(this::changeGroup);
@@ -232,6 +241,7 @@ public class Client extends Application {
         ClientViewController.getAppView().setListUsersFunction(this::listAddableUsers);
         ClientViewController.getAppView().setAddConversationAction(this::addConversation);
         ClientViewController.getAppView().setAddMemberAction(this::addMember);
+        ClientViewController.getAppView().setRenameConversationAction(this::renameConversation);
 
         try {
             ClientViewController.getAppView().run();

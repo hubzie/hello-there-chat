@@ -3,8 +3,9 @@
 <?import java.net.URL?>
 <?import pl.hellothere.client.view.groupmodification.TitleBar?>
 
+<?import javafx.geometry.Insets?>
 <BorderPane fx:controller="pl.hellothere.client.view.groupmodification.ClientViewGroupModificationController"
-            xmlns:fx="http://javafx.com/fxml">
+            xmlns:fx="http://javafx.com/fxml" id="group-modification-pane">
 
     <top>
         <TitleBar id="title-bar">
@@ -22,18 +23,18 @@
 
             <HBox alignment="center"
                   GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2">
-                <Label id="title" text="Hello There" />
+                <Label id="title" text="Modify Group" />
             </HBox>
 
-            <Label text="Group Name:"
+            <Label text="Change Group Name:"
                    GridPane.columnIndex="0" GridPane.rowIndex="2"/>
 
-            <TextField fx:id="groupNameField" promptText="Enter Group Name"
+            <TextField fx:id="groupNameField" promptText="Enter New Group Name"
                        GridPane.columnIndex="1" GridPane.rowIndex="2"/>
 
             <HBox alignment="center"
                   GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="2">
-                <Label text="Members:" />
+                <Label text="Add Members:" />
             </HBox>
 
             <ListView fx:id="possibleMembersList" GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.columnSpan="2">
@@ -41,8 +42,10 @@
             </ListView>
 
             <HBox spacing="10" alignment="center"
-                  GridPane.columnIndex="0" GridPane.rowIndex="8" GridPane.columnSpan="2">
-                <Button text="Modify Group" onAction="#handleCreateGroupButtonAction"/>
+                  GridPane.columnIndex="0" GridPane.rowIndex="6" GridPane.columnSpan="2">
+                <Button text="Modify Group" onAction="#handleCreateGroupButtonAction">
+                    <HBox.margin> <Insets> <bottom>10</bottom> </Insets> </HBox.margin>
+                </Button>
             </HBox>
 
         </GridPane>

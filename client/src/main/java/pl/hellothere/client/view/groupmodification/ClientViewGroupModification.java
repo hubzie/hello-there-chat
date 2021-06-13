@@ -39,6 +39,7 @@ public class ClientViewGroupModification extends Application {
         for(UserData i : userDataList) possibleMembers.add(new PrettyUserData(i));
         cvgmc.getMembersList().setItems(possibleMembers);
         cvgmc.getMembersList().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        cvgmc.setGroupNameField(ClientViewController.getAppView().getCurrentGroup().getName());
         primaryStage.show();
     }
 
@@ -63,7 +64,7 @@ public class ClientViewGroupModification extends Application {
         }
 
         primaryStage.setTitle("Hello There");
-        primaryStage.setScene(new Scene(root, 350, 330));
+        primaryStage.setScene(new Scene(root, 350, 350));
         primaryStage.setResizable(false);
         primaryStage.initStyle(StageStyle.UNDECORATED);
 

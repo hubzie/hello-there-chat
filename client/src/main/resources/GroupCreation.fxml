@@ -4,7 +4,7 @@
 <?import pl.hellothere.client.view.groupcreation.TitleBar?>
 
 <BorderPane fx:controller="pl.hellothere.client.view.groupcreation.ClientViewGroupCreationController"
-            xmlns:fx="http://javafx.com/fxml">
+            xmlns:fx="http://javafx.com/fxml" id="group-creation-pane">
 
     <top>
         <TitleBar id="title-bar">

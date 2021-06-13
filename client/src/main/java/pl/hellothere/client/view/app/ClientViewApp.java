@@ -28,6 +28,7 @@ import pl.hellothere.containers.socket.data.messages.TextMessage;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -52,6 +53,7 @@ public class ClientViewApp extends Application {
     private Function<String, List<UserData>> listUsersFunction;
     private Consumer<String> addConversationAction;
     private Consumer<Integer> addMemberAction;
+    private BiConsumer<Integer, String> renameConversationAction;
 
     public void run() throws Exception { start(new Stage()); }
 
@@ -141,13 +143,19 @@ public class ClientViewApp extends Application {
 
     public List<UserData> getUserList(String pref) { return listUsersFunction.apply(pref); }
 
-    public void setAddConversationAction(Consumer<String> addConversationAction) { this.addConversationAction = addConversationAction; } 
+    public void setAddConversationAction(Consumer<String> addConversationAction) { this.addConversationAction = addConversationAction; }
 
     public Consumer<String> getAddConversationAction() { return addConversationAction; }
 
     public void setAddMemberAction(Consumer<Integer> addMemberAction) { this.addMemberAction = addMemberAction; }
 
     public Consumer<Integer> getAddMemberAction() { return addMemberAction; }
+
+    public Conversation getCurrentGroup() { return curGroup; }
+
+    public void setRenameConversationAction(BiConsumer<Integer, String> renameConversationAction) { this.renameConversationAction = renameConversationAction; }
+
+    public BiConsumer<Integer, String> getRenameConversationAction() { return renameConversationAction; }
 
     void setCvac(ClientViewAppController cvac) { this.cvac = cvac; }
 
