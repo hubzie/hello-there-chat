@@ -175,12 +175,9 @@ public class Client extends Application {
     }
 
     void reloadConversationList() throws CommunicationException {
-        System.out.println("RELOADED");
-
         List<Conversation> list = connection.getConversationList();
 
         ClientViewController.getAppView().clearGroups();
-
         ClientViewController.getAppView().clearMessages();
 
         if (list.isEmpty())
@@ -189,8 +186,8 @@ public class Client extends Application {
         if (conversationDetails == null || !conversationDetails.isValid())
             changeGroup(list.get(0).getID());
 
-        while (!list.contains(conversationDetails))
-            list = connection.loadMoreConversationsAndReload();
+        //while (!list.contains(conversationDetails))
+        //    list = connection.loadMoreConversationsAndReload();
 
 
         for (Conversation c : list) {

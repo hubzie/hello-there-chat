@@ -174,11 +174,11 @@ public class DatabaseClient implements AutoCloseable {
                 "from conversations " +
                 "natural join (select conversation_id from membership where user_id = ?) member " +
                 "where active = true " +
-                "order by last_update desc " +
-                "limit ?"
+                "order by last_update desc "
+                //+ "limit ?"
         )) {
             s.setInt(1, user_id);
-            s.setInt(2, count);
+            // s.setInt(2, count);
 
             try (ResultSet r = s.executeQuery()) {
                 List<Conversation> list = new LinkedList<>();
