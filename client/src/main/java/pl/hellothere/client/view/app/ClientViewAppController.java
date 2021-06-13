@@ -47,7 +47,7 @@ public class ClientViewAppController {
             ClientViewController.getAppView().getStickerStage().getScene().getRoot().setStyle("-fx-background-color: derive(Grey, -70.0%);");
             ((ScrollPane)ClientViewController.getAppView().getStickerStage().getScene().getRoot()).getContent().setStyle("-fx-background-color: derive(Grey, -70.0%);");
             ClientViewController.getAppView().getStickerStage().getScene().getRoot().getStylesheets().add("AppStyleDarkGrey.css");
-            ClientViewController.getAppView().getStickerStage().getScene().getRoot().setStyle("-fx-border-width: 2; -fx-border-color: derive(Grey, -70.0%); -fx-background-color: derive(Grey, -70.0%);");
+            ClientViewController.getAppView().getStickerStage().getScene().getRoot().setStyle("-fx-border-width: 2; -fx-border-color: derive(Grey, -70.0%); -fx-background-color: derive(Grey, -70.0%); -fx-background: derive(Grey, -70.0%);");
         }
         else {
             ClientViewController.getAppView().getPrimaryStage().getScene().getRoot().getStylesheets().add("AppStyleGrey.css");

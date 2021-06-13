@@ -54,7 +54,7 @@
 
             <HBox spacing="10" alignment="center"
                   GridPane.columnIndex="0" GridPane.rowIndex="7" GridPane.columnSpan="2">
-                <Button text="Register"
+                <Button text="Change Data"
                         onAction="#handleRegisterButtonAction"/>
             </HBox>
 
