@@ -208,6 +208,7 @@ public class Client extends Application {
     void addConversation(String name) {
         try {
             connection.createConversation(name);
+            reloadConversationList();
         } catch (CommunicationException e) {
             e.printStackTrace();
             ClientViewController.showErrorMessage("No connection");

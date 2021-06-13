@@ -299,7 +299,7 @@ public class ClientViewApp extends Application {
             getStyleClass().add("group-button");
             setMaxWidth(Double.MAX_VALUE);
             setOnAction(e -> changeGroup(conv));
-            if(conv.getName() == null && conversationDetails.getUsers().size() > 2) {
+            if((conv.getName() == null || conv.getName().equals("")) && conversationDetails.getUsers().size() > 2) {
                 StringBuilder autoGroupName = new StringBuilder();
                 Pattern patt = Pattern.compile("\\b[a-zA-Z0-9]");
 
@@ -315,7 +315,7 @@ public class ClientViewApp extends Application {
 
                 setText(autoGroupName.toString());
             }
-            else if(conv.getName() == null && conversationDetails.getUsers().size() == 2) {
+            else if((conv.getName() == null || conv.getName().equals("")) && conversationDetails.getUsers().size() == 2) {
                 for(UserData i : conversationDetails.getUsers()) {
                     if(i.getID() != curUserID) {
                         setText(i.getName());
@@ -323,7 +323,7 @@ public class ClientViewApp extends Application {
                     }
                 }
             }
-            else if(conv.getName() == null) setText("Empty Group");
+            else if((conv.getName() == null || conv.getName().equals(""))) setText("Only You");
             else setText(conv.getName());
         }
     }

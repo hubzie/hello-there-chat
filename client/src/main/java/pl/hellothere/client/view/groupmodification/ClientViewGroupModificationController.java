@@ -21,9 +21,7 @@ public class ClientViewGroupModificationController {
     public void handleCloseButtonAction() { ClientViewController.getGroupModificationView().close(); }
 
     public void handleCreateGroupButtonAction() {
-        if(!groupNameField.getText().equals("")){
-            ClientViewController.getAppView().getRenameConversationAction().accept(ClientViewController.getAppView().getCurrentGroup().getID(), groupNameField.getText());
-        }
+        ClientViewController.getAppView().getRenameConversationAction().accept(ClientViewController.getAppView().getCurrentGroup().getID(), groupNameField.getText());
         for(ClientViewGroupModification.PrettyUserData i : possibleMembersList.getSelectionModel().getSelectedItems()) {
             ClientViewController.getAppView().getAddMemberAction().accept(i.getData().getID());
         }
