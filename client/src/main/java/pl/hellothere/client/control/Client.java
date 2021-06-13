@@ -22,7 +22,6 @@ import pl.hellothere.tools.ConnectionError;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Client extends Application {

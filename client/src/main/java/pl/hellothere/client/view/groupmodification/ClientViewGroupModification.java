@@ -43,7 +43,7 @@ public class ClientViewGroupModification extends Application {
 
         currentMembers.clear();
         for(UserData i : ClientViewController.getAppView().getConversationDetails().getUsers()) {
-            if(i.getID() != ClientViewController.getAppView().getCurUserID()) currentMembers.add(new PrettyUserData(i));
+            /*if(i.getID() != ClientViewController.getAppView().getCurUserID())*/ currentMembers.add(new PrettyUserData(i));
         }
         cvgmc.getCurrentMembersList().setItems(currentMembers);
         cvgmc.getCurrentMembersList().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);

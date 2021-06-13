@@ -50,7 +50,7 @@
     <left>
         <BorderPane>
             <center>
-                <ScrollPane fx:id="groupsPane" id="groups-pane" vbarPolicy="ALWAYS" hbarPolicy="NEVER" fitToWidth="true" fitToHeight="true">
+                <ScrollPane fx:id="groupsPane" id="groups-pane" vbarPolicy="ALWAYS" hbarPolicy="NEVER" fitToWidth="true" fitToHeight="true" minWidth="150">
                     <VBox fx:id="groupsBox" id="groups-box" spacing="2" alignment="TOP_CENTER"/>
                 </ScrollPane>
             </center>
