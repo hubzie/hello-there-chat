@@ -8,10 +8,8 @@ import pl.hellothere.containers.socket.connection.SecurityData;
 import pl.hellothere.containers.socket.data.UserData;
 import pl.hellothere.containers.socket.data.converstions.AddableUsersList;
 import pl.hellothere.containers.socket.data.converstions.ConversationList;
-import pl.hellothere.containers.socket.data.messages.Message;
 import pl.hellothere.containers.socket.data.messages.MessageList;
 import pl.hellothere.containers.socket.data.notifications.ErrorNotification;
-import pl.hellothere.containers.socket.data.notifications.MessageNotification;
 import pl.hellothere.containers.socket.data.notifications.Notification;
 import pl.hellothere.containers.socket.data.notifications.StopNotification;
 import pl.hellothere.server.database.DatabaseClient;
@@ -139,14 +137,14 @@ public class ClientHandler extends Thread {
 
     void manageMembers(ManageMembersRequest req) throws DatabaseException {
         switch (req.getType()) {
-            case ADD: db.addMember(conv_id, user.getID(), req.getId()); break;
-            case REMOVE: db.removeMember(conv_id, user.getID(), req.getId()); break;
+            case ADD: db.addMember(conv_id, user.getID(), req.getID()); break;
+            case REMOVE: db.removeMember(conv_id, user.getID(), req.getID()); break;
         }
     }
 
     void modifyConversation(ModifyConversationRequest req) throws DatabaseException {
         switch (req.getType()) {
-            case CREATE: db.addMember(db.createConversation(), -1, user.getID()); break;
+            case CREATE: db.addMember(db.createConversation(req.getName()), -1, user.getID()); break;
             case DELETE: db.deleteConversation(req.getID(), user.getID()); break;
             case RENAME: db.renameConversation(req.getID(), user.getID(), req.getName()); break;
         }
