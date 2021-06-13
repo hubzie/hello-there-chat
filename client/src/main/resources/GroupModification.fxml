@@ -26,22 +26,35 @@
             </HBox>
 
             <Label text="Change Group Name:"
-                   GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                   GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.halignment="CENTER"/>
 
             <TextField fx:id="groupNameField" promptText="Enter New Group Name"
-                       GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                       GridPane.columnIndex="1" GridPane.rowIndex="2">
+                <GridPane.margin> <Insets> <right>10</right> </Insets> </GridPane.margin>
+            </TextField>
 
             <HBox alignment="center"
-                  GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="2">
+                  GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.columnSpan="1">
                 <Label text="Add Members:" />
+                <GridPane.margin> <Insets> <left>10</left> </Insets> </GridPane.margin>
             </HBox>
 
-            <ListView fx:id="possibleMembersList" GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.columnSpan="2">
+            <ListView fx:id="possibleMembersList" GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.columnSpan="1">
+                <GridPane.margin> <Insets> <left>10</left> </Insets> </GridPane.margin>
+            </ListView>
 
+            <HBox alignment="center"
+                  GridPane.columnIndex="1" GridPane.rowIndex="4" GridPane.columnSpan="1">
+                <Label text="Remove Members:" />
+                <GridPane.margin> <Insets> <right>10</right> </Insets> </GridPane.margin>
+            </HBox>
+
+            <ListView fx:id="currentMembersList" GridPane.columnIndex="1" GridPane.rowIndex="5" GridPane.columnSpan="1">
+                <GridPane.margin> <Insets> <right>10</right> </Insets> </GridPane.margin>
             </ListView>
 
             <HBox spacing="10" alignment="center"
-                  GridPane.columnIndex="0" GridPane.rowIndex="6" GridPane.columnSpan="2">
+                  GridPane.columnIndex="0" GridPane.rowIndex="7" GridPane.columnSpan="2">
                 <Button text="Modify Group" onAction="#handleCreateGroupButtonAction">
                     <HBox.margin> <Insets> <bottom>10</bottom> </Insets> </HBox.margin>
                 </Button>

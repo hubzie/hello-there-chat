@@ -26,7 +26,6 @@ import pl.hellothere.containers.socket.data.messages.Message;
 import pl.hellothere.containers.socket.data.messages.MessageType;
 import pl.hellothere.containers.socket.data.messages.StickerMessage;
 import pl.hellothere.containers.socket.data.messages.TextMessage;
-import pl.hellothere.tools.QuadConsumer;
 import pl.hellothere.tools.QuadFunction;
 
 import java.io.File;
@@ -59,6 +58,7 @@ public class ClientViewApp extends Application {
     private Function<String, List<UserData>> listUsersFunction;
     private Consumer<String> addConversationAction;
     private Consumer<Integer> addMemberAction;
+    private Consumer<Integer> removeMemberAction;
     private BiConsumer<Integer, String> renameConversationAction;
     private QuadFunction<Integer,String,String,String,ModifyUserResult.Code> modifyUserAction;
 
@@ -162,6 +162,10 @@ public class ClientViewApp extends Application {
 
     public Consumer<Integer> getAddMemberAction() { return addMemberAction; }
 
+    public void setRemoveMemberAction(Consumer<Integer> removeMemberAction) { this.removeMemberAction = removeMemberAction; }
+
+    public Consumer<Integer> getRemoveMemberAction() { return removeMemberAction; }
+
     public Conversation getCurrentGroup() { return curGroup; }
 
     public void setRenameConversationAction(BiConsumer<Integer, String> renameConversationAction) { this.renameConversationAction = renameConversationAction; }
@@ -175,6 +179,8 @@ public class ClientViewApp extends Application {
     public int getCurUserID() { return curUserID; }
 
     public Stage getPrimaryStage() { return primaryStage; }
+
+    public ConversationDetails getConversationDetails() { return conversationDetails; }
 
     void setCvac(ClientViewAppController cvac) { this.cvac = cvac; }
 
@@ -297,12 +303,19 @@ public class ClientViewApp extends Application {
                     {
                         setBottom( new Label() {
                             {
-                                StringBuilder sb = new StringBuilder();
-                                Pattern patt = Pattern.compile("\\b[a-zA-Z0-9]");
-                                Matcher match = patt.matcher(userIdDataMap.get(m.getSenderID()).getName());
-                                while (match.find()) sb.append(match.group());
-                                setText(sb.toString());
+                                if(userIdDataMap.get(m.getSenderID()) == null) {
+                                    setText("?");
+                                }
+                                else {
+                                    StringBuilder sb = new StringBuilder();
+                                    Pattern patt = Pattern.compile("\\b[a-zA-Z0-9]");
+                                    Matcher match = patt.matcher(userIdDataMap.get(m.getSenderID()).getName());
+                                    while (match.find()) sb.append(match.group());
+                                    setText(sb.toString());
+                                }
 
+                                setMinWidth(25);
+                                setAlignment(Pos.CENTER);
                                 getStyleClass().add("message-sender");
                             }
                         });

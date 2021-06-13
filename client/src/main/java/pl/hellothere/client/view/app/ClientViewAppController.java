@@ -1,6 +1,5 @@
 package pl.hellothere.client.view.app;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;

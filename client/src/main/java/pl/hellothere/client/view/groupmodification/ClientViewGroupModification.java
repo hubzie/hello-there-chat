@@ -20,10 +20,9 @@ import java.util.Objects;
 
 public class ClientViewGroupModification extends Application {
     private Stage primaryStage;
-
     private boolean isRunning = false;
-
     public ObservableList<PrettyUserData> possibleMembers = FXCollections.observableArrayList();
+    public ObservableList<PrettyUserData> currentMembers = FXCollections.observableArrayList();
     public ClientViewGroupModificationController cvgmc;
 
     public void setCvgcc(ClientViewGroupModificationController cvgmc) {
@@ -35,12 +34,21 @@ public class ClientViewGroupModification extends Application {
             start(new Stage());
             isRunning = true;
         }
+
+        cvgmc.setGroupNameField(ClientViewController.getAppView().getCurrentGroup().getName());
+
         possibleMembers.clear();
         List<UserData> userDataList = ClientViewController.getAppView().getUserList("");
         for(UserData i : userDataList) possibleMembers.add(new PrettyUserData(i));
-        cvgmc.getMembersList().setItems(possibleMembers);
-        cvgmc.getMembersList().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        cvgmc.setGroupNameField(ClientViewController.getAppView().getCurrentGroup().getName());
+        cvgmc.getPossibleMembersList().setItems(possibleMembers);
+        cvgmc.getPossibleMembersList().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        currentMembers.clear();
+        for(UserData i : ClientViewController.getAppView().getConversationDetails().getUsers()) {
+            if(i.getID() != ClientViewController.getAppView().getCurUserID()) currentMembers.add(new PrettyUserData(i));
+        }
+        cvgmc.getCurrentMembersList().setItems(currentMembers);
+        cvgmc.getCurrentMembersList().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         primaryStage.hide();
         primaryStage.show();
@@ -65,7 +73,7 @@ public class ClientViewGroupModification extends Application {
         }
 
         primaryStage.setTitle("Hello There");
-        primaryStage.setScene(new Scene(root, 350, 350));
+        primaryStage.setScene(new Scene(root, 400, 350));
         primaryStage.setResizable(false);
         primaryStage.initStyle(StageStyle.UNDECORATED);
 

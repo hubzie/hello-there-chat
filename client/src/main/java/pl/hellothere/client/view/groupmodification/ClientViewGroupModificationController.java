@@ -7,10 +7,13 @@ import pl.hellothere.client.view.controller.ClientViewController;
 public class ClientViewGroupModificationController {
     public TextField groupNameField;
     public ListView<ClientViewGroupModification.PrettyUserData> possibleMembersList = new ListView<>();
+    public ListView<ClientViewGroupModification.PrettyUserData> currentMembersList = new ListView<>();
 
     public ClientViewGroupModificationController() { ClientViewController.getGroupModificationView().setCvgcc(this); }
 
-    public ListView<ClientViewGroupModification.PrettyUserData> getMembersList() { return possibleMembersList; }
+    public ListView<ClientViewGroupModification.PrettyUserData> getPossibleMembersList() { return possibleMembersList; }
+
+    public ListView<ClientViewGroupModification.PrettyUserData> getCurrentMembersList() { return currentMembersList; }
 
     public void setGroupNameField(String groupName) { groupNameField.setText(groupName); }
 
@@ -18,9 +21,15 @@ public class ClientViewGroupModificationController {
 
     public void handleCreateGroupButtonAction() {
         ClientViewController.getAppView().getRenameConversationAction().accept(ClientViewController.getAppView().getCurrentGroup().getID(), groupNameField.getText());
+
         for(ClientViewGroupModification.PrettyUserData i : possibleMembersList.getSelectionModel().getSelectedItems()) {
             ClientViewController.getAppView().getAddMemberAction().accept(i.getData().getID());
         }
+
+        for(ClientViewGroupModification.PrettyUserData i : currentMembersList.getSelectionModel().getSelectedItems()) {
+            ClientViewController.getAppView().getRemoveMemberAction().accept(i.getData().getID());
+        }
+
         ClientViewController.getGroupModificationView().close();
     }
 }

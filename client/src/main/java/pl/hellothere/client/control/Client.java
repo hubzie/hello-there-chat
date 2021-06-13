@@ -225,6 +225,15 @@ public class Client extends Application {
         }
     }
 
+    void removeMember(int id) {
+        try {
+            connection.removeMember(id);
+        } catch (CommunicationException e) {
+            e.printStackTrace();
+            ClientViewController.showErrorMessage("No connection");
+        }
+    }
+
     void renameConversation(int id, String name) {
         try {
             connection.renameConversation(id, name);
@@ -253,6 +262,7 @@ public class Client extends Application {
         ClientViewController.getAppView().setListUsersFunction(this::listAddableUsers);
         ClientViewController.getAppView().setAddConversationAction(this::addConversation);
         ClientViewController.getAppView().setAddMemberAction(this::addMember);
+        ClientViewController.getAppView().setRemoveMemberAction(this::removeMember);
         ClientViewController.getAppView().setRenameConversationAction(this::renameConversation);
         ClientViewController.getAppView().setModifyUserAction(this::modifyUser);
 
