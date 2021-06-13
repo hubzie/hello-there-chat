@@ -173,8 +173,8 @@ public class DatabaseClient implements AutoCloseable {
                 "select conversation_id, name " +
                 "from conversations " +
                 "natural join (select conversation_id from membership where user_id = ?) member " +
-                "left join (select conversation_id, max(send_time) as last_update from messages group by conversation_id ) last using (conversation_id) " +
-                "order by last_update desc nulls last " +
+                "where active = true " +
+                "order by last_update desc " +
                 "limit ?"
         )) {
             s.setInt(1, user_id);
@@ -191,7 +191,28 @@ public class DatabaseClient implements AutoCloseable {
         }
     }
 
-    public List<Message> getMessages(int conv_id, Date time) throws DatabaseException {
+    void verifyAction(int conv_id, int user_id) throws DatabaseException {
+        if(conv_id == -1 || user_id == -1)
+            return;
+
+        try (PreparedStatement s = db.prepareStatement("select count(*) from membership where conversation_id = ? and user_id = ? and ( select active from conversations where conversation_id = ? )")) {
+            s.setInt(1, conv_id);
+            s.setInt(2, user_id);
+            s.setInt(3, conv_id);
+
+            try (ResultSet r = s.executeQuery()) {
+                r.next();
+                if(r.getInt(1) != 1)
+                    throw new DatabaseUpdateException("You aren't member of this conversation");
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+    }
+
+    public List<Message> getMessages(int conv_id, int user_id, Date time) throws DatabaseException {
+        verifyAction(conv_id, user_id);
+
         String statement;
         if(time == null)
             statement = "select *" +
@@ -283,24 +304,6 @@ public class DatabaseClient implements AutoCloseable {
         }
     }
 
-    void verifyAction(int conv_id, int user_id) throws DatabaseException {
-        if(conv_id == -1 || user_id == -1)
-            return;
-
-        try (PreparedStatement s = db.prepareStatement("select count(*) from membership where conversation_id = ? and user_id = ?")) {
-            s.setInt(1, conv_id);
-            s.setInt(2, user_id);
-
-            try (ResultSet r = s.executeQuery()) {
-                r.next();
-                if(r.getInt(1) != 1)
-                    throw new DatabaseUpdateException("You aren't member of this conversation");
-            }
-        } catch (SQLException e) {
-            throw new DatabaseException(e);
-        }
-    }
-
     public void addMember(int conv_id, int user_id, int target) throws DatabaseException {
         verifyAction(conv_id, user_id);
 
@@ -389,12 +392,9 @@ public class DatabaseClient implements AutoCloseable {
         verifyAction(conv_id, user_id);
 
         try (PreparedStatement s = db.prepareStatement(
-                "delete from membership where conversation_id = ?;" +
-                        "delete from conversations where conversation_id = ?"
+                "update conversations set active = false where conversation_id = ?"
         )) {
             s.setInt(1, conv_id);
-            s.setInt(2, conv_id);
-
             s.execute();
 
             conversationListener.sendUpdate(conv_id, new RefreshNotification(RefreshNotification.Context.CONVERSATION_LIST));
