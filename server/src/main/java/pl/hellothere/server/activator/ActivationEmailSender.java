@@ -6,9 +6,12 @@ import javax.mail.internet.MimeMessage;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ActivationEmailSender {
     private final Properties config;
+    private final ExecutorService sender = Executors.newFixedThreadPool(1);
 
     public ActivationEmailSender() throws EmailActivatorException {
         try (InputStream file = new FileInputStream("src/main/resources/email.properties")) {
@@ -19,27 +22,28 @@ public class ActivationEmailSender {
         }
     }
 
-    public void sendToken(String email, String token) throws EmailActivatorException {
-        Session session = Session.getInstance(config, new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(config.getProperty("mail.user"), config.getProperty("mail.password"));
+    public void sendToken(String email, String token) {
+        sender.submit(() -> {
+            String link = config.getProperty("server.activationAddress") + token;
+
+            try {
+                Session session = Session.getInstance(config, new Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(config.getProperty("mail.user"), config.getProperty("mail.password"));
+                    }
+                });
+
+                Message msg = new MimeMessage(session);
+                msg.setFrom(new InternetAddress(config.getProperty("mail.user"), "Hello There Chat"));
+                msg.setRecipient(Message.RecipientType.TO, new InternetAddress(email));
+                msg.setSubject("Activation link");
+                msg.setContent("Cilic <a href=\"" + link + "\">here</a> to activate your account", "text/html; charset=utf-8");
+
+                Transport.send(msg);
+            } catch (Exception e) {
+                System.out.println("Activation link: " + link);
             }
         });
-
-        String link = config.getProperty("server.activationAddress")+token;
-
-        try {
-            Message msg = new MimeMessage(session);
-            msg.setFrom(new InternetAddress(config.getProperty("mail.user"), "Hello There Chat"));
-            msg.setRecipient(Message.RecipientType.TO, new InternetAddress(email));
-            msg.setSubject("Link aktywacyjny");
-            msg.setContent("Kliknij <a href=\""+link+"\">tutaj</a>, aby aktywować swoje konto", "text/html; charset=utf-8");
-
-            Transport.send(msg);
-        } catch (Exception e) {
-            System.out.println("Activation link: "+link);
-            throw new EmailActivatorException(e);
-        }
     }
 }

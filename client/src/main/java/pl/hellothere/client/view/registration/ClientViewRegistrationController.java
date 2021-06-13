@@ -24,6 +24,15 @@ public class ClientViewRegistrationController {
 
     public void handleMinimizeButtonAction() { ClientViewController.getRegistrationView().minimize(); }
 
+    public void addErrorPrompt(String message) {
+        resultPromptBox.getChildren().add(new Label() {
+            {
+                setText(message);
+                setTextFill(Color.RED);
+            }
+        });
+    }
+
     public void clearResultPrompt() { resultPromptBox.getChildren().clear(); }
 
     public void handleCloseButtonAction() {
@@ -40,52 +49,27 @@ public class ClientViewRegistrationController {
         resultPromptBox.getChildren().clear();
 
         if(nameField.getText().equals("")) {
-            resultPromptBox.getChildren().add(new Label() {
-                {
-                    setText("Name cannot be empty");
-                    setTextFill(Color.RED);
-                }
-            });
+            addErrorPrompt("Name cannot be empty");
             return;
         }
 
         if(emailField.getText().equals("")) {
-            resultPromptBox.getChildren().add(new Label() {
-                {
-                    setText("E-mail cannot be empty");
-                    setTextFill(Color.RED);
-                }
-            });
+            addErrorPrompt("E-mail cannot be empty");
             return;
         }
 
         if(loginField.getText().equals("")) {
-            resultPromptBox.getChildren().add(new Label() {
-                {
-                    setText("Login cannot be empty");
-                    setTextFill(Color.RED);
-                }
-            });
+            addErrorPrompt("Login cannot be empty");
             return;
         }
 
         if(passwordField.getText().equals("")) {
-            resultPromptBox.getChildren().add(new Label() {
-                {
-                    setText("Password cannot be empty");
-                    setTextFill(Color.RED);
-                }
-            });
+            addErrorPrompt("Password cannot be empty");
             return;
         }
 
         if(!confirmPasswordField.getText().equals(passwordField.getText())) {
-            resultPromptBox.getChildren().add(new Label() {
-                {
-                    setText("Passwords doesn't match");
-                    setTextFill(Color.RED);
-                }
-            });
+            addErrorPrompt("Passwords doesn't match");
             return;
         }
 

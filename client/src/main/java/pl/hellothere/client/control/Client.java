@@ -61,10 +61,10 @@ public class Client extends Application {
             switch (connection.register(name, login, email, password)) {
                 case OK:
                     Platform.runLater(() -> {
-                        ClientViewController.showErrorMessage("Konto zostało założone i oczekuje na aktywację");
                         ClientViewController.getRegistrationView().close();
                         try {
                             ClientViewController.getLoginView().run();
+                            ClientViewController.showInfoMessage("Account created and waiting for activation");
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
@@ -72,11 +72,11 @@ public class Client extends Application {
                     break;
                 case LOGIN_ALREADY_USED:
                     ClientViewController.getRegistrationView().clearResultPrompt();
-                    ClientViewController.showErrorMessage("Podany login jest już użyty");
+                    ClientViewController.getRegistrationView().addErrorPrompt("Login already used");
                     break;
                 case EMAIL_ALREADY_USED:
                     ClientViewController.getRegistrationView().clearResultPrompt();
-                    ClientViewController.showErrorMessage("Podany email jest już użyty");
+                    ClientViewController.getRegistrationView().addErrorPrompt("Email already used");
                     break;
             }
         } catch (CommunicationException e) {

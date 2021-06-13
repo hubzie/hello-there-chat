@@ -2,9 +2,11 @@ package pl.hellothere.client.view.controller;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import pl.hellothere.client.view.app.ClientViewApp;
 import pl.hellothere.client.view.groupcreation.ClientViewGroupCreation;
@@ -38,18 +40,29 @@ public class ClientViewController extends Application {
 
     public static void close() { Platform.exit(); }
 
-    public static void showErrorMessage(String errorMessage) {
-        Stage errorStage = new Stage();
+    static void showMessage(String message, String title, String color) {
+        Stage stage = new Stage();
         StackPane root = new StackPane();
-        root.setStyle("-fx-background-color: WhiteSmoke;");
-        Label errorLabel = new Label(errorMessage);
-        errorLabel.setStyle("-fx-font-family: Lucida Console; -fx-text-fill: Red; -fx-font-size: 20; -fx-wrap-text: true");
-        root.getChildren().add(errorLabel);
+        root.setAlignment(Pos.CENTER);
+        root.setStyle("-fx-background-color: WhiteSmoke; -fx-padding: 10;");
 
-        errorStage.setTitle("Hello There Error");
-        errorStage.setScene(new Scene(root, 300, 100));
-        errorStage.setResizable(false);
+        Label label = new Label(message);
+        label.setStyle("-fx-font-family: Lucida Console; -fx-text-fill: "+color+"; -fx-font-size: 20; -fx-wrap-text: true;");
+        label.setTextAlignment(TextAlignment.CENTER);
+        root.getChildren().add(label);
 
-        errorStage.show();
+        stage.setTitle(title);
+        stage.setScene(new Scene(root, 300, 100));
+        stage.setResizable(false);
+
+        stage.show();
+    }
+
+    public static void showErrorMessage(String message) {
+        showMessage(message, "Hello There Error", "Red");
+    }
+
+    public static void showInfoMessage(String message) {
+        showMessage(message, "Hello There Info", "LimeGreen");
     }
 }

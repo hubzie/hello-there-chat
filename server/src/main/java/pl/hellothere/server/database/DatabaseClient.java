@@ -113,7 +113,7 @@ public class DatabaseClient implements AutoCloseable {
 
                 return RegistrationResult.Code.OK;
             }
-        } catch (SQLException | DatabaseException | HasherException | EmailActivatorException e) {
+        } catch (SQLException | DatabaseException | HasherException e) {
             e.printStackTrace();
             return RegistrationResult.Code.SERVER_ERROR;
         }
