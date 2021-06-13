@@ -7,6 +7,7 @@ import pl.hellothere.client.network.NotificationHandler;
 import pl.hellothere.client.network.ServerClient;
 import pl.hellothere.client.view.app.ClientViewApp;
 import pl.hellothere.client.view.controller.ClientViewController;
+import pl.hellothere.containers.socket.data.UserData;
 import pl.hellothere.containers.socket.data.converstions.Conversation;
 import pl.hellothere.containers.socket.data.converstions.ConversationDetails;
 import pl.hellothere.containers.socket.data.messages.Message;
@@ -18,7 +19,9 @@ import pl.hellothere.tools.CommunicationException;
 import pl.hellothere.tools.ConnectionError;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Client extends Application {
@@ -189,12 +192,46 @@ public class Client extends Application {
         ClientViewController.getAppView().changeGroup(conversationDetails);
     }
 
+    List<UserData> listAddableUsers(String pref) {
+        List<UserData> userList = new LinkedList<>();
+
+        try {
+            userList = connection.getAddableUserList(pref);
+        } catch (CommunicationException e) {
+            e.printStackTrace();
+            ClientViewController.showErrorMessage("No connection");
+        }
+
+        return userList;
+    }
+
+    void addConversation(String name) {
+        try {
+            connection.createConversation(name);
+        } catch (CommunicationException e) {
+            e.printStackTrace();
+            ClientViewController.showErrorMessage("No connection");
+        }
+    }
+
+    void addMember(int id) {
+        try {
+            connection.addMember(id);
+        } catch (CommunicationException e) {
+            e.printStackTrace();
+            ClientViewController.showErrorMessage("No connection");
+        }
+    }
+
     void startMainApp() {
         ClientViewController.getAppView().setUserID(connection.getUser().getID());
         ClientViewController.getAppView().setGroupAction(this::changeGroup);
         ClientViewController.getAppView().setSendAction(this::sendMessage);
         ClientViewController.getAppView().setLogoutAction(this::logout);
         ClientViewController.getAppView().setLoadMessagesAction(this::loadMoreMessages);
+        ClientViewController.getAppView().setListUsersFunction(this::listAddableUsers);
+        ClientViewController.getAppView().setAddConversationAction(this::addConversation);
+        ClientViewController.getAppView().setAddMemberAction(this::addMember);
 
         try {
             ClientViewController.getAppView().run();

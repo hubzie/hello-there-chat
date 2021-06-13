@@ -1,5 +1,6 @@
 package pl.hellothere.client.view.app;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -57,5 +58,23 @@ public class ClientViewAppController {
         }
 
         isDarkMode = !isDarkMode;
+    }
+
+    public void handleCreateConversationButtonAction() {
+        try {
+            ClientViewController.getGroupCreationView().run();
+        } catch (Exception e) {
+            ClientViewController.showErrorMessage("View Error");
+            e.printStackTrace();
+        }
+    }
+
+    public void handleModifyConversationButtonAction() {
+        try {
+            ClientViewController.getGroupModificationView().run();
+        } catch (Exception e) {
+            ClientViewController.showErrorMessage("View Error");
+            e.printStackTrace();
+        }
     }
 }

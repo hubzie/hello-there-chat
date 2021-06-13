@@ -47,9 +47,25 @@
     </bottom>
 
     <left>
-        <ScrollPane fx:id="groupsPane" id="groups-pane" vbarPolicy="ALWAYS" hbarPolicy="NEVER" fitToWidth="true" fitToHeight="true">
-            <VBox fx:id="groupsBox" id="groups-box" spacing="2" alignment="TOP_CENTER"/>
-        </ScrollPane>
+        <BorderPane>
+            <center>
+                <ScrollPane fx:id="groupsPane" id="groups-pane" vbarPolicy="ALWAYS" hbarPolicy="NEVER" fitToWidth="true" fitToHeight="true">
+                    <VBox fx:id="groupsBox" id="groups-box" spacing="2" alignment="TOP_CENTER"/>
+                </ScrollPane>
+            </center>
+            <bottom>
+                <VBox id="group-buttons-box">
+                    <HBox alignment="CENTER">
+                        <Button id="modify-group-button" text="Modify Group" onAction="#handleModifyConversationButtonAction">
+                        </Button>
+                    </HBox>
+                    <HBox alignment="CENTER">
+                        <Button id="create-group-button" text="Create Group" onAction="#handleCreateConversationButtonAction">
+                        </Button>
+                    </HBox>
+                </VBox>
+            </bottom>
+        </BorderPane>
     </left>
 
     <stylesheets>

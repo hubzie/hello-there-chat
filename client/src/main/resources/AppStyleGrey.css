@@ -112,6 +112,45 @@
     -fx-background-color: derive(-fx-primary-background, -20.0%);
 }
 
+#modify-group-button {
+    -fx-text-fill: -fx-primary-text;
+    -fx-background-color: Transparent;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0 0 0 0;
+    -fx-border-width: 0;
+    -fx-border-color: Transparent;
+}
+
+#modify-group-button:hover {
+    -fx-background-color: derive(-fx-primary-background, -15.0%);
+}
+
+#modify-group-button:pressed {
+    -fx-background-color: derive(-fx-primary-background, -20.0%);
+}
+
+#create-group-button {
+    -fx-text-fill: -fx-primary-text;
+    -fx-background-color: Transparent;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0 0 0 0;
+    -fx-border-width: 0;
+    -fx-border-color: Transparent;
+}
+
+#create-group-button:hover {
+    -fx-background-color: derive(-fx-primary-background, -15.0%);
+}
+
+#create-group-button:pressed {
+    -fx-background-color: derive(-fx-primary-background, -20.0%);
+}
+
+#group-buttons-box {
+    -fx-background-color: derive(-fx-primary-background, -5.0%);
+    -fx-background-insets: -1 0 0 0;
+}
+
 .box {
     -fx-background-color: -fx-primary-background;
     -fx-border-width: 0;

@@ -1,0 +1,56 @@
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.net.URL?>
+<?import pl.hellothere.client.view.groupmodification.TitleBar?>
+
+<BorderPane fx:controller="pl.hellothere.client.view.groupmodification.ClientViewGroupModificationController"
+            xmlns:fx="http://javafx.com/fxml">
+
+    <top>
+        <TitleBar id="title-bar">
+            <right>
+                <HBox>
+                    <Button id="minimize-button" text="_" onAction="#handleMinimizeButtonAction" minWidth="50"/>
+                    <Button id="close-button" text="x" onAction="#handleCloseButtonAction" minWidth="50"/>
+                </HBox>
+            </right>
+        </TitleBar>
+    </top>
+
+    <center>
+        <GridPane alignment="center" hgap="10" vgap="10" >
+
+            <HBox alignment="center"
+                  GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2">
+                <Label id="title" text="Hello There" />
+            </HBox>
+
+            <Label text="Group Name:"
+                   GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+
+            <TextField fx:id="groupNameField" promptText="Enter Group Name"
+                       GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+            <HBox alignment="center"
+                  GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="2">
+                <Label text="Members:" />
+            </HBox>
+
+            <ListView fx:id="possibleMembersList" GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.columnSpan="2">
+
+            </ListView>
+
+            <HBox spacing="10" alignment="center"
+                  GridPane.columnIndex="0" GridPane.rowIndex="8" GridPane.columnSpan="2">
+                <Button text="Modify Group" onAction="#handleCreateGroupButtonAction"/>
+            </HBox>
+
+        </GridPane>
+    </center>
+
+    <stylesheets>
+        <URL value="@RegistrationGrey.css" />
+    </stylesheets>
+
+</BorderPane>
+

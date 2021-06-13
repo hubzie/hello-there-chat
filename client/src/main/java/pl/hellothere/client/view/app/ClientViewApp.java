@@ -29,6 +29,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,6 +49,9 @@ public class ClientViewApp extends Application {
     ConversationDetails conversationDetails = null;
     private final HashMap<Integer, UserData> userIdDataMap = new HashMap<>();
     private final Stage stickerStage = new Stage();
+    private Function<String, List<UserData>> listUsersFunction;
+    private Consumer<String> addConversationAction;
+    private Consumer<Integer> addMemberAction;
 
     public void run() throws Exception { start(new Stage()); }
 
@@ -133,9 +137,19 @@ public class ClientViewApp extends Application {
 
     public void setUserID(int curUserID) { this.curUserID = curUserID; }
 
-    void setCvac(ClientViewAppController cvac) {
-        this.cvac = cvac;
-    }
+    public void setListUsersFunction(Function<String, List<UserData>> listUsersFunction) { this.listUsersFunction = listUsersFunction; }
+
+    public List<UserData> getUserList(String pref) { return listUsersFunction.apply(pref); }
+
+    public void setAddConversationAction(Consumer<String> addConversationAction) { this.addConversationAction = addConversationAction; } 
+
+    public Consumer<String> getAddConversationAction() { return addConversationAction; }
+
+    public void setAddMemberAction(Consumer<Integer> addMemberAction) { this.addMemberAction = addMemberAction; }
+
+    public Consumer<Integer> getAddMemberAction() { return addMemberAction; }
+
+    void setCvac(ClientViewAppController cvac) { this.cvac = cvac; }
 
     Stage getPrimaryStage() { return primaryStage; }
 
@@ -202,7 +216,6 @@ public class ClientViewApp extends Application {
         }
         stickerStage.getScene().getStylesheets().add("AppStyleGrey.css");
         stickerStage.getScene().getRoot().setStyle("-fx-border-width: 2; -fx-border-color: WhiteSmoke;");
-        //stickerStage.getScene().getRoot().getStylesheets().add("AppStyleGrey.css");
     }
 
     public class TextMessageBox extends HBox {

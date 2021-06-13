@@ -89,3 +89,7 @@
 #register-button:pressed {
     -fx-background-color: derive(-fx-primary-background, -20.0%);
 }
+
+#title-create-conversation {
+    -fx-font-size: 20;
+}

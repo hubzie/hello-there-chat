@@ -7,6 +7,8 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import pl.hellothere.client.view.app.ClientViewApp;
+import pl.hellothere.client.view.groupcreation.ClientViewGroupCreation;
+import pl.hellothere.client.view.groupmodification.ClientViewGroupModification;
 import pl.hellothere.client.view.login.ClientViewLogin;
 import pl.hellothere.client.view.registration.ClientViewRegistration;
 
@@ -14,6 +16,8 @@ public class ClientViewController extends Application {
     private static final ClientViewLogin cvl0 = new ClientViewLogin();
     private static final ClientViewApp cva0 = new ClientViewApp();
     private static final ClientViewRegistration cvr0 = new ClientViewRegistration();
+    private static final ClientViewGroupCreation cvgc0 = new ClientViewGroupCreation();
+    private static final ClientViewGroupModification cvgm0 = new ClientViewGroupModification();
 
     @Override
     public void start(Stage primaryStage) { }
@@ -23,6 +27,10 @@ public class ClientViewController extends Application {
     public static ClientViewApp getAppView() { return cva0; }
 
     public static ClientViewRegistration getRegistrationView() { return cvr0; }
+
+    public static ClientViewGroupCreation getGroupCreationView() { return cvgc0; }
+
+    public static ClientViewGroupModification getGroupModificationView() { return cvgm0; }
 
     public static void close() { Platform.exit(); }
 
