@@ -25,7 +25,8 @@ ALTER TABLE users ADD CONSTRAINT cns_users CHECK ( (active = true and activation
 
 CREATE  TABLE membership ( 
 	user_id              integer  NOT NULL ,
-	conversation_id      integer  NOT NULL 
+	conversation_id      integer  NOT NULL ,
+	CONSTRAINT unq_membership UNIQUE ( user_id, conversation_id )
  );
 
 CREATE  TABLE messages ( 

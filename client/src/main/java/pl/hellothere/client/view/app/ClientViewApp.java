@@ -126,6 +126,11 @@ public class ClientViewApp extends Application {
         cvac.groupsBox.getChildren().add(convButtonMap.get(c));
     }
 
+    public void clearGroups() {
+        convButtonMap.clear();
+        cvac.groupsBox.getChildren().clear();
+    }
+
     public void setUserID(int curUserID) { this.curUserID = curUserID; }
 
     void setCvac(ClientViewAppController cvac) {

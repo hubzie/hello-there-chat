@@ -3,13 +3,17 @@ package pl.hellothere.client.control;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import pl.hellothere.client.network.NotificationHandler;
 import pl.hellothere.client.network.ServerClient;
 import pl.hellothere.client.view.app.ClientViewApp;
 import pl.hellothere.client.view.controller.ClientViewController;
 import pl.hellothere.containers.socket.data.converstions.Conversation;
 import pl.hellothere.containers.socket.data.converstions.ConversationDetails;
 import pl.hellothere.containers.socket.data.messages.Message;
+import pl.hellothere.containers.socket.data.notifications.ErrorNotification;
 import pl.hellothere.containers.socket.data.notifications.MessageNotification;
+import pl.hellothere.containers.socket.data.notifications.Notification;
+import pl.hellothere.containers.socket.data.notifications.RefreshNotification;
 import pl.hellothere.tools.CommunicationException;
 import pl.hellothere.tools.ConnectionError;
 
@@ -117,6 +121,12 @@ public class Client extends Application {
         }
     }
 
+    void reloadGroup() throws CommunicationException {
+        conversationDetails = connection.changeConversation(conversationDetails.getID());
+        if(conversationDetails.isValid())
+            ClientViewController.getAppView().setConversationDetails(conversationDetails);
+    }
+
     void changeGroup(int groupId) {
         try {
             conversationDetails = connection.changeConversation(groupId);
@@ -161,6 +171,24 @@ public class Client extends Application {
         }
     }
 
+    void reloadConversationList() throws CommunicationException {
+        List<Conversation> list = connection.getConversationList();
+
+        if (conversationDetails == null || !conversationDetails.isValid())
+            changeGroup(list.get(0).getID());
+
+        while (!list.contains(conversationDetails))
+            list = connection.loadMoreConversationsAndReload();
+
+        ClientViewController.getAppView().clearGroups();
+        for (Conversation c : list) {
+            ClientViewController.getAppView().setConversationDetails(connection.changeConversation(c.getID()));
+            ClientViewController.getAppView().addGroup(c);
+        }
+
+        ClientViewController.getAppView().changeGroup(conversationDetails);
+    }
+
     void startMainApp() {
         ClientViewController.getAppView().setUserID(connection.getUser().getID());
         ClientViewController.getAppView().setGroupAction(this::changeGroup);
@@ -170,26 +198,42 @@ public class Client extends Application {
 
         try {
             ClientViewController.getAppView().run();
-            connection.listen(x -> Platform.runLater(() -> {
-                try {
-                    if (x instanceof MessageNotification)
-                        ClientViewController.getAppView().addBottomMessage(((MessageNotification) x).getContent());
-                    else
-                        System.out.println(x);
-                } catch (Exception e) {
-                    e.printStackTrace();
+            connection.listen(new NotificationHandler(){
+                @Override
+                public void handle(Notification action) {
+                    Platform.runLater(() -> {
+                        try {
+                            if (action instanceof MessageNotification)
+                                ClientViewController.getAppView().addBottomMessage(((MessageNotification) action).getContent());
+                            else
+                                System.out.println(action);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
                 }
-            }));
 
-            List<Conversation> list = connection.getConversationList();
-            for (Conversation c : list) {
-                ClientViewController.getAppView().setConversationDetails(connection.changeConversation(c.getID()));
-                ClientViewController.getAppView().addGroup(c);
-            }
+                @Override
+                public void handle(ErrorNotification action) {
+                    Platform.runLater(() -> ClientViewController.showErrorMessage(action.getMessage()));
+                }
 
+                @Override
+                public void handle(RefreshNotification action) {
+                    Platform.runLater(() -> {
+                        try {
+                            switch (action.getContext()) {
+                                case CONVERSATION_DATA: reloadGroup(); break;
+                                case CONVERSATION_LIST: reloadConversationList(); break;
+                            }
+                        } catch (CommunicationException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            });
 
-            if (!list.isEmpty())
-                ClientViewController.getAppView().changeGroup(list.get(0));
+            reloadConversationList();
         } catch (ConnectionError e) {
             e.printStackTrace();
             ClientViewController.getAppView().close();

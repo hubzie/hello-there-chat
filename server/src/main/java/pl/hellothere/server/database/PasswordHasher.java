@@ -1,5 +1,7 @@
 package pl.hellothere.server.database;
 
+import pl.hellothere.server.database.exceptions.HasherException;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -12,7 +14,7 @@ public class PasswordHasher {
         return b.toString();
     }
 
-    static byte[] encode(String password, byte[] salt) throws HasherException {
+    static byte[] encode(String password, byte[] salt) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             if(salt != null)
@@ -22,6 +24,4 @@ public class PasswordHasher {
             throw new HasherException();
         }
     }
-
-    public static class HasherException extends Exception {}
 }

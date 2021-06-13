@@ -2,15 +2,18 @@ COPY conversations (conversation_id, name) FROM stdin;
 1	Duel on Mustafar
 2	\N
 3	\N
-4	\N
 \.
 
+-- CREDENTIALS
+-- obiwan password
+-- sith abc123
+-- asky password123
+-- dook password123
 COPY users (user_id, name, login, email, password, salt, active, activation_token) FROM stdin;
 1	Obi-Wan Kenobi	obiwan	obiwan@jedi.org	\\x86f6dd6a13336803807e59563860f2dae0b683646de45ce87165d65053ec0c79	\\xbaf43f0c7876e669398b09d6051c4877	t	\N
 2	Chancellor Palpatine	sith	senat@gov.org	\\x2ef9fa00636f4ac3e3a55b4b60c4ace01b8ce5d19504d88cc73537eba0d19f4a	\\x5fcf65256dfb18f364392e1ff410065d	t	\N
-3	Anakin Skywalker	asky	asky@jedi.org	\\x9ab2c7546e46676c7a62ba4ea45d2f80ca4ed7b0d03139c805091ce1304aea98	\\xc2eaf428d182a1f89e1d09635c0d9a48	t	\N
+3	Anakin Skywalker	asky	asky@jedi.org	\\x33eefc95ee9ba9036532ca77c47fcfc1e8929633368a2cf93d56497bcbb2b540	\\x4582e5779505141a1793815a8f512910	t	\N
 4	Count Dooku	dook	dook@gov.org	\\x9ab2c7546e46676c7a62ba4ea45d2f80ca4ed7b0d03139c805091ce1304aea98	\\xc2eaf428d182a1f89e1d09635c0d9a48	t	\N
-5	Ala	ala	ala@ala.org	\\x69189dc6102223961bd29f8128cc0360e0e126176406c19f0e4d2b2444949088	\\xe449ac2a865a65a94882cef0321064a9	t	\N
 \.
 
 COPY membership (user_id, conversation_id) FROM stdin;
@@ -22,7 +25,6 @@ COPY membership (user_id, conversation_id) FROM stdin;
 2	3
 3	3
 4	3
-5	4
 \.
 
 COPY messages (user_id, conversation_id, send_time, content, type) FROM stdin;
@@ -124,9 +126,6 @@ COPY messages (user_id, conversation_id, send_time, content, type) FROM stdin;
 3	3	2021-05-26 18:37:26.642733	He seems to be all right. No broken bones, breathing's all right.	T
 2	3	2021-05-26 18:37:26.644096	Leave him, or we'll never make it.	T
 3	3	2021-05-26 18:37:26.645431	His fate will be the same as ours.	T
-5	4	2021-05-26 18:39:10.86564	Hello!	T
-5	4	2021-05-26 18:40:31.149519	Ala ma kota!	T
-1	1	2021-05-26 18:42:01.302324	Hello There!	T
 \.
 
 SELECT pg_catalog.setval('conversation_id', 4, true);

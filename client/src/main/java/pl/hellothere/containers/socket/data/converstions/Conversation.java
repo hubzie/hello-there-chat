@@ -20,4 +20,18 @@ public class Conversation implements SocketPackage {
     public String getName() {
         return name;
     }
+
+    public boolean isValid() {
+        return id != -1;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return (o instanceof Conversation) && ((Conversation) o).getID() == id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
 }

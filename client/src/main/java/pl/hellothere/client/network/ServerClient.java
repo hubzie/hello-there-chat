@@ -1,16 +1,11 @@
 package pl.hellothere.client.network;
 
-import pl.hellothere.containers.socket.authorization.AuthorizationRequest;
-import pl.hellothere.containers.socket.authorization.AuthorizationResult;
-import pl.hellothere.containers.socket.authorization.RegistrationRequest;
-import pl.hellothere.containers.socket.authorization.RegistrationResult;
+import pl.hellothere.containers.socket.authorization.*;
 import pl.hellothere.containers.socket.connection.SecurityData;
 import pl.hellothere.containers.socket.connection.commands.Command;
-import pl.hellothere.containers.socket.connection.requests.ChangeConversationRequest;
-import pl.hellothere.containers.socket.connection.requests.ConversationListRequest;
-import pl.hellothere.containers.socket.connection.requests.GetMessagesRequest;
-import pl.hellothere.containers.socket.connection.requests.SendMessageRequest;
+import pl.hellothere.containers.socket.connection.requests.*;
 import pl.hellothere.containers.socket.data.UserData;
+import pl.hellothere.containers.socket.data.converstions.AddableUsersList;
 import pl.hellothere.containers.socket.data.converstions.Conversation;
 import pl.hellothere.containers.socket.data.converstions.ConversationDetails;
 import pl.hellothere.containers.socket.data.messages.Message;
@@ -31,6 +26,7 @@ public class ServerClient {
     private final Encryptor encryptor = new Encryptor();
 
     int conv_id = -1;
+    int conv_cnt = 16;
     UserData user = null;
 
     public ServerClient() throws ConnectionError {
@@ -79,8 +75,20 @@ public class ServerClient {
         return user;
     }
 
+    public ModifyUserResult.Code modifyUser(int id, String name, String login, String password) throws CommunicationException {
+        ModifyUserResult res = communicator.sendAndRead(new ModifyUserRequest(id, name, login, encryptor.encrypt(password)));
+        if (res.getCode().equals(ModifyUserResult.Code.SERVER_ERROR))
+            throw new CommunicationException();
+        return res.getCode();
+    }
+
     public List<Conversation> getConversationList() throws CommunicationException {
-        return communicator.sendAndRead(new ConversationListRequest());
+        return communicator.sendAndRead(new ConversationListRequest(conv_cnt));
+    }
+
+    public List<Conversation> loadMoreConversationsAndReload() throws CommunicationException {
+        conv_cnt += 8;
+        return getConversationList();
     }
 
     public ConversationDetails changeConversation(int conv_id) throws CommunicationException {
@@ -94,6 +102,18 @@ public class ServerClient {
     public List<Message> loadMoreMessages(Date time) throws CommunicationException {
         return communicator.sendAndRead(new GetMessagesRequest(time));
     }
+
+    public void addConversation(String name) throws CommunicationException { communicator.send(ModifyConversationRequest.create(name)); }
+
+    public void removeConversation(int id) throws CommunicationException { communicator.send(ModifyConversationRequest.delete(id)); }
+
+    public void renameConversation(int id, String name) throws CommunicationException { communicator.send(ModifyConversationRequest.rename(id, name)); }
+
+    public List<UserData> getAddableUserList(String prefix) throws CommunicationException { return communicator.sendAndRead(new AddableUserListRequest(prefix)); }
+
+    public void addMember(int id) throws CommunicationException { communicator.send(new ManageMembersRequest(ManageMembersRequest.Type.ADD, id)); }
+
+    public void removeMember(int id) throws CommunicationException { communicator.send(new ManageMembersRequest(ManageMembersRequest.Type.REMOVE, id)); }
 
     public void sendMessage(Message msg) throws CommunicationException {
         communicator.send(new SendMessageRequest(msg));

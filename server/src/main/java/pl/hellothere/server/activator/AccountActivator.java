@@ -1,6 +1,7 @@
 package pl.hellothere.server.activator;
 
 import pl.hellothere.server.database.DatabaseClient;
+import pl.hellothere.server.database.exceptions.DatabaseException;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -27,7 +28,7 @@ public class AccountActivator extends Thread {
         writer.flush();
     }
 
-    boolean parse(String request) throws DatabaseClient.DatabaseException {
+    boolean parse(String request) throws DatabaseException {
         String[] data = request.split("[ ?&]");
 
         if (data.length != 4 || !data[0].equals("GET") || !data[1].equals("/activate.html") || !data[2].startsWith("token="))
@@ -44,7 +45,7 @@ public class AccountActivator extends Thread {
                 sendResult("404 ERROR", "Not found");
             else
                 sendResult("200 OK", "Account activated successfully");
-        } catch (IOException | DatabaseClient.DatabaseException e) {
+        } catch (IOException | DatabaseException e) {
             e.printStackTrace();
         } finally {
             try {
