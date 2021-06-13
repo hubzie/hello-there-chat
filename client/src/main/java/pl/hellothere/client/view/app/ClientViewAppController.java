@@ -23,6 +23,8 @@ public class ClientViewAppController {
         ClientViewController.getAppView().setCvac(this);
     }
 
+    public void ClearMessagesBox() { messagesBox.getChildren().clear(); }
+
     @FXML private void handleSendButtonAction() {
         if(!newMessageField.getText().equals("")) {
             ClientViewController.getAppView().getSendAction().accept(Message.createMessage(newMessageField.getText(), MessageType.Text));
@@ -91,6 +93,7 @@ public class ClientViewAppController {
     }
 
     public void handleModifyConversationButtonAction() {
+        if(ClientViewController.getAppView().getConversationDetails() == null || groupsBox.getChildren().size() == 0) return;
         try {
             ClientViewController.getGroupModificationView().run();
             if(ClientViewController.getGroupCreationView() != null) ClientViewController.getGroupCreationView().close();

@@ -20,6 +20,8 @@ public class ClientViewGroupModificationController {
     public void handleCloseButtonAction() { ClientViewController.getGroupModificationView().close(); }
 
     public void handleCreateGroupButtonAction() {
+        boolean deleteMyself = false;
+
         ClientViewController.getAppView().getRenameConversationAction().accept(ClientViewController.getAppView().getCurrentGroup().getID(), groupNameField.getText());
 
         for(ClientViewGroupModification.PrettyUserData i : possibleMembersList.getSelectionModel().getSelectedItems()) {
@@ -27,8 +29,14 @@ public class ClientViewGroupModificationController {
         }
 
         for(ClientViewGroupModification.PrettyUserData i : currentMembersList.getSelectionModel().getSelectedItems()) {
+            if(i.getData().getID() == ClientViewController.getAppView().getCurUserID()) {
+                deleteMyself = true;
+                continue;
+            }
             ClientViewController.getAppView().getRemoveMemberAction().accept(i.getData().getID());
         }
+
+        if(deleteMyself) ClientViewController.getAppView().getRemoveMemberAction().accept(ClientViewController.getAppView().getCurUserID());
 
         ClientViewController.getGroupModificationView().close();
     }

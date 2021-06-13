@@ -182,6 +182,8 @@ public class ClientViewApp extends Application {
 
     public ConversationDetails getConversationDetails() { return conversationDetails; }
 
+    public void clearMessages() { cvac.ClearMessagesBox(); }
+
     void setCvac(ClientViewAppController cvac) { this.cvac = cvac; }
 
     Stage getStickerStage() { return stickerStage; }
