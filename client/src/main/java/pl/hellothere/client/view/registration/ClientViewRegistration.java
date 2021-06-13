@@ -43,7 +43,7 @@ public class ClientViewRegistration extends Application {
 
         Parent root;
         try {
-            root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/Registration.fxml")));
+            root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/fxml/Registration.fxml")));
         } catch (NullPointerException e) {
             throw new NoFxmlLoadedException();
         }

@@ -36,7 +36,7 @@ public class ClientViewGroupCreation extends Application {
 
         Parent root;
         try {
-            root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/GroupCreation.fxml")));
+            root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/fxml/GroupCreation.fxml")));
         } catch (NullPointerException e) {
             throw new NoFxmlLoadedException();
         }

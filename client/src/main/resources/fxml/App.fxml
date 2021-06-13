@@ -70,7 +70,7 @@
     </left>
 
     <stylesheets>
-        <URL value="@AppStyleGrey.css" />
+        <URL value="@../css/AppStyleGrey.css" />
     </stylesheets>
 
 </BorderPane>

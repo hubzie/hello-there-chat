@@ -54,7 +54,7 @@ public class ClientViewLogin extends Application {
         Parent root;
 
         try {
-            root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/Login.fxml")));
+            root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/fxml/Login.fxml")));
         } catch (NullPointerException e) {
             throw new NoFxmlLoadedException();
         }

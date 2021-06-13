@@ -62,7 +62,7 @@
     </center>
 
     <stylesheets>
-        <URL value="@RegistrationGrey.css" />
+        <URL value="@../css/RegistrationGrey.css" />
     </stylesheets>
 
 </BorderPane>

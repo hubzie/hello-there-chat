@@ -202,7 +202,7 @@ public class ClientViewApp extends Application {
         Parent root;
 
         try {
-            root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/App.fxml")));
+            root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/fxml/App.fxml")));
         } catch (NullPointerException e) {
             throw new NoFxmlLoadedException();
         }
@@ -245,7 +245,7 @@ public class ClientViewApp extends Application {
             if(curFile.isFile() && mimetype != null && mimetype.split("/")[0].equals("image"))
                 stickerPane.getChildren().add(new StickerButton(curFile.getName()));
         }
-        stickerStage.getScene().getStylesheets().add("AppStyleGrey.css");
+        stickerStage.getScene().getStylesheets().add("css/AppStyleGrey.css");
         stickerStage.getScene().getRoot().setStyle("-fx-border-width: 2; -fx-border-color: WhiteSmoke;");
 
         Properties prop = new Properties();
