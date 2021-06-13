@@ -6,13 +6,11 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import pl.hellothere.client.view.controller.ClientViewController;
-import pl.hellothere.client.view.groupcreation.ClientViewGroupCreationController;
 import pl.hellothere.containers.socket.data.UserData;
 
 import java.util.List;
@@ -67,7 +65,7 @@ public class ClientViewGroupModification extends Application {
 
         Parent root;
         try {
-            root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/GroupModification.fxml")));
+            root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/fxml/GroupModification.fxml")));
         } catch (NullPointerException e) {
             throw new NoFxmlLoadedException();
         }

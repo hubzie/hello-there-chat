@@ -8,8 +8,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import pl.hellothere.client.view.controller.ClientViewController;
-import pl.hellothere.client.view.registration.ClientViewRegistrationController;
-import pl.hellothere.tools.QuadConsumer;
 
 import java.util.Objects;
 
@@ -28,7 +26,7 @@ public class ClientViewUserModification extends Application {
 
         Parent root;
         try {
-            root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/UserModification.fxml")));
+            root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/fxml/UserModification.fxml")));
         } catch (NullPointerException e) {
             throw new NoFxmlLoadedException();
         }

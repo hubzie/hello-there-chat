@@ -47,7 +47,7 @@ public class ClientViewAppController {
         ClientViewController.getAppView().getStickerStage().getScene().getRoot().getStylesheets().clear();
 
         if(!isDarkMode) {
-            ClientViewController.getAppView().getPrimaryStage().getScene().getRoot().getStylesheets().add("AppStyleDarkGrey.css");
+            ClientViewController.getAppView().getPrimaryStage().getScene().getRoot().getStylesheets().add("css/AppStyleDarkGrey.css");
             ClientViewController.getAppView().getStickerStage().getScene().getRoot().setStyle("-fx-background-color: derive(Grey, -70.0%);");
             ((ScrollPane)ClientViewController.getAppView().getStickerStage().getScene().getRoot()).getContent().setStyle("-fx-background-color: derive(Grey, -70.0%);");
             ClientViewController.getAppView().getStickerStage().getScene().getRoot().getStylesheets().add("AppStyleDarkGrey.css");
@@ -62,7 +62,7 @@ public class ClientViewAppController {
             }
         }
         else {
-            ClientViewController.getAppView().getPrimaryStage().getScene().getRoot().getStylesheets().add("AppStyleGrey.css");
+            ClientViewController.getAppView().getPrimaryStage().getScene().getRoot().getStylesheets().add("css/AppStyleGrey.css");
             ClientViewController.getAppView().getStickerStage().getScene().getRoot().setStyle("-fx-background-color: WhiteSmoke;");
             ((ScrollPane)ClientViewController.getAppView().getStickerStage().getScene().getRoot()).getContent().setStyle("-fx-background-color: WhiteSmoke;");
             ClientViewController.getAppView().getStickerStage().getScene().getRoot().getStylesheets().add("AppStyleGrey.css");
