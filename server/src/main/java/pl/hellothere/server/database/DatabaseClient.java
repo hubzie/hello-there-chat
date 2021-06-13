@@ -314,7 +314,7 @@ public class DatabaseClient implements AutoCloseable {
             s.setInt(2, conv_id);
             s.execute();
 
-            conversationListener.sendUpdate(target, new RefreshNotification(RefreshNotification.Context.CONVERSATION_LIST));
+            userListener.sendUpdate(target, new RefreshNotification(RefreshNotification.Context.CONVERSATION_LIST));
             conversationListener.sendUpdate(conv_id, new RefreshNotification(RefreshNotification.Context.CONVERSATION_DATA));
         } catch (SQLException e) {
             e.printStackTrace();
@@ -333,7 +333,7 @@ public class DatabaseClient implements AutoCloseable {
             if(s.executeUpdate() != 1)
                 throw new DatabaseUpdateException("Unable to remove member");
         } catch (SQLException e) {
-            conversationListener.sendUpdate(target, new RefreshNotification(RefreshNotification.Context.CONVERSATION_LIST));
+            userListener.sendUpdate(target, new RefreshNotification(RefreshNotification.Context.CONVERSATION_LIST));
             conversationListener.sendUpdate(conv_id, new RefreshNotification(RefreshNotification.Context.CONVERSATION_DATA));
             throw DatabaseException.convert(e,null,null);
         }
